@@ -65,6 +65,12 @@ app.get("/api/boletas", async (req, res) => {
   }
 });
 
+app.get("/favicon.ico", (req, res) => {
+  const faviconPath = path.join(__dirname, "favicon.ico");
+  res.sendFile(faviconPath);
+});
+
+
 app.post("/enviar-mensaje-boleta", async (req, res) => {
   try {
     const mensaje = req.body;
