@@ -76,7 +76,7 @@ function mostrarBoletasAgrupadas(lista) {
 
     boletas.forEach(boleta => {
       console.log('boleta ',boleta);
-      const urlBoleta = boleta.Boleta==true ? boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`) : '';
+      const urlBoleta = boleta.Boleta ? boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`) : '';
       console.log('urlBoleta ',urlBoleta);
       const urlComprobante = boleta.Comprobante.replace("/upload/", `/upload/fl_attachment/`);
       const card = document.createElement("div");
