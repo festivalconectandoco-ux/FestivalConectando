@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  fetch("data/boletas.json")
+  fetch("/api/boletas")
     .then(res => res.json())
     .then(data => mostrarBoletasAgrupadas(data.Asistentes))
     .catch(err => console.error("Error cargando boletas:", err));
