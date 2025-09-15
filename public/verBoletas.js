@@ -51,6 +51,7 @@ function mostrarBoletasAgrupadas(lista) {
     grupos[clave].push(boleta);
   });
 
+  console.log('grupos ', grupos)
   const todosGrupos = [];
 
   Object.entries(grupos).forEach(([clave, boletas]) => {
@@ -71,9 +72,12 @@ function mostrarBoletasAgrupadas(lista) {
     container.appendChild(grupoDiv);
 
     const grupoContainer = grupoDiv.querySelector(".row");
+      console.log('boletas ',boletas);
 
     boletas.forEach(boleta => {
-      const urlBoleta = boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`);
+      console.log('boleta ',boleta);
+      const urlBoleta = boleta.Boleta==true ? boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`) : '';
+      console.log('urlBoleta ',urlBoleta);
       const urlComprobante = boleta.Comprobante.replace("/upload/", `/upload/fl_attachment/`);
       const card = document.createElement("div");
       card.className = "col-12 col-md-6 tarjeta-boleta";
@@ -97,10 +101,14 @@ function mostrarBoletasAgrupadas(lista) {
           </div>
         </div>
       `;
+            console.log('card ',card);
+
       grupoContainer.appendChild(card);
     });
 
     todosGrupos.push(grupoDiv);
+      console.log('todosGrupos ', todosGrupos)
+
   });
 
   // Filtro en tiempo real
