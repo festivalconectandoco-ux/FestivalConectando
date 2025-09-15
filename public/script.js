@@ -38,25 +38,26 @@ document.getElementById("agregarAsistente").addEventListener("click", async () =
   const contenedor = document.getElementById("grupoAsistentes");
 
   const div = document.createElement("div");
-  div.classList.add("row", "mb-3", "border", "p-3", "rounded", "bg-white");
-  div.innerHTML = `
-    <div class="col-md-6">
-      <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
-      <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
-    </div>
-    <div class="col-md-6">
-      <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
-      <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
-    </div>
-    <div class="col-md-6">
-      <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
-      <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
-    </div>
-    <div class="col-md-6">
-      <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
-      <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required></select>
-    </div>
-  `;
+div.classList.add("row", "mb-3", "border", "p-3", "rounded", "bg-white", "gap-3");
+div.innerHTML = `
+  <div class="col-12 col-md-6">
+    <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
+    <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
+  </div>
+  <div class="col-12 col-md-6">
+    <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
+    <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
+  </div>
+  <div class="col-12 col-md-6">
+    <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
+    <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
+  </div>
+  <div class="col-12 col-md-6">
+    <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
+    <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required></select>
+  </div>
+`;
+
   contenedor.appendChild(div);
 
   cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
@@ -67,25 +68,26 @@ async function cargarAsistenteInicial(){
   const contenedor = document.getElementById("grupoAsistentes");
 
   const div = document.createElement("div");
-  div.classList.add("row", "mb-3", "border", "p-3", "rounded", "bg-white");
-  div.innerHTML = `
-    <div class="col-md-6">
-      <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
-      <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
-    </div>
-    <div class="col-md-6">
-      <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
-      <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
-    </div>
-    <div class="col-md-6">
-      <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
-      <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
-    </div>
-    <div class="col-md-6">
-      <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
-      <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required></select>
-    </div>
-  `;
+div.classList.add("row", "mb-3", "border", "p-3", "rounded", "bg-white", "gap-3");
+div.innerHTML = `
+  <div class="col-12 col-md-6">
+    <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
+    <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
+  </div>
+  <div class="col-12 col-md-6">
+    <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
+    <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
+  </div>
+  <div class="col-12 col-md-6">
+    <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
+    <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
+  </div>
+  <div class="col-12 col-md-6">
+    <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
+    <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required></select>
+  </div>
+`;
+
   contenedor.appendChild(div);
 
   cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
