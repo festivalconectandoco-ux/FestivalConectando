@@ -4,10 +4,10 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
-app.use(express.static("public")); // donde está tu ventaBoleteria.html
+app.use(express.static(path.join(__dirname, "public"))); // donde está tu ventaBoleteria.html
 
 app.post("/registrar-boleta", (req, res) => {
   const nuevaBoleta = req.body;
