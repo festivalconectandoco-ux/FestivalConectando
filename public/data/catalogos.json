@@ -1,0 +1,150 @@
+{
+	"tiposDeDocumento":[
+		{
+			"id":"1",
+			"nombre":"Tarjeta de identidad"
+		},
+		{
+			"id":"2",
+			"nombre":"Cédula de ciudadanía"
+		},
+		{
+			"id":"3",
+			"nombre":"Pasaporte"
+		},
+		{
+			"id":"4",
+			"nombre":"Otro"
+		}
+	],
+	"mediosDePago":[
+		{
+			"id":"1",
+			"nombre":"Nequi"
+		},
+		{
+			"id":"2",
+			"nombre":"Daviplata"
+		},
+		{
+			"id":"3",
+			"nombre":"Transfiya"
+		},
+		{
+			"id":"4",
+			"nombre":"Llave"
+		},
+		{
+			"id":"5",
+			"nombre":"Efectivo"
+		}
+	],
+	"responsables":[
+		{
+			"id":"1",
+			"nombre":"Jennifer"
+		},
+		{
+			"id":"2",
+			"nombre":"Camilo"
+		},
+		{
+			"id":"3",
+			"nombre":"Otro"
+		}
+	],
+	"tipoAsistente":[
+		{
+			"id":"1",
+			"nombre":"Comprador",
+			"visible":true
+		},
+		{
+			"id":"2",
+			"nombre":"Emprendimiento",
+			"visible":true
+		},
+		{
+			"id":"3",
+			"nombre":"Artista",
+			"visible":false
+		},
+		{
+			"id":"4",
+			"nombre":"Invitado artistas",
+			"visible":false
+		},
+		{
+			"id":"5",
+			"nombre":"Invitado festival",
+			"visible":false
+		}
+	],
+  "Promocion": [
+	{
+	  "idPromocion": "1",
+	  "descripcion": "Preventa 1",
+	  "fechaInicial": "2025-09-15",
+	  "fechaFin": "2025-09-30",
+	  "precio": 100000,
+	  "cantidadPersonas": 1,
+	  "activo": true
+	},
+	{
+	  "idPromocion": "2",
+	  "descripcion": "Preventa 2",
+	  "fechaInicial": "2025-10-01",
+	  "fechaFin": "2025-10-15",
+	  "precio": 115000,
+	  "cantidadPersonas": 1,
+	  "activo": true
+	},
+	{
+	  "idPromocion": "3",
+	  "descripcion": "Precio final",
+	  "fechaInicial": "2025-11-29",
+	  "fechaFin": "2025-11-29",
+	  "precio": 130000,
+	  "cantidadPersonas": 1,
+	  "activo": false
+	}
+  ],
+  "indicativosTelefonicos": [
+	{
+	  "pais": "Colombia",
+	  "codigo": "+57"
+	},
+	{
+	  "pais": "México",
+	  "codigo": "+52"
+	},
+	{
+	  "pais": "Estados Unidos",
+	  "codigo": "+1"
+	},
+	{
+	  "pais": "Ecuador",
+	  "codigo": "+593"
+	},
+	{
+	  "pais": "Chile",
+	  "codigo": "+56"
+	},
+	{
+	  "pais": "Perú",
+	  "codigo": "+51"
+	},
+	{
+	  "pais": "Argentina",
+	  "codigo": "+54"
+	},
+	{
+	  "pais": "Venezuela",
+	  "codigo": "+58"
+	},
+	{
+	  "pais": "Otro",
+	  "codigo": ""
+	}
+  ]
+}
