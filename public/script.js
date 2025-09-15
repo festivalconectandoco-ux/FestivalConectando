@@ -1,7 +1,7 @@
 let contadorAsistentes = 0;
 let catalogosGlobales = null;
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   // Establecer fecha actual
   const fechaInput = document.getElementById("fechaCompra");
   const hoy = new Date().toISOString().split("T")[0];
@@ -13,8 +13,9 @@ document.addEventListener("DOMContentLoaded", function () {
     campoOtro.classList.toggle("d-none", this.value !== "Otro");
   });
 
+  
   // Cargar catálogos
-  fetch("data/catalogos.json")
+  await fetch("data/catalogos.json")
     .then(response => response.json())
     .then(data => {
       catalogosGlobales = data;
@@ -24,15 +25,15 @@ document.addEventListener("DOMContentLoaded", function () {
       cargarPromociones(data.Promocion, "promocion");
     })
     .catch(error => console.error("Error cargando catalogos.json:", error));
+  await cargarAsistenteInicial();
 });
 
 // Agregar asistentes dinámicamente
-document.getElementById("agregarAsistente").addEventListener("click", () => {
+document.getElementById("agregarAsistente").addEventListener("click", async () => {
   if (!catalogosGlobales) {
     console.error("Catálogos no cargados aún");
     return;
   }
-
   contadorAsistentes++;
   const contenedor = document.getElementById("grupoAsistentes");
 
@@ -62,10 +63,75 @@ document.getElementById("agregarAsistente").addEventListener("click", () => {
   cargarTipoAsistente(catalogosGlobales.tipoAsistente, `tipoAsistente_${contadorAsistentes}`);
 });
 
+async function cargarAsistenteInicial(){
+  const contenedor = document.getElementById("grupoAsistentes");
+
+  const div = document.createElement("div");
+  div.classList.add("row", "mb-3", "border", "p-3", "rounded", "bg-white");
+  div.innerHTML = `
+    <div class="col-md-6">
+      <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
+      <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
+    </div>
+    <div class="col-md-6">
+      <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
+      <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
+    </div>
+    <div class="col-md-6">
+      <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
+      <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
+    </div>
+    <div class="col-md-6">
+      <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
+      <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required></select>
+    </div>
+  `;
+  contenedor.appendChild(div);
+
+  cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
+  cargarTipoAsistente(catalogosGlobales.tipoAsistente, `tipoAsistente_${contadorAsistentes}`);
+}
+
 // Enviar formulario
-document.getElementById("formVenta").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  await registrarAsistente(this);
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("formVenta");
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  form.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    // Validación personalizada
+    const medioPago = document.getElementById("medioPago").value;
+    const quienRecibio = document.getElementById("quienRecibio").value;
+
+    if (medioPago === "0" && quienRecibio === "0") {
+      alert("Por favor selecciona un medio de pago y una persona que recibió válidos.");
+      return submitBtn.disabled = false; // Reactiva el botón si hay error
+    }
+    if (medioPago === "0" && quienRecibio !== "0") {
+      alert("Por favor selecciona un medio de pago válido.");
+      return submitBtn.disabled = false; // Reactiva el botón si hay error
+    }
+    if (medioPago !== "0" && quienRecibio === "0") {
+      alert("Por favor selecciona una persona que recibió válida.");
+      return submitBtn.disabled = false; // Reactiva el botón si hay error
+    }
+
+    // Desactiva el botón para evitar múltiples envíos
+    submitBtn.disabled = true;
+
+    try {
+      await registrarAsistente(this); // Tu lógica principal
+      form.reset(); // Esto dispara el evento 'reset'
+    } catch (error) {
+      console.error("Error al registrar asistente:", error);
+      submitBtn.disabled = false;
+    }
+  });
+
+  form.addEventListener("reset", () => {
+    submitBtn.disabled = false;
+  });
 });
 
 async function registrarAsistente(formElement) {
@@ -95,6 +161,8 @@ async function registrarAsistente(formElement) {
     const quienRecibioSelect = document.getElementById("quienRecibio");
     const quienRecibioTexto = quienRecibioSelect.options[quienRecibioSelect.selectedIndex].text;
 
+    const comprobanteInput = document.getElementById("comprobante");
+    const file = comprobanteInput.files[0];
     const ahora = new Date();
     const referencia = ahora.getFullYear().toString() +
       String(ahora.getMonth() + 1).padStart(2, "0") +
@@ -103,7 +171,12 @@ async function registrarAsistente(formElement) {
       String(ahora.getMinutes()).padStart(2, "0") +
       String(ahora.getSeconds()).padStart(2, "0");
 
+    const comprobanteBase64 = await convertirArchivoABase64(file);
+    console.log("comprobanteBase64:", comprobanteBase64);
+
     const imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia });
+const comprobanteUrl = await subirComprobante(comprobanteBase64,referencia);
+    console.log("comprobanteUrl:", comprobanteUrl);
 
     asistentes.push({
       nombreComprador: datosGenerales.nombre,
@@ -115,7 +188,7 @@ async function registrarAsistente(formElement) {
       MedioPago: medioPagoTexto,
       QuienRecibio: quienRecibioTexto,
       FechaCompra: new Date().toISOString(),
-      Comprobante: "pendiente",
+      Comprobante: comprobanteUrl,
       Celular: celularCompleto,
       Referencia: referencia,
       Boleta: imagenBase64
@@ -126,6 +199,17 @@ async function registrarAsistente(formElement) {
   alert("Boletas registradas con éxito");
   formElement.reset();
   document.getElementById("grupoAsistentes").innerHTML = "";
+}
+
+function convertirArchivoABase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(reader.result); // Devuelve el base64 completo (con MIME)
+    reader.onerror = error => reject(error);
+
+    reader.readAsDataURL(file); // Convierte el archivo
+  });
 }
 
 async function procesarBoletas(asistentes) {
@@ -144,11 +228,6 @@ async function procesarBoletas(asistentes) {
         body: `Hola ${asistente.nombreAsistente}, bienvenido al festival conectando!`,
         mediaUrl: asistente.Boleta
       };
-      await fetch("/enviar-imagen-whatsapp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reqWp)
-      });
 
       await fetch("/enviar-mensaje-boleta", {
         method: "POST",
@@ -243,7 +322,6 @@ async function generarImagenBoleta({ nombre, documento, referencia }) {
         .then(data => {
           resolve(data.url); // ← Aquí retornas la URL pública
         })
-
         .catch(err => console.error("Error enviando boleta:", err));
     };
 
@@ -251,3 +329,30 @@ async function generarImagenBoleta({ nombre, documento, referencia }) {
   });
 }
 
+async function subirComprobante(base64, referencia) {
+  try {
+    console.log('subirComprobante')
+
+    const reqFb = {
+      imagenBase64: base64,
+      referencia: referencia
+    };
+console.log('reqFb',reqFb)
+    const response = await fetch("/subir-comprobante", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(reqFb)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.url) {
+      throw new Error(data.error || "No se pudo subir el comprobante");
+    }
+
+    return data.url; // ← Devuelve la URL pública
+  } catch (err) {
+    console.error("Error subiendo comprobante:", err);
+    throw err; // ← Propaga el error para que el caller lo maneje
+  }
+}

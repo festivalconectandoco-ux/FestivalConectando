@@ -119,6 +119,24 @@ app.post("/subir-imagen-boleta", async (req, res) => {
   }
 });
 
+app.post("/subir-comprobante", async (req, res) => {
+  try {
+    const { imagenBase64, referencia } = req.body;
+console.log('req.body',req.body)
+    if (!imagenBase64 || !referencia) {
+      return res.status(400).json({ error: "Faltan datos" });
+    }
+    const resultado = await cloudinary.uploader.upload(imagenBase64, {
+      folder: "comprobantes",
+      public_id: `comprobante_${referencia}`,
+      overwrite: true
+    });    
+    res.status(200).json({ url: resultado.secure_url });
+  } catch (error) {
+    console.error("Error subiendo imagen:", error);
+    res.status(500).json({ error: "Error al subir imagen a Cloudinary" });
+  }
+});
 
 
 

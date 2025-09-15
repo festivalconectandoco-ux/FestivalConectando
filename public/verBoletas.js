@@ -9,13 +9,37 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function mostrarBoletasAgrupadas(lista) {
-  const container = document.getElementById("boletasContainer");
-  if (!container) return;
+    const container = document.getElementById("boletasContainer");
+    if (!container) return;
+
 
   if (lista.length === 0) {
     container.innerHTML = `<p class="text-muted">No hay boletas registradas.</p>`;
     return;
   }
+    // Calcular totales
+let totalVendidas = lista.length;
+let totalRecaudo = 0;
+
+lista.forEach(boleta => {
+  const match = boleta.Promocion.match(/\$([\d.,]+)/);
+  if (match) {
+    const valor = parseInt(match[1].replace(/[.,]/g, ""));
+    totalRecaudo += valor;
+  }
+});
+
+      // Mostrar resumen
+  const resumen = document.createElement("div");
+  resumen.className = "alert alert-info mt-4";
+  resumen.innerHTML = `
+    <h5 class="mb-2">Resumen de ventas</h5>
+    <p><strong>Total boletas vendidas:</strong> ${totalVendidas}</p>
+    <p><strong>Total recaudado:</strong> $${totalRecaudo.toLocaleString("es-CO")}</p>
+  `;
+  container.appendChild(resumen);
+
+
 
   // Agrupar por nombreComprador + Celular
   const grupos = {};
@@ -45,7 +69,8 @@ function mostrarBoletasAgrupadas(lista) {
 
     const grupoContainer = grupoDiv.querySelector(".row");
     boletas.forEach(boleta => {
-      const urlDescarga = boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`);
+      const urlBoleta = boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`);
+      const urlComprobante = boleta.Comprobante.replace("/upload/", `/upload/fl_attachment/`);
       const card = document.createElement("div");
       card.className = "col-md-6";
 
@@ -60,33 +85,15 @@ function mostrarBoletasAgrupadas(lista) {
             <p class="mb-1"><strong>Recibido por:</strong> ${boleta.QuienRecibio}</p>
             <p class="mb-1"><strong>Fecha:</strong> ${new Date(boleta.FechaCompra).toLocaleString()}</p>
             <p class="mb-1"><strong>Referencia:</strong> ${boleta.Referencia}</p>
-            <a href="${urlDescarga}" class="btn btn-sm btn-primary mt-2">Descargar boleta PNG</a>
-            <a href="${boleta.Qr || "#"}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">Ver QR</a>
+            <a href="${urlBoleta}" class="btn btn-sm btn-primary mt-2">Descargar boleta PNG</a>
+            <a href="${urlComprobante}" class="btn btn-sm btn-primary mt-2">Descargar comprobante de pago</a>
           </div>
         </div>
       `;
       grupoContainer.appendChild(card);
     });
   });
-  // Calcular totales
-let totalVendidas = lista.length;
-let totalRecaudo = 0;
 
-lista.forEach(boleta => {
-  const match = boleta.Promocion.match(/\$([\d.,]+)/);
-  if (match) {
-    const valor = parseInt(match[1].replace(/[.,]/g, ""));
-    totalRecaudo += valor;
-  }
-});
 
-// Mostrar resumen
-const resumen = document.createElement("div");
-resumen.className = "alert alert-info mt-4";
-resumen.innerHTML = `
-  <h5 class="mb-2">Resumen de ventas</h5>
-  <p><strong>Total boletas vendidas:</strong> ${totalVendidas}</p>
-  <p><strong>Total recaudado:</strong> $${totalRecaudo.toLocaleString("es-CO")}</p>
-`;
-container.appendChild(resumen);
+
 }
