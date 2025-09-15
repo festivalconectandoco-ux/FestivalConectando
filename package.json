@@ -12,8 +12,19 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^2.2.0",
+    "cloudinary": "^2.7.0",
+    "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "firebase-admin": "^13.5.0",
-    "fs": "^0.0.1-security"
-  }
+    "fs": "^0.0.1-security",
+    "twilio": "^3.30.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/festivalconectandoco-ux/FestivalConectando.git"
+  },
+  "bugs": {
+    "url": "https://github.com/festivalconectandoco-ux/FestivalConectando/issues"
+  },
+  "homepage": "https://github.com/festivalconectandoco-ux/FestivalConectando#readme"
 }

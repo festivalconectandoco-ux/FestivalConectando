@@ -1,7 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   fetch("/api/boletas")
     .then(res => res.json())
-    .then(data => mostrarBoletasAgrupadas(data.Asistentes))
+    .then(data => {
+      mostrarBoletasAgrupadas(data.Asistentes);
+      console.log("data.Asistentes", data.Asistentes);
+    })
     .catch(err => console.error("Error cargando boletas:", err));
 });
 
@@ -42,6 +45,7 @@ function mostrarBoletasAgrupadas(lista) {
 
     const grupoContainer = grupoDiv.querySelector(".row");
     boletas.forEach(boleta => {
+      const urlDescarga = boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`);
       const card = document.createElement("div");
       card.className = "col-md-6";
 
@@ -56,7 +60,7 @@ function mostrarBoletasAgrupadas(lista) {
             <p class="mb-1"><strong>Recibido por:</strong> ${boleta.QuienRecibio}</p>
             <p class="mb-1"><strong>Fecha:</strong> ${new Date(boleta.FechaCompra).toLocaleString()}</p>
             <p class="mb-1"><strong>Referencia:</strong> ${boleta.Referencia}</p>
-            <a href="${boleta.LinkBoleta || "#"}" target="_blank" class="btn btn-sm btn-primary mt-2">Ver boleta PDF</a>
+            <a href="${urlDescarga}" class="btn btn-sm btn-primary mt-2">Descargar boleta PNG</a>
             <a href="${boleta.Qr || "#"}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">Ver QR</a>
           </div>
         </div>

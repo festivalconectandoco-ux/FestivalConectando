@@ -63,17 +63,22 @@ document.getElementById("agregarAsistente").addEventListener("click", () => {
 });
 
 // Enviar formulario
-document.getElementById("formVenta").addEventListener("submit", function (e) {
+document.getElementById("formVenta").addEventListener("submit", async function (e) {
   e.preventDefault();
+  await registrarAsistente(this);
+});
 
-  const formData = new FormData(this);
+async function registrarAsistente(formElement) {
+  const formData = new FormData(formElement);
   const datosGenerales = Object.fromEntries(formData.entries());
   const indicativo = datosGenerales.paisTelefono || ""; 
   const celular = datosGenerales.celular || "";
   const celularCompleto = `${indicativo}${celular}`;
 
   const asistentes = [];
-  document.querySelectorAll("#grupoAsistentes .row").forEach(grupo => {
+  const grupos = document.querySelectorAll("#grupoAsistentes .row");
+
+  for (const grupo of grupos) {
     const nombreAsistente = grupo.querySelector(".nombreAsistente").value;
     const documento = grupo.querySelector(".documentoAsistente").value;
     const tipoDocSelect = grupo.querySelector(".tipoDocumentoAsistente");
@@ -92,43 +97,69 @@ document.getElementById("formVenta").addEventListener("submit", function (e) {
 
     const ahora = new Date();
     const referencia = ahora.getFullYear().toString() +
-    String(ahora.getMonth() + 1).padStart(2, "0") +
-    String(ahora.getDate()).padStart(2, "0") +
-    String(ahora.getHours()).padStart(2, "0") +
-    String(ahora.getMinutes()).padStart(2, "0") +
-    String(ahora.getSeconds()).padStart(2, "0");
+      String(ahora.getMonth() + 1).padStart(2, "0") +
+      String(ahora.getDate()).padStart(2, "0") +
+      String(ahora.getHours()).padStart(2, "0") +
+      String(ahora.getMinutes()).padStart(2, "0") +
+      String(ahora.getSeconds()).padStart(2, "0");
+
+    const imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia });
 
     asistentes.push({
-        nombreComprador: datosGenerales.nombre,
-        nombreAsistente: nombreAsistente,
-        TipoDocumentoAsistente: tipoDoc,
-        DocumentoAsistente: documento,
-        TipoAsistente: tipoAsistente,
-        Promocion: promocionTexto,
-        MedioPago: medioPagoTexto,
-        QuienRecibio: quienRecibioTexto,
-        FechaCompra: new Date().toISOString(),
-        Comprobante: "pendiente",
-        Celular: celularCompleto,
-        Referencia: referencia
+      nombreComprador: datosGenerales.nombre,
+      nombreAsistente: nombreAsistente,
+      TipoDocumentoAsistente: tipoDoc,
+      DocumentoAsistente: documento,
+      TipoAsistente: tipoAsistente,
+      Promocion: promocionTexto,
+      MedioPago: medioPagoTexto,
+      QuienRecibio: quienRecibioTexto,
+      FechaCompra: new Date().toISOString(),
+      Comprobante: "pendiente",
+      Celular: celularCompleto,
+      Referencia: referencia,
+      Boleta: imagenBase64
     });
-  });
+  }
 
-  asistentes.forEach(asistente => {
-    fetch("/registrar-boleta", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(asistente),
-    })
-      .then(res => res.json())
-      .then(data => console.log("Boleta registrada:", data.codigo))
-      .catch(err => console.error("Error registrando boleta:", err));
-  });
-
+  await procesarBoletas(asistentes);
   alert("Boletas registradas con éxito");
-  this.reset();
+  formElement.reset();
   document.getElementById("grupoAsistentes").innerHTML = "";
-});
+}
+
+async function procesarBoletas(asistentes) {
+
+  for (const asistente of asistentes) {
+    try {
+      await fetch("/registrar-boleta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(asistente)
+      });
+
+      const reqWp = {
+        from: "whatsapp:+14155238886",
+        to: `whatsapp:${asistente.Celular}`, // Asegúrate que cada asistente tenga su número
+        body: `Hola ${asistente.nombreAsistente}, bienvenido al festival conectando!`,
+        mediaUrl: asistente.Boleta
+      };
+      await fetch("/enviar-imagen-whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reqWp)
+      });
+
+      await fetch("/enviar-mensaje-boleta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reqWp)
+      });
+    } catch (error) {
+      console.error(`Error procesando boleta para ${asistente.nombre}:`, error);
+    }
+  }
+}
 
 // Funciones auxiliares
 function cargarOpciones(lista, selectId) {
@@ -180,3 +211,43 @@ function cargarIndicativos(lista, selectId) {
     select.appendChild(option);
   });
 }
+
+async function generarImagenBoleta({ nombre, documento, referencia }) {
+  return new Promise((resolve, reject) => {
+    const canvas = document.getElementById("canvasBoleta");
+    const ctx = canvas.getContext("2d");
+
+    const img = new Image();
+    img.src = "/plantilla.png";
+
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      ctx.font = "bold 10px Arial";
+      ctx.fillStyle = "#ffff";
+
+      ctx.fillText(`Nombre completo: ${nombre}`, 50, 340);
+      ctx.fillText(`Número de d ocumento: ${documento}`, 50, 350);
+      ctx.fillText(`Referencia: ${referencia}`, 50, 360);
+
+      const imagenBase64 = canvas.toDataURL("image/png");
+
+      const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}${nombre}`};
+      fetch("/subir-imagen-boleta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reqFb),
+      })
+        .then(res => res.json())
+        .then(data => {
+          resolve(data.url); // ← Aquí retornas la URL pública
+        })
+
+        .catch(err => console.error("Error enviando boleta:", err));
+    };
+
+    img.onerror = () => reject("Error al cargar la plantilla");
+  });
+}
+
