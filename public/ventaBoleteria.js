@@ -192,6 +192,10 @@ async function registrarAsistente(formElement) {
       comprobanteBase64 = await convertirArchivoABase64(file);
       imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia });
       comprobanteUrl = await subirComprobante(comprobanteBase64, referencia);
+      if (!comprobanteUrl) {
+        asistentesFallidos.push(nombreAsistente);
+        continue;
+      }
     } catch (error) {
       asistentesFallidos.push(nombreAsistente);
       continue;
