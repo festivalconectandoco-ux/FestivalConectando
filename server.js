@@ -93,14 +93,11 @@ app.post("/enviar-mensaje-boleta", async (req, res) => {
   }
 });
 
-// Endpoint para enviar archivo por WhatsApp usando GreenAPI
 app.post("/enviar-mensaje-boleta-greenapi", async (req, res) => {
   try {
     let { urlFile, fileName, caption, numero } = req.body;
     const url = process.env.URL_GREENAPI;
-    // Si no viene el número, usar el de prueba
     if (!numero) numero = "573058626761";
-    // Limpiar y asegurar formato
     numero = numero.replace(/[^\d]/g, "");
     const chatId = `${numero}@c.us`;
     const payload = {
@@ -163,19 +160,16 @@ app.post("/subir-comprobante", async (req, res) => {
   }
 });
 
-// Actualizar el campo EnvioWhatsapp de un asistente por referencia
 app.post("/actualizar-envio-whatsapp", async (req, res) => {
   try {
     const { referencia, EnvioWhatsapp } = req.body;
     if (!referencia) {
       return res.status(400).json({ error: "Referencia requerida" });
     }
-    // Buscar el documento por referencia
     const snapshot = await db.collection("boletas").where("Referencia", "==", referencia).get();
     if (snapshot.empty) {
       return res.status(404).json({ error: "No se encontró la boleta con esa referencia" });
     }
-    // Actualizar todos los documentos que coincidan (debería ser solo uno)
     const batch = db.batch();
     snapshot.forEach(doc => {
       batch.update(doc.ref, { EnvioWhatsapp });

@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   await cargarAsistenteInicial();
 });
 
-// Agregar asistentes dinámicamente
 document.getElementById("agregarAsistente").addEventListener("click", async () => {
   if (!catalogosGlobales) {
     console.error("Catálogos no cargados aún");
@@ -101,8 +100,6 @@ async function cargarAsistenteInicial(){
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("formVenta");
   const submitBtn = form.querySelector('button[type="submit"]');
-
-  // Crear overlay de carga
   const overlay = document.createElement('div');
   overlay.id = 'loadingOverlay';
   overlay.style.position = 'fixed';
@@ -197,7 +194,7 @@ async function registrarAsistente(formElement) {
       comprobanteUrl = await subirComprobante(comprobanteBase64, referencia);
     } catch (error) {
       asistentesFallidos.push(nombreAsistente);
-      continue; // No agregar este asistente
+      continue;
     }
 
     asistentes.push({
@@ -229,9 +226,9 @@ async function registrarAsistente(formElement) {
 function convertirArchivoABase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result); // Devuelve el base64 completo (con MIME)
+    reader.onload = () => resolve(reader.result);
     reader.onerror = error => reject(error);
-    reader.readAsDataURL(file); // Convierte el archivo
+    reader.readAsDataURL(file);
   });
 }
 
@@ -255,7 +252,7 @@ async function procesarBoletas(asistentes) {
         urlFile: asistente.Boleta,
         fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
         caption: caption,
-        numero: asistente.Celular
+        numero: '573058626761'//asistente.Celular
       };
       const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
         method: "POST",
@@ -267,7 +264,6 @@ async function procesarBoletas(asistentes) {
       } else {
         asistente.EnvioWhatsapp = 0;
       }
-      // Actualizar en Firestore el valor correcto
       await fetch("/actualizar-envio-whatsapp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -275,7 +271,6 @@ async function procesarBoletas(asistentes) {
       });
     } catch (error) {
       asistente.EnvioWhatsapp = 0;
-      // Intentar actualizar en Firestore aunque haya error
       await fetch("/actualizar-envio-whatsapp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -358,7 +353,7 @@ async function generarImagenBoleta({ nombre, documento, referencia }) {
       })
         .then(res => res.json())
         .then(data => {
-          resolve(data.url); // ← Aquí retornas la URL pública
+          resolve(data.url);
         })
         .catch(err => console.error("Error enviando boleta:", err));
     };
@@ -378,9 +373,9 @@ async function subirComprobante(base64, referencia) {
     if (!response.ok || !data.url) {
       throw new Error(data.error || "No se pudo subir el comprobante");
     }
-    return data.url; // ← Devuelve la URL pública
+    return data.url;
   } catch (err) {
     console.error("Error subiendo comprobante:", err);
-    throw err; // ← Propaga el error para que el caller lo maneje
+    throw err;
   }
 }

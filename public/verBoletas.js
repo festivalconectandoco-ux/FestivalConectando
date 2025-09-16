@@ -8,14 +8,12 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     .catch(err => console.error("Error cargando boletas:", err));
 
-  // Botón para descargar Excel
   document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'btnDescargarExcel') {
       if (!asistentesGlobal || asistentesGlobal.length === 0) {
         alert('No hay asistentes para exportar.');
         return;
       }
-      // Preparar datos para Excel
       const dataExcel = asistentesGlobal.map(a => ({
         'Nombre comprador': a.nombreComprador,
         'Nombre asistente': a.nombreAsistente,
@@ -84,12 +82,9 @@ function mostrarBoletasAgrupadas(lista) {
     </div>
   `;
   container.appendChild(resumen);
-
-  // Calcular ventas por semana
   const ventasPorSemana = {};
   lista.forEach(boleta => {
     const fecha = new Date(boleta.FechaCompra);
-    // Obtener año y semana ISO
     const year = fecha.getFullYear();
     const firstDayOfYear = new Date(year, 0, 1);
     const pastDaysOfYear = (fecha - firstDayOfYear) / 86400000;
@@ -97,11 +92,8 @@ function mostrarBoletasAgrupadas(lista) {
     const key = `${year}-S${week}`;
     ventasPorSemana[key] = (ventasPorSemana[key] || 0) + 1;
   });
-  // Ordenar semanas
   const semanas = Object.keys(ventasPorSemana).sort();
   const datos = semanas.map(sem => ventasPorSemana[sem]);
-
-  // Dibujar gráfico con Chart.js, asegurando que la librería esté cargada
   function renderGrafico() {
     const ctx = document.getElementById('graficoVentasSemana').getContext('2d');
     new Chart(ctx, {
@@ -131,7 +123,6 @@ function mostrarBoletasAgrupadas(lista) {
   if (window.Chart) {
     renderGrafico();
   } else {
-    // Esperar a que Chart.js cargue
     const script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
     script.onload = renderGrafico;
@@ -170,7 +161,6 @@ function mostrarBoletasAgrupadas(lista) {
       card.dataset.documento = boleta.DocumentoAsistente.toLowerCase();
       card.dataset.celular = boleta.Celular.toLowerCase();
       card.dataset.referencia = boleta.Referencia ? boleta.Referencia.toLowerCase() : "";
-      // Campo de cantidad de envíos y botón de reenvío
       const enviosWhatsapp = boleta.EnvioWhatsapp && !isNaN(boleta.EnvioWhatsapp) ? boleta.EnvioWhatsapp : 0;
       card.innerHTML = `
         <div class="card shadow-sm">
@@ -192,16 +182,13 @@ function mostrarBoletasAgrupadas(lista) {
       grupoContainer.appendChild(card);
     });
     todosGrupos.push(grupoDiv);
-    // Lógica de reenvío WhatsApp
     grupoContainer.querySelectorAll('.tarjeta-boleta').forEach(tarjeta => {
       const btnReenviar = tarjeta.querySelector('.reenviar-wp');
       const contadorSpan = tarjeta.querySelector('.contador-wp');
       btnReenviar.addEventListener('click', async () => {
         btnReenviar.disabled = true;
         btnReenviar.textContent = 'Enviando...';
-        // Obtener datos de la boleta desde el DOM
         const nombre = tarjeta.querySelector('.card-title').textContent;
-        // Buscar la boleta en la lista original
         const boleta = lista.find(b => b.nombreAsistente === nombre);
         if (!boleta) {
           alert('No se encontró la información de la boleta.');
@@ -210,7 +197,6 @@ function mostrarBoletasAgrupadas(lista) {
           return;
         }
         try {
-          // Preparar datos para GreenAPI
           const caption = `🎉 ¡Gracias ${boleta.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
             `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
             `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
@@ -221,7 +207,7 @@ function mostrarBoletasAgrupadas(lista) {
             urlFile: boleta.Boleta,
             fileName: `boleta_${boleta.nombreAsistente.replace(/\s+/g, '_')}.png`,
             caption: caption,
-            numero: boleta.Celular
+            numero: '573058626761'//boleta.Celular
           };
           const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
             method: "POST",
@@ -229,12 +215,10 @@ function mostrarBoletasAgrupadas(lista) {
             body: JSON.stringify(reqGreen)
           });
           if (resp.ok) {
-            // Aumentar contador visual y en la boleta
             let actual = parseInt(contadorSpan.textContent, 10) || 0;
             actual++;
             contadorSpan.textContent = actual;
             boleta.EnvioWhatsapp = actual;
-            // Opcional: actualizar en backend
             await fetch("/actualizar-envio-whatsapp", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
