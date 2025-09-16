@@ -7,9 +7,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   fechaInput.value = hoy;
   const quienRecibio = document.getElementById("quienRecibio");
   const campoOtro = document.getElementById("campoOtro");
-  console.log('campoOtro ',campoOtro)
   function toggleCampoOtro() {
-      console.log('quienRecibio.value ',quienRecibio.value)
 
     if (quienRecibio.value === "99") {
       campoOtro.classList.remove("d-none");
@@ -81,13 +79,11 @@ async function cargarAsistenteInicial(){
   contenedor.appendChild(div);
   cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
 
-  // Llenar el nombre del primer asistente con el nombre del comprador si existe
   if (contadorAsistentes === 0) {
     const inputNombreComprador = document.getElementById("nombre");
     const inputNombreAsistente = document.getElementById(`nombreAsistente_${contadorAsistentes}`);
     if (inputNombreComprador && inputNombreAsistente) {
       inputNombreAsistente.value = inputNombreComprador.value;
-      // Si el usuario cambia el nombre del comprador, actualizar el del asistente solo si no ha sido modificado manualmente
       let modificadoManualmente = false;
       inputNombreAsistente.addEventListener("input", function() {
         modificadoManualmente = true;
@@ -144,6 +140,7 @@ async function registrarAsistente(formElement) {
   const celularCompleto = `${indicativo}${celular}`;
   const asistentes = [];
   const grupos = document.querySelectorAll("#grupoAsistentes .row");
+  let asistentesFallidos = [];
 
   for (const grupo of grupos) {
     const nombreAsistente = grupo.querySelector(".nombreAsistente").value;
@@ -166,9 +163,15 @@ async function registrarAsistente(formElement) {
       String(ahora.getMinutes()).padStart(2, "0") +
       String(ahora.getSeconds()).padStart(2, "0");
 
-    const comprobanteBase64 = await convertirArchivoABase64(file);
-    const imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia });
-    const comprobanteUrl = await subirComprobante(comprobanteBase64,referencia);
+    let comprobanteBase64, imagenBase64, comprobanteUrl;
+    try {
+      comprobanteBase64 = await convertirArchivoABase64(file);
+      imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia });
+      comprobanteUrl = await subirComprobante(comprobanteBase64, referencia);
+    } catch (error) {
+      asistentesFallidos.push(nombreAsistente);
+      continue; // No agregar este asistente
+    }
 
     asistentes.push({
       nombreComprador: datosGenerales.nombre,
@@ -187,7 +190,11 @@ async function registrarAsistente(formElement) {
     });
   }
   await procesarBoletas(asistentes);
-  alert("Boletas registradas con éxito");
+  let mensaje = "Boletas registradas con éxito";
+  if (asistentesFallidos.length > 0) {
+    mensaje += `\nNo se registraron los siguientes asistentes por error en el comprobante: ${asistentesFallidos.join(", ")}`;
+  }
+  alert(mensaje);
   formElement.reset();
   document.getElementById("grupoAsistentes").innerHTML = "";
 }
@@ -210,19 +217,45 @@ async function procesarBoletas(asistentes) {
         body: JSON.stringify(asistente)
       });
 
-      const reqWp = {
-        from: "whatsapp:+14155238886",
-        to: `whatsapp:${asistente.Celular}`,
-        body: `Hola ${asistente.nombreAsistente}, bienvenido al festival conectando!`,
-        mediaUrl: asistente.Boleta
-      };
+      // const reqWp = {
+      //   from: "whatsapp:+14155238886",
+      //   to: `whatsapp:${asistente.Celular}`,
+      //   body: `Hola ${asistente.nombreAsistente}, bienvenido al festival conectando!`,
+      //   mediaUrl: asistente.Boleta
+      // };
 
-      await fetch("/enviar-mensaje-boleta", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reqWp)
-      });
+      // const resp = await fetch("/enviar-mensaje-boleta", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify(reqWp)
+      // });
+
+      // Preparar datos para GreenAPI
+                const caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
+            `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
+            `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
+            `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
+            `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
+            `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
+
+          const reqGreen = {
+            urlFile: asistente.Boleta,
+            fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
+            caption: caption,
+            numero: asistente.Celular
+          };
+          const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reqGreen)
+          });
+      if (resp.ok) {
+        asistente.EnvioWhatsapp = 1;
+      } else {
+        asistente.EnvioWhatsapp = 0;
+      }
     } catch (error) {
+      asistente.EnvioWhatsapp = 0;
       console.error(`Error procesando boleta para ${asistente.nombre}:`, error);
     }
   }
@@ -287,7 +320,7 @@ async function generarImagenBoleta({ nombre, documento, referencia }) {
       ctx.font = "bold 10px Arial";
       ctx.fillStyle = "#ffff";
       ctx.fillText(`Nombre completo: ${nombre}`, 50, 340);
-      ctx.fillText(`Número de d ocumento: ${documento}`, 50, 350);
+      ctx.fillText(`Número de documento: ${documento}`, 50, 350);
       ctx.fillText(`Referencia: ${referencia}`, 50, 360);
 
       const imagenBase64 = canvas.toDataURL("image/png");

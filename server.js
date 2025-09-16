@@ -93,6 +93,39 @@ app.post("/enviar-mensaje-boleta", async (req, res) => {
   }
 });
 
+// Endpoint para enviar archivo por WhatsApp usando GreenAPI
+app.post("/enviar-mensaje-boleta-greenapi", async (req, res) => {
+  try {
+    let { urlFile, fileName, caption, numero } = req.body;
+    const url = process.env.URL_GREENAPI;
+    // Si no viene el número, usar el de prueba
+    if (!numero) numero = "573058626761";
+    // Limpiar y asegurar formato
+    numero = numero.replace(/[^\d]/g, "");
+    const chatId = `${numero}@c.us`;
+    const payload = {
+      chatId,
+      urlFile,
+      fileName,
+      caption
+    };
+    const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (response.ok) {
+      res.status(200).json({ mensaje: "Archivo enviado con éxito", data });
+    } else {
+      res.status(500).json({ error: data });
+    }
+  } catch (error) {
+    console.error("Error enviando archivo por GreenAPI:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.post("/subir-imagen-boleta", async (req, res) => {
   try {
@@ -127,6 +160,31 @@ app.post("/subir-comprobante", async (req, res) => {
   } catch (error) {
     console.error("Error subiendo imagen:", error);
     res.status(500).json({ error: "Error al subir imagen a Cloudinary" });
+  }
+});
+
+// Actualizar el campo EnvioWhatsapp de un asistente por referencia
+app.post("/actualizar-envio-whatsapp", async (req, res) => {
+  try {
+    const { referencia, EnvioWhatsapp } = req.body;
+    if (!referencia) {
+      return res.status(400).json({ error: "Referencia requerida" });
+    }
+    // Buscar el documento por referencia
+    const snapshot = await db.collection("boletas").where("Referencia", "==", referencia).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "No se encontró la boleta con esa referencia" });
+    }
+    // Actualizar todos los documentos que coincidan (debería ser solo uno)
+    const batch = db.batch();
+    snapshot.forEach(doc => {
+      batch.update(doc.ref, { EnvioWhatsapp });
+    });
+    await batch.commit();
+    res.status(200).json({ mensaje: "EnvioWhatsapp actualizado" });
+  } catch (error) {
+    console.error("Error actualizando EnvioWhatsapp:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
