@@ -18,10 +18,8 @@ const client = twilio(
 let serviceAccount;
 
 if (process.env.NODE_ENV === "production") {
-  // En Render u otro servidor
   serviceAccount = JSON.parse(process.env.FIREBASE_KEY_JSON);
 } else {
-  // En local
   serviceAccount = require("./firebaseKey.json");
 }
 
@@ -45,9 +43,7 @@ app.post("/registrar-boleta", async (req, res) => {
   try {
     const nuevaBoleta = req.body;
     nuevaBoleta.id = Date.now().toString();
-
     await db.collection("boletas").add(nuevaBoleta);
-
     res.status(200).json({ mensaje: "Boleta registrada con éxito", id: nuevaBoleta.id });
   } catch (error) {
     console.error("Error guardando boleta:", error);
@@ -74,26 +70,18 @@ app.get("/favicon.ico", (req, res) => {
 app.post("/enviar-mensaje-boleta", async (req, res) => {
   try {
     const mensaje = req.body;
-
-    console.log("enviar-mensaje-boleta mensaje:", mensaje);
-
     const message = await client.messages.create({
       from: mensaje.from,
       body: mensaje.body,
       to: mensaje.to,
       mediaUrl: [mensaje.mediaUrl],
     });
-
-    console.log("enviar-mensaje-boleta response:", message);
-
-    // Validación adicional por si Twilio responde con un objeto que contiene error
     if (message.error) {
       console.warn("Twilio respondió con error lógico:", message);
       return res.status(500).json({
         error: message.error,
       });
     }
-
     res.status(200).json({
       mensaje: "mensaje enviado con éxito",
       sid: message.sid,
@@ -109,7 +97,6 @@ app.post("/enviar-mensaje-boleta", async (req, res) => {
 app.post("/subir-imagen-boleta", async (req, res) => {
   try {
     const { imagenBase64, referencia } = req.body;
-
     if (!imagenBase64 || !referencia) {
       return res.status(400).json({ error: "Faltan datos" });
     }
@@ -128,7 +115,6 @@ app.post("/subir-imagen-boleta", async (req, res) => {
 app.post("/subir-comprobante", async (req, res) => {
   try {
     const { imagenBase64, referencia } = req.body;
-console.log('req.body',req.body)
     if (!imagenBase64 || !referencia) {
       return res.status(400).json({ error: "Faltan datos" });
     }
@@ -143,8 +129,6 @@ console.log('req.body',req.body)
     res.status(500).json({ error: "Error al subir imagen a Cloudinary" });
   }
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

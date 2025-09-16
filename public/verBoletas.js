@@ -11,21 +11,17 @@ document.addEventListener("DOMContentLoaded", () => {
 function mostrarBoletasAgrupadas(lista) {
   const container = document.getElementById("boletasContainer");
   if (!container) return;
-
   container.innerHTML = `
     <div class="mb-3">
       <input type="text" class="form-control" id="filtroBoletas" placeholder="Filtrar por nombre, documento o celular">
     </div>
   `;
-
   if (lista.length === 0) {
     container.innerHTML += `<p class="text-muted">No hay boletas registradas.</p>`;
     return;
   }
-
   let totalVendidas = lista.length;
   let totalRecaudo = 0;
-
   lista.forEach(boleta => {
     const match = boleta.Promocion.match(/\$([\d.,]+)/);
     if (match) {
@@ -33,7 +29,6 @@ function mostrarBoletasAgrupadas(lista) {
       totalRecaudo += valor;
     }
   });
-
   const resumen = document.createElement("div");
   resumen.className = "alert alert-info mt-2";
   resumen.innerHTML = `
@@ -42,7 +37,6 @@ function mostrarBoletasAgrupadas(lista) {
     <p><strong>Total recaudado:</strong> $${totalRecaudo.toLocaleString("es-CO")}</p>
   `;
   container.appendChild(resumen);
-  // Ordenar por FechaCompra descendente (más reciente primero)
   lista.sort((a, b) => new Date(b.FechaCompra) - new Date(a.FechaCompra));
   const grupos = {};
   lista.forEach(boleta => {
@@ -50,14 +44,10 @@ function mostrarBoletasAgrupadas(lista) {
     if (!grupos[clave]) grupos[clave] = [];
     grupos[clave].push(boleta);
   });
-
-  console.log('grupos ', grupos)
   const todosGrupos = [];
-
   Object.entries(grupos).forEach(([clave, boletas]) => {
     const grupoDiv = document.createElement("div");
     grupoDiv.className = "mb-4 grupo-boleta";
-
     grupoDiv.innerHTML = `
       <div class="card border-primary mb-3">
         <div class="card-header bg-primary text-white">
@@ -70,21 +60,15 @@ function mostrarBoletasAgrupadas(lista) {
       </div>
     `;
     container.appendChild(grupoDiv);
-
     const grupoContainer = grupoDiv.querySelector(".row");
-      console.log('boletas ',boletas);
-
     boletas.forEach(boleta => {
-      console.log('boleta ',boleta);
       const urlBoleta = boleta.Boleta ? boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`) : '';
-      console.log('urlBoleta ',urlBoleta);
       const urlComprobante = boleta.Comprobante.replace("/upload/", `/upload/fl_attachment/`);
       const card = document.createElement("div");
       card.className = "col-12 col-md-6 tarjeta-boleta";
       card.dataset.nombre = boleta.nombreAsistente.toLowerCase();
       card.dataset.documento = boleta.DocumentoAsistente.toLowerCase();
       card.dataset.celular = boleta.Celular.toLowerCase();
-
       card.innerHTML = `
         <div class="card shadow-sm">
           <div class="card-body">
@@ -101,17 +85,11 @@ function mostrarBoletasAgrupadas(lista) {
           </div>
         </div>
       `;
-            console.log('card ',card);
-
       grupoContainer.appendChild(card);
     });
-
     todosGrupos.push(grupoDiv);
-      console.log('todosGrupos ', todosGrupos)
-
   });
 
-  // Filtro en tiempo real
   const inputFiltro = document.getElementById("filtroBoletas");
   inputFiltro.addEventListener("input", () => {
     const texto = inputFiltro.value.toLowerCase();

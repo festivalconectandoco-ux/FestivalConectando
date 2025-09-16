@@ -2,20 +2,14 @@ let contadorAsistentes = 0;
 let catalogosGlobales = null;
 
 document.addEventListener("DOMContentLoaded", async function () {
-  // Establecer fecha actual
   const fechaInput = document.getElementById("fechaCompra");
   const hoy = new Date().toISOString().split("T")[0];
   fechaInput.value = hoy;
-
-  // Mostrar campo "Otro" si aplica
   document.getElementById("quienRecibio").addEventListener("change", function () {
     const campoOtro = document.getElementById("campoOtro");
     campoOtro.classList.toggle("d-none", this.value !== "Otro");
   });
-
-  
-  // Cargar catálogos
-  await fetch("data/catalogos.json")
+    await fetch("data/catalogos.json")
     .then(response => response.json())
     .then(data => {
       catalogosGlobales = data;
@@ -36,100 +30,78 @@ document.getElementById("agregarAsistente").addEventListener("click", async () =
   }
   contadorAsistentes++;
   const contenedor = document.getElementById("grupoAsistentes");
-
   const div = document.createElement("div");
   div.classList.add("row", "mb-3", "border", "p-3", "rounded", "bg-white");
-div.innerHTML = `
-  <div class="col-12 mb-3 col-md-12">
-    <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
-    <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
-  </div>
-  <div class="col-6 mb-3 col-md-5">
-    <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
-    <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
-  </div>
-  <div class="col-6 mb-3 col-md-4">
-    <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
-    <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
-  </div>
-  <div class="col-6 mb-3 col-md-3">
-    <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
-    <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required></select>
-  </div>
-`;
+  div.innerHTML = `
+    <div class="col-12 mb-3 col-md-12">
+      <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
+      <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
+    </div>
+    <div class="col-6 mb-3 col-md-5">
+      <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
+      <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
+    </div>
+    <div class="col-6 mb-3 col-md-4">
+      <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
+      <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
+    </div>
+  `;
   contenedor.appendChild(div);
-
   cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
-  cargarTipoAsistente(catalogosGlobales.tipoAsistente, `tipoAsistente_${contadorAsistentes}`);
 });
 
 async function cargarAsistenteInicial(){
   const contenedor = document.getElementById("grupoAsistentes");
-
   const div = document.createElement("div");
   div.classList.add("row", "mb-3", "border", "p-3", "rounded", "bg-white");
-div.innerHTML = `
-  <div class="col-12 mb-3 col-md-12">
-    <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
-    <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
-  </div>
-  <div class="col-6 mb-3 col-md-5">
-    <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
-    <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
-  </div>
-  <div class="col-6 mb-3 col-md-4">
-    <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
-    <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
-  </div>
-  <div class="col-6 mb-3 col-md-3">
-    <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
-    <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required></select>
-  </div>
-`;
-
+  div.innerHTML = `
+    <div class="col-12 mb-3 col-md-12">
+      <label for="nombreAsistente_${contadorAsistentes}" class="form-label">Nombre del asistente:</label>
+      <input type="text" class="form-control nombreAsistente" id="nombreAsistente_${contadorAsistentes}" required>
+    </div>
+    <div class="col-6 mb-3 col-md-5">
+      <label for="tipoDocumentoAsistente_${contadorAsistentes}" class="form-label">Tipo de documento:</label>
+      <select class="form-select tipoDocumentoAsistente" id="tipoDocumentoAsistente_${contadorAsistentes}" required></select>
+    </div>
+    <div class="col-6 mb-3 col-md-4">
+      <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
+      <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
+    </div>
+  `;
   contenedor.appendChild(div);
-
   cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
-  cargarTipoAsistente(catalogosGlobales.tipoAsistente, `tipoAsistente_${contadorAsistentes}`);
 }
 
 // Enviar formulario
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("formVenta");
   const submitBtn = form.querySelector('button[type="submit"]');
-
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
-
-    // Validación personalizada
     const medioPago = document.getElementById("medioPago").value;
     const quienRecibio = document.getElementById("quienRecibio").value;
 
     if (medioPago === "0" && quienRecibio === "0") {
       alert("Por favor selecciona un medio de pago y una persona que recibió válidos.");
-      return submitBtn.disabled = false; // Reactiva el botón si hay error
+      return submitBtn.disabled = false;
     }
     if (medioPago === "0" && quienRecibio !== "0") {
       alert("Por favor selecciona un medio de pago válido.");
-      return submitBtn.disabled = false; // Reactiva el botón si hay error
+      return submitBtn.disabled = false;
     }
     if (medioPago !== "0" && quienRecibio === "0") {
       alert("Por favor selecciona una persona que recibió válida.");
-      return submitBtn.disabled = false; // Reactiva el botón si hay error
+      return submitBtn.disabled = false;
     }
-
-    // Desactiva el botón para evitar múltiples envíos
     submitBtn.disabled = true;
-
     try {
-      await registrarAsistente(this); // Tu lógica principal
-      form.reset(); // Esto dispara el evento 'reset'
+      await registrarAsistente(this);
+      form.reset();
     } catch (error) {
       console.error("Error al registrar asistente:", error);
       submitBtn.disabled = false;
     }
   });
-
   form.addEventListener("reset", () => {
     submitBtn.disabled = false;
   });
@@ -141,7 +113,6 @@ async function registrarAsistente(formElement) {
   const indicativo = datosGenerales.paisTelefono || ""; 
   const celular = datosGenerales.celular || "";
   const celularCompleto = `${indicativo}${celular}`;
-
   const asistentes = [];
   const grupos = document.querySelectorAll("#grupoAsistentes .row");
 
@@ -150,18 +121,12 @@ async function registrarAsistente(formElement) {
     const documento = grupo.querySelector(".documentoAsistente").value;
     const tipoDocSelect = grupo.querySelector(".tipoDocumentoAsistente");
     const tipoDoc = tipoDocSelect.options[tipoDocSelect.selectedIndex].text;
-    const tipoAsistenteSelect = grupo.querySelector(".tipoAsistente");
-    const tipoAsistente = tipoAsistenteSelect.options[tipoAsistenteSelect.selectedIndex].text;
-
     const promocionSelect = document.getElementById("promocion");
     const promocionTexto = promocionSelect.options[promocionSelect.selectedIndex].text;
-
     const medioPagoSelect = document.getElementById("medioPago");
     const medioPagoTexto = medioPagoSelect.options[medioPagoSelect.selectedIndex].text;
-
     const quienRecibioSelect = document.getElementById("quienRecibio");
     const quienRecibioTexto = quienRecibioSelect.options[quienRecibioSelect.selectedIndex].text;
-
     const comprobanteInput = document.getElementById("comprobante");
     const file = comprobanteInput.files[0];
     const ahora = new Date();
@@ -173,18 +138,14 @@ async function registrarAsistente(formElement) {
       String(ahora.getSeconds()).padStart(2, "0");
 
     const comprobanteBase64 = await convertirArchivoABase64(file);
-    console.log("comprobanteBase64:", comprobanteBase64);
-
     const imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia });
-const comprobanteUrl = await subirComprobante(comprobanteBase64,referencia);
-    console.log("comprobanteUrl:", comprobanteUrl);
+    const comprobanteUrl = await subirComprobante(comprobanteBase64,referencia);
 
     asistentes.push({
       nombreComprador: datosGenerales.nombre,
       nombreAsistente: nombreAsistente,
       TipoDocumentoAsistente: tipoDoc,
       DocumentoAsistente: documento,
-      TipoAsistente: tipoAsistente,
       Promocion: promocionTexto,
       MedioPago: medioPagoTexto,
       QuienRecibio: quienRecibioTexto,
@@ -192,10 +153,10 @@ const comprobanteUrl = await subirComprobante(comprobanteBase64,referencia);
       Comprobante: comprobanteUrl,
       Celular: celularCompleto,
       Referencia: referencia,
-      Boleta: imagenBase64
+      Boleta: imagenBase64,
+      EnvioWhatsapp: 0
     });
   }
-
   await procesarBoletas(asistentes);
   alert("Boletas registradas con éxito");
   formElement.reset();
@@ -205,16 +166,13 @@ const comprobanteUrl = await subirComprobante(comprobanteBase64,referencia);
 function convertirArchivoABase64(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-
     reader.onload = () => resolve(reader.result); // Devuelve el base64 completo (con MIME)
     reader.onerror = error => reject(error);
-
     reader.readAsDataURL(file); // Convierte el archivo
   });
 }
 
 async function procesarBoletas(asistentes) {
-
   for (const asistente of asistentes) {
     try {
       await fetch("/registrar-boleta", {
@@ -225,7 +183,7 @@ async function procesarBoletas(asistentes) {
 
       const reqWp = {
         from: "whatsapp:+14155238886",
-        to: `whatsapp:${asistente.Celular}`, // Asegúrate que cada asistente tenga su número
+        to: `whatsapp:${asistente.Celular}`,
         body: `Hola ${asistente.nombreAsistente}, bienvenido al festival conectando!`,
         mediaUrl: asistente.Boleta
       };
@@ -266,21 +224,9 @@ function cargarPromociones(lista, selectId) {
       option.value = promo.idPromocion;
       option.textContent = `${promo.descripcion} - $${promo.precio}`;
       select.appendChild(option);
-    });
+  });
 }
 
-function cargarTipoAsistente(lista, selectId) {
-  const select = document.getElementById(selectId);
-  if (!select) return;
-  lista
-    .filter(tipo => tipo.visible)
-    .forEach(tipo => {
-      const option = document.createElement("option");
-      option.value = tipo.id;
-      option.textContent = tipo.nombre;
-            select.appendChild(option);
-            });
-    }
 function cargarIndicativos(lista, selectId) {
   const select = document.getElementById(selectId);
   if (!select) return;
@@ -296,17 +242,14 @@ async function generarImagenBoleta({ nombre, documento, referencia }) {
   return new Promise((resolve, reject) => {
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
-
     const img = new Image();
     img.src = "/plantilla.png";
 
     img.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
       ctx.font = "bold 10px Arial";
       ctx.fillStyle = "#ffff";
-
       ctx.fillText(`Nombre completo: ${nombre}`, 50, 340);
       ctx.fillText(`Número de d ocumento: ${documento}`, 50, 350);
       ctx.fillText(`Referencia: ${referencia}`, 50, 360);
@@ -325,32 +268,22 @@ async function generarImagenBoleta({ nombre, documento, referencia }) {
         })
         .catch(err => console.error("Error enviando boleta:", err));
     };
-
     img.onerror = () => reject("Error al cargar la plantilla");
   });
 }
 
 async function subirComprobante(base64, referencia) {
   try {
-    console.log('subirComprobante')
-
-    const reqFb = {
-      imagenBase64: base64,
-      referencia: referencia
-    };
-console.log('reqFb',reqFb)
+    const reqFb = {imagenBase64: base64,referencia: referencia};
     const response = await fetch("/subir-comprobante", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(reqFb)
     });
-
     const data = await response.json();
-
     if (!response.ok || !data.url) {
       throw new Error(data.error || "No se pudo subir el comprobante");
     }
-
     return data.url; // ← Devuelve la URL pública
   } catch (err) {
     console.error("Error subiendo comprobante:", err);
