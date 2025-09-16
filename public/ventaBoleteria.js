@@ -101,6 +101,30 @@ async function cargarAsistenteInicial(){
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("formVenta");
   const submitBtn = form.querySelector('button[type="submit"]');
+
+  // Crear overlay de carga
+  const overlay = document.createElement('div');
+  overlay.id = 'loadingOverlay';
+  overlay.style.position = 'fixed';
+  overlay.style.top = 0;
+  overlay.style.left = 0;
+  overlay.style.width = '100vw';
+  overlay.style.height = '100vh';
+  overlay.style.background = 'rgba(255,255,255,0.7)';
+  overlay.style.display = 'none';
+  overlay.style.zIndex = 9999;
+  overlay.style.justifyContent = 'center';
+  overlay.style.alignItems = 'center';
+  overlay.innerHTML = `<div style="text-align:center"><div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status"><span class="visually-hidden">Cargando...</span></div><div class="mt-2">Procesando...</div></div>`;
+  document.body.appendChild(overlay);
+
+  function mostrarOverlay() {
+    overlay.style.display = 'flex';
+  }
+  function ocultarOverlay() {
+    overlay.style.display = 'none';
+  }
+
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
     const medioPago = document.getElementById("medioPago").value;
@@ -119,6 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return submitBtn.disabled = false;
     }
     submitBtn.disabled = true;
+    mostrarOverlay();
     try {
       await registrarAsistente(this);
       form.reset();
@@ -126,9 +151,11 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Error al registrar asistente:", error);
       submitBtn.disabled = false;
     }
+    ocultarOverlay();
   });
   form.addEventListener("reset", () => {
     submitBtn.disabled = false;
+    ocultarOverlay();
   });
 });
 
@@ -217,45 +244,43 @@ async function procesarBoletas(asistentes) {
         body: JSON.stringify(asistente)
       });
 
-      // const reqWp = {
-      //   from: "whatsapp:+14155238886",
-      //   to: `whatsapp:${asistente.Celular}`,
-      //   body: `Hola ${asistente.nombreAsistente}, bienvenido al festival conectando!`,
-      //   mediaUrl: asistente.Boleta
-      // };
+      const caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
+        `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
+        `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
+        `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
+        `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
+        `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
 
-      // const resp = await fetch("/enviar-mensaje-boleta", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(reqWp)
-      // });
-
-      // Preparar datos para GreenAPI
-                const caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
-            `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
-            `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
-            `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
-            `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
-            `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
-
-          const reqGreen = {
-            urlFile: asistente.Boleta,
-            fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
-            caption: caption,
-            numero: asistente.Celular
-          };
-          const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(reqGreen)
-          });
+      const reqGreen = {
+        urlFile: asistente.Boleta,
+        fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
+        caption: caption,
+        numero: asistente.Celular
+      };
+      const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reqGreen)
+      });
       if (resp.ok) {
         asistente.EnvioWhatsapp = 1;
       } else {
         asistente.EnvioWhatsapp = 0;
       }
+      // Actualizar en Firestore el valor correcto
+      await fetch("/actualizar-envio-whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: asistente.EnvioWhatsapp })
+      });
     } catch (error) {
       asistente.EnvioWhatsapp = 0;
+      // Intentar actualizar en Firestore aunque haya error
+      await fetch("/actualizar-envio-whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: 0 })
+      });
       console.error(`Error procesando boleta para ${asistente.nombre}:`, error);
     }
   }
