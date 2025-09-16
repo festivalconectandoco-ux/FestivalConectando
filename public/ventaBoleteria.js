@@ -5,10 +5,20 @@ document.addEventListener("DOMContentLoaded", async function () {
   const fechaInput = document.getElementById("fechaCompra");
   const hoy = new Date().toISOString().split("T")[0];
   fechaInput.value = hoy;
-  document.getElementById("quienRecibio").addEventListener("change", function () {
-    const campoOtro = document.getElementById("campoOtro");
-    campoOtro.classList.toggle("d-none", this.value !== "Otro");
-  });
+  const quienRecibio = document.getElementById("quienRecibio");
+  const campoOtro = document.getElementById("campoOtro");
+  console.log('campoOtro ',campoOtro)
+  function toggleCampoOtro() {
+      console.log('quienRecibio.value ',quienRecibio.value)
+
+    if (quienRecibio.value === "99") {
+      campoOtro.classList.remove("d-none");
+    } else {
+      campoOtro.classList.add("d-none");
+    }
+  }
+  quienRecibio.addEventListener("change", toggleCampoOtro);
+  toggleCampoOtro();
     await fetch("data/catalogos.json")
     .then(response => response.json())
     .then(data => {
@@ -70,6 +80,25 @@ async function cargarAsistenteInicial(){
   `;
   contenedor.appendChild(div);
   cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
+
+  // Llenar el nombre del primer asistente con el nombre del comprador si existe
+  if (contadorAsistentes === 0) {
+    const inputNombreComprador = document.getElementById("nombre");
+    const inputNombreAsistente = document.getElementById(`nombreAsistente_${contadorAsistentes}`);
+    if (inputNombreComprador && inputNombreAsistente) {
+      inputNombreAsistente.value = inputNombreComprador.value;
+      // Si el usuario cambia el nombre del comprador, actualizar el del asistente solo si no ha sido modificado manualmente
+      let modificadoManualmente = false;
+      inputNombreAsistente.addEventListener("input", function() {
+        modificadoManualmente = true;
+      });
+      inputNombreComprador.addEventListener("input", function() {
+        if (!modificadoManualmente) {
+          inputNombreAsistente.value = inputNombreComprador.value;
+        }
+      });
+    }
+  }
 }
 
 // Enviar formulario
@@ -217,14 +246,21 @@ function cargarOpciones(lista, selectId) {
 function cargarPromociones(lista, selectId) {
   const select = document.getElementById(selectId);
   if (!select) return;
+  const hoy = new Date();
+  hoy.setHours(23, 59, 59, 999);
   lista
-    .filter(promo => promo.activo)
+    .filter(promo => {
+      if (!promo.activo || !promo.fechaInicial || !promo.fechaFin) return false;
+      const fechaInicio = new Date(promo.fechaInicial);
+      const fechaFin = new Date(promo.fechaFin);
+      return fechaInicio <= hoy && hoy <= fechaFin;
+    })
     .forEach(promo => {
       const option = document.createElement("option");
       option.value = promo.idPromocion;
       option.textContent = `${promo.descripcion} - $${promo.precio}`;
       select.appendChild(option);
-  });
+    });
 }
 
 function cargarIndicativos(lista, selectId) {

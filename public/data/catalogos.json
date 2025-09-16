@@ -57,62 +57,80 @@
 			"nombre":"Camilo"
 		},
 		{
-			"id":"3",
+			"id":"99",
 			"nombre":"Otro"
-		}
-	],
-	"tipoAsistente":[
-		{
-			"id":"1",
-			"nombre":"Comprador",
-			"visible":true
-		},
-		{
-			"id":"2",
-			"nombre":"Emprendimiento",
-			"visible":true
-		},
-		{
-			"id":"3",
-			"nombre":"Artista",
-			"visible":false
-		},
-		{
-			"id":"4",
-			"nombre":"Invitado artistas",
-			"visible":false
-		},
-		{
-			"id":"5",
-			"nombre":"Invitado festival",
-			"visible":false
 		}
 	],
   "Promocion": [
 	{
 	  "idPromocion": "1",
-	  "descripcion": "Preventa 1",
+	  "descripcion": "Preventa 5 Oct",
 	  "fechaInicial": "2025-09-15",
-	  "fechaFin": "2025-09-30",
+	  "fechaFin": "2025-10-05",
 	  "precio": 100000,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	},
 	{
 	  "idPromocion": "2",
-	  "descripcion": "Preventa 2",
-	  "fechaInicial": "2025-10-01",
-	  "fechaFin": "2025-10-15",
-	  "precio": 115000,
+	  "descripcion": "Preventa 18 Nov",
+	  "fechaInicial": "2025-10-06",
+	  "fechaFin": "2025-11-18",
+	  "precio": 110000,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	},
 	{
 	  "idPromocion": "3",
 	  "descripcion": "Precio final",
-	  "fechaInicial": "2025-11-29",
+	  "fechaInicial": "2025-11-19",
 	  "fechaFin": "2025-11-29",
 	  "precio": 130000,
+	  "cantidadPersonas": 1,
+	  "activo": true
+	},
+	{
+	  "idPromocion": "4",
+	  "descripcion": "Emprendimimento",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-29",
+	  "precio": 50000,
+	  "cantidadPersonas": 1,
+	  "activo": false
+	},
+	{
+	  "idPromocion": "5",
+	  "descripcion": "Logistica",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-29",
+	  "precio": 0,
+	  "cantidadPersonas": 1,
+	  "activo": false
+	},
+	{
+	  "idPromocion": "5",
+	  "descripcion": "Artistas",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-29",
+	  "precio": 0,
+	  "cantidadPersonas": 1,
+	  "activo": false
+	},
+	{
+	  "idPromocion": "5",
+	  "descripcion": "Invitados artistas",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-29",
+	  "precio": 0,
+	  "cantidadPersonas": 1,
+	  "activo": false
+	},
+	{
+	  "idPromocion": "5",
+	  "descripcion": "Invitados festival",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-29",
+	  "precio": 0,
 	  "cantidadPersonas": 1,
 	  "activo": false
 	}

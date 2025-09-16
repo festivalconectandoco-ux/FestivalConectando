@@ -13,7 +13,7 @@ function mostrarBoletasAgrupadas(lista) {
   if (!container) return;
   container.innerHTML = `
     <div class="mb-3">
-      <input type="text" class="form-control" id="filtroBoletas" placeholder="Filtrar por nombre, documento o celular">
+      <input type="text" class="form-control" id="filtroBoletas" placeholder="Filtrar por nombre, documento, celular o referencia">
     </div>
   `;
   if (lista.length === 0) {
@@ -65,16 +65,16 @@ function mostrarBoletasAgrupadas(lista) {
       const urlBoleta = boleta.Boleta ? boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`) : '';
       const urlComprobante = boleta.Comprobante.replace("/upload/", `/upload/fl_attachment/`);
       const card = document.createElement("div");
-      card.className = "col-12 col-md-6 tarjeta-boleta";
-      card.dataset.nombre = boleta.nombreAsistente.toLowerCase();
-      card.dataset.documento = boleta.DocumentoAsistente.toLowerCase();
-      card.dataset.celular = boleta.Celular.toLowerCase();
+  card.className = "col-12 col-md-6 tarjeta-boleta";
+  card.dataset.nombre = boleta.nombreAsistente.toLowerCase();
+  card.dataset.documento = boleta.DocumentoAsistente.toLowerCase();
+  card.dataset.celular = boleta.Celular.toLowerCase();
+  card.dataset.referencia = boleta.Referencia ? boleta.Referencia.toLowerCase() : "";
       card.innerHTML = `
         <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title">${boleta.nombreAsistente}</h5>
             <p class="mb-1"><strong>Documento:</strong> ${boleta.DocumentoAsistente}</p>
-            <p class="mb-1"><strong>Tipo:</strong> ${boleta.TipoAsistente}</p>
             <p class="mb-1"><strong>Promoción:</strong> ${boleta.Promocion}</p>
             <p class="mb-1"><strong>Medio de pago:</strong> ${boleta.MedioPago}</p>
             <p class="mb-1"><strong>Recibido por:</strong> ${boleta.QuienRecibio}</p>
@@ -100,7 +100,8 @@ function mostrarBoletasAgrupadas(lista) {
         const match =
           tarjeta.dataset.nombre.includes(texto) ||
           tarjeta.dataset.documento.includes(texto) ||
-          tarjeta.dataset.celular.includes(texto);
+          tarjeta.dataset.celular.includes(texto) ||
+          (tarjeta.dataset.referencia && tarjeta.dataset.referencia.includes(texto));
         tarjeta.style.display = match ? "block" : "none";
         if (match) visible = true;
       });
