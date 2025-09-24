@@ -52,7 +52,32 @@ document.getElementById("agregarAsistente").addEventListener("click", async () =
       <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
       <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
     </div>
+    <div class="col-6 mb-3 col-md-3">
+      <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
+      <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required>
+        <option value="adulto">Adulto</option>
+        <option value="niño">Niño (menor de 12 años)</option>
+      </select>
+    </div>
+    <div class="col-6 mb-3 col-md-3 d-none" id="edadAsistenteContainer_${contadorAsistentes}">
+      <label for="edadAsistente_${contadorAsistentes}" class="form-label">Edad del niño:</label>
+      <input type="number" min="1" max="11" class="form-control edadAsistente" id="edadAsistente_${contadorAsistentes}" placeholder="Edad">
+    </div>
   `;
+  // Mostrar campo edad solo si es niño
+  const tipoAsistenteSelect = div.querySelector(`#tipoAsistente_${contadorAsistentes}`);
+  const edadContainer = div.querySelector(`#edadAsistenteContainer_${contadorAsistentes}`);
+  tipoAsistenteSelect.addEventListener("change", function() {
+    const edadInput = div.querySelector(`#edadAsistente_${contadorAsistentes}`);
+    if (tipoAsistenteSelect.value === "niño") {
+      edadContainer.classList.remove("d-none");
+      edadInput.setAttribute("required", "required");
+    } else {
+      edadContainer.classList.add("d-none");
+      edadInput.removeAttribute("required");
+      edadInput.value = "";
+    }
+  });
   contenedor.appendChild(div);
   cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
 });
@@ -74,7 +99,32 @@ async function cargarAsistenteInicial(){
       <label for="documentoAsistente_${contadorAsistentes}" class="form-label">Documento:</label>
       <input type="text" class="form-control documentoAsistente" id="documentoAsistente_${contadorAsistentes}" required>
     </div>
+    <div class="col-6 mb-3 col-md-3">
+      <label for="tipoAsistente_${contadorAsistentes}" class="form-label">Tipo de asistente:</label>
+      <select class="form-select tipoAsistente" id="tipoAsistente_${contadorAsistentes}" required>
+        <option value="adulto">Adulto</option>
+        <option value="niño">Niño (menor de 12 años)</option>
+      </select>
+    </div>
+    <div class="col-6 mb-3 col-md-3 d-none" id="edadAsistenteContainer_${contadorAsistentes}">
+      <label for="edadAsistente_${contadorAsistentes}" class="form-label">Edad del niño:</label>
+      <input type="number" min="1" max="11" class="form-control edadAsistente" id="edadAsistente_${contadorAsistentes}" placeholder="Edad">
+    </div>
   `;
+  // Mostrar campo edad solo si es niño
+  const tipoAsistenteSelect = div.querySelector(`#tipoAsistente_${contadorAsistentes}`);
+  const edadContainer = div.querySelector(`#edadAsistenteContainer_${contadorAsistentes}`);
+  tipoAsistenteSelect.addEventListener("change", function() {
+    const edadInput = div.querySelector(`#edadAsistente_${contadorAsistentes}`);
+    if (tipoAsistenteSelect.value === "niño") {
+      edadContainer.classList.remove("d-none");
+      edadInput.setAttribute("required", "required");
+    } else {
+      edadContainer.classList.add("d-none");
+      edadInput.removeAttribute("required");
+      edadInput.value = "";
+    }
+  });
   contenedor.appendChild(div);
   cargarOpciones(catalogosGlobales.tiposDeDocumento, `tipoDocumentoAsistente_${contadorAsistentes}`);
 
@@ -163,19 +213,40 @@ async function registrarAsistente(formElement) {
   const celular = datosGenerales.celular || "";
   const celularCompleto = `${indicativo}${celular}`;
   const asistentes = [];
-  const grupos = document.querySelectorAll("#grupoAsistentes .row");
+    const grupos = document.querySelectorAll("#grupoAsistentes .row");
+    // Generar referencia con formato yyyymmddhhmmss
+    const now = new Date();
+    const referencia = now.getFullYear().toString() +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      String(now.getDate()).padStart(2, '0') +
+      String(now.getHours()).padStart(2, '0') +
+      String(now.getMinutes()).padStart(2, '0') +
+      String(now.getSeconds()).padStart(2, '0') +
+      String(now.getMilliseconds()).padStart(3, '0');
   let asistentesFallidos = [];
   let mensaje = "Boletas registradas con éxito";
 
   for (const grupo of grupos) {
-  let nombreAsistente = grupo.querySelector(".nombreAsistente").value.trim();
-  nombreAsistente = nombreAsistente.replace(/\s+/g, '_');
-  let documento = grupo.querySelector(".documentoAsistente").value.trim();
-  documento = documento.replace(/\s+/g, '_');
+    let nombreAsistente = grupo.querySelector(".nombreAsistente").value.trim();
+    nombreAsistente = nombreAsistente.replace(/\s+/g, '_');
+    let documento = grupo.querySelector(".documentoAsistente").value.trim();
+    documento = documento.replace(/\s+/g, '_');
     const tipoDocSelect = grupo.querySelector(".tipoDocumentoAsistente");
     const tipoDoc = tipoDocSelect.options[tipoDocSelect.selectedIndex].text;
+    const tipoAsistente = grupo.querySelector(".tipoAsistente").value;
+    let edad = null;
+    if (tipoAsistente === "niño") {
+      edad = grupo.querySelector(".edadAsistente").value;
+      if (!edad || isNaN(edad) || edad > 11 || edad < 1) {
+        asistentesFallidos.push(`${nombreAsistente} (edad inválida)`);
+        continue;
+      }
+    }
     const promocionSelect = document.getElementById("promocion");
-    const promocionTexto = promocionSelect.options[promocionSelect.selectedIndex].text;
+    let promocionTexto = promocionSelect.options[promocionSelect.selectedIndex].text;
+    if (tipoAsistente === "niño") {
+      promocionTexto = "Niño (No paga)";
+    }
     const medioPagoSelect = document.getElementById("medioPago");
     const medioPagoTexto = medioPagoSelect.options[medioPagoSelect.selectedIndex].text;
     const quienRecibioSelect = document.getElementById("quienRecibio");
@@ -185,7 +256,7 @@ async function registrarAsistente(formElement) {
     let comprobanteBase64, imagenBase64, comprobanteUrl;
     try {
       comprobanteBase64 = await convertirArchivoABase64(file);
-      imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento });
+        imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia, tipoAsistente, edad });
       comprobanteUrl = await subirComprobante(comprobanteBase64, documento);
       if (!comprobanteUrl) {
         asistentesFallidos.push(nombreAsistente);
@@ -203,12 +274,15 @@ async function registrarAsistente(formElement) {
       Promocion: promocionTexto,
       MedioPago: medioPagoTexto,
       QuienRecibio: quienRecibioTexto,
-      FechaCompra: new Date().toISOString(),
+        FechaCompra: now.toISOString(),
       Comprobante: comprobanteUrl,
       Celular: celularCompleto,
-      Referencia: documento,
+        Referencia: referencia,
       Boleta: imagenBase64,
-      EnvioWhatsapp: 0
+      EnvioWhatsapp: 0,
+      tipoAsistente: tipoAsistente,
+      edad: edad,
+      valorBoleta: tipoAsistente === "niño" ? 0 : undefined
     });
   }
 
@@ -225,12 +299,15 @@ async function registrarAsistente(formElement) {
     }
 
     // Envío de WhatsApp y registro de historialEnvio
-    const caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
+    let caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
       `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
       `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
       `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
       `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
       `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
+    if (asistente.tipoAsistente === "niño") {
+      caption = `🧒 BOLETA NIÑO (menor de 12 años)\nEdad: ${asistente.edad}\n\n` + caption;
+    }
 
     const reqGreen = {
       urlFile: asistente.Boleta,
@@ -410,7 +487,7 @@ function cargarIndicativos(lista, selectId) {
   });
 }
 
-async function generarImagenBoleta({ nombre, documento, referencia }) {
+async function generarImagenBoleta({ nombre, documento, referencia, tipoAsistente, edad }) {
   return new Promise((resolve, reject) => {
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
@@ -425,7 +502,9 @@ async function generarImagenBoleta({ nombre, documento, referencia }) {
       ctx.fillText(`Nombre completo: ${nombre}`, 50, 340);
       ctx.fillText(`Número de documento: ${documento}`, 50, 350);
       ctx.fillText(`Referencia: ${referencia}`, 50, 360);
-
+      if (tipoAsistente === "niño") {
+        ctx.fillText(`BOLETA NIÑO - Edad: ${edad}`, 50, 370);
+      }
       const imagenBase64 = canvas.toDataURL("image/png");
 
       const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}${nombre}`};
