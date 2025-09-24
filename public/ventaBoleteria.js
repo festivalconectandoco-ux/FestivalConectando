@@ -191,7 +191,9 @@ async function registrarAsistente(formElement) {
     try {
       comprobanteBase64 = await convertirArchivoABase64(file);
       imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia });
+      console.log('imagenBase64 ',imagenBase64 );
       comprobanteUrl = await subirComprobante(comprobanteBase64, referencia);
+      console.log('comprobanteUrl ',comprobanteUrl );
       if (!comprobanteUrl) {
         asistentesFallidos.push(nombreAsistente);
         continue;
@@ -263,23 +265,39 @@ async function procesarBoletas(asistentes) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(reqGreen)
       });
-      if (resp.ok) {
-        asistente.EnvioWhatsapp = 1;
-      } else {
-        asistente.EnvioWhatsapp = 0;
-      }
-      await fetch("/actualizar-envio-whatsapp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: asistente.EnvioWhatsapp })
-      });
+        let respuestaServicio = "";
+        try {
+          respuestaServicio = await resp.text();
+        } catch (e) {
+          respuestaServicio = "Error leyendo respuesta";
+        }
+        if (resp.ok) {
+          asistente.EnvioWhatsapp = 1;
+        } else {
+          asistente.EnvioWhatsapp = 0;
+        }
+        const historialEnvio = {
+          fecha: new Date().toISOString(),
+          mensaje: caption,
+          respuesta: respuestaServicio
+        };
+        await fetch("/actualizar-envio-whatsapp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: asistente.EnvioWhatsapp, historialEnvio })
+        });
     } catch (error) {
       asistente.EnvioWhatsapp = 0;
-      await fetch("/actualizar-envio-whatsapp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: 0 })
-      });
+        const historialEnvio = {
+          fecha: new Date().toISOString(),
+          mensaje: caption,
+          respuesta: error?.message || "Error en envío"
+        };
+        await fetch("/actualizar-envio-whatsapp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: 0, historialEnvio })
+        });
       console.error(`Error procesando boleta para ${asistente.nombre}:`, error);
     }
   }

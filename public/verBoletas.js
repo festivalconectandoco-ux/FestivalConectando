@@ -162,6 +162,18 @@ function mostrarBoletasAgrupadas(lista) {
       card.dataset.celular = boleta.Celular.toLowerCase();
       card.dataset.referencia = boleta.Referencia ? boleta.Referencia.toLowerCase() : "";
       const enviosWhatsapp = boleta.EnvioWhatsapp && !isNaN(boleta.EnvioWhatsapp) ? boleta.EnvioWhatsapp : 0;
+      let historialHtml = "";
+      if (Array.isArray(boleta.historialEnvio) && boleta.historialEnvio.length > 0) {
+        historialHtml = `<details class='mt-2'><summary>Historial de envíos WhatsApp (${boleta.historialEnvio.length})</summary><ul class='list-group mt-2'>`;
+        boleta.historialEnvio.slice().reverse().forEach(item => {
+          historialHtml += `<li class='list-group-item'>
+            <div><strong>Fecha:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString() : "-"}</div>
+            <div><strong>Mensaje:</strong> <pre style='white-space:pre-wrap;font-size:12px;'>${item.mensaje || "-"}</pre></div>
+            <div><strong>Respuesta:</strong> <pre style='white-space:pre-wrap;font-size:12px;'>${item.respuesta || "-"}</pre></div>
+          </li>`;
+        });
+        historialHtml += `</ul></details>`;
+      }
       card.innerHTML = `
         <div class="card shadow-sm">
           <div class="card-body">
@@ -176,6 +188,7 @@ function mostrarBoletasAgrupadas(lista) {
             <button class="btn btn-sm btn-success mt-2 reenviar-wp">Reenviar WhatsApp</button>
             <a href="${urlBoleta}" class="btn btn-sm btn-primary mt-2">Descargar boleta PNG</a>
             <a href="${urlComprobante}" class="btn btn-sm btn-primary mt-2">Descargar comprobante de pago</a>
+            ${historialHtml}
           </div>
         </div>
       `;
@@ -196,13 +209,14 @@ function mostrarBoletasAgrupadas(lista) {
           btnReenviar.textContent = 'Reenviar WhatsApp';
           return;
         }
+        let caption = `🎉 ¡Gracias ${boleta.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
+          `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
+          `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
+          `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
+          `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
+          `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
+        let respuestaServicio = "";
         try {
-          const caption = `🎉 ¡Gracias ${boleta.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
-            `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
-            `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
-            `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
-            `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
-            `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
           const reqGreen = {
             urlFile: boleta.Boleta,
             fileName: `boleta_${boleta.nombreAsistente.replace(/\s+/g, '_')}.png`,
@@ -214,21 +228,43 @@ function mostrarBoletasAgrupadas(lista) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(reqGreen)
           });
+          try {
+            respuestaServicio = await resp.text();
+          } catch (e) {
+            respuestaServicio = "Error leyendo respuesta";
+          }
+          let actual = parseInt(contadorSpan.textContent, 10) || 0;
           if (resp.ok) {
-            let actual = parseInt(contadorSpan.textContent, 10) || 0;
             actual++;
             contadorSpan.textContent = actual;
             boleta.EnvioWhatsapp = actual;
-            await fetch("/actualizar-envio-whatsapp", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ referencia: boleta.Referencia, EnvioWhatsapp: actual })
-            });
+          }
+          const historialEnvio = {
+            fecha: new Date().toISOString(),
+            mensaje: caption,
+            respuesta: respuestaServicio
+          };
+          await fetch("/actualizar-envio-whatsapp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ referencia: boleta.Referencia, EnvioWhatsapp: boleta.EnvioWhatsapp, historialEnvio })
+          });
+          if (resp.ok) {
             alert('Mensaje reenviado exitosamente');
           } else {
             alert('No se pudo reenviar el mensaje de WhatsApp.');
           }
         } catch (err) {
+          const historialEnvio = {
+            fecha: new Date().toISOString(),
+            mensaje: caption,
+            respuesta: err?.message || "Error en envío"
+          };
+          await fetch("/actualizar-envio-whatsapp", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ referencia: boleta.Referencia, EnvioWhatsapp: boleta.EnvioWhatsapp, historialEnvio })
+          });
           alert('Error al reenviar WhatsApp.');
         }
         btnReenviar.disabled = false;

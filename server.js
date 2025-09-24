@@ -162,7 +162,7 @@ app.post("/subir-comprobante", async (req, res) => {
 
 app.post("/actualizar-envio-whatsapp", async (req, res) => {
   try {
-    const { referencia, EnvioWhatsapp } = req.body;
+    const { referencia, EnvioWhatsapp, historialEnvio } = req.body;
     if (!referencia) {
       return res.status(400).json({ error: "Referencia requerida" });
     }
@@ -172,7 +172,15 @@ app.post("/actualizar-envio-whatsapp", async (req, res) => {
     }
     const batch = db.batch();
     snapshot.forEach(doc => {
-      batch.update(doc.ref, { EnvioWhatsapp });
+      const updateData = { EnvioWhatsapp };
+      if (historialEnvio) {
+        batch.update(doc.ref, {
+          ...updateData,
+          historialEnvio: admin.firestore.FieldValue.arrayUnion(historialEnvio)
+        });
+      } else {
+        batch.update(doc.ref, updateData);
+      }
     });
     await batch.commit();
     res.status(200).json({ mensaje: "EnvioWhatsapp actualizado" });
