@@ -163,13 +163,26 @@ function mostrarBoletasAgrupadas(lista) {
       card.dataset.referencia = boleta.Referencia ? boleta.Referencia.toLowerCase() : "";
       const enviosWhatsapp = boleta.EnvioWhatsapp && !isNaN(boleta.EnvioWhatsapp) ? boleta.EnvioWhatsapp : 0;
       let historialHtml = "";
+      // Historial de envíos WhatsApp
       if (Array.isArray(boleta.historialEnvio) && boleta.historialEnvio.length > 0) {
-        historialHtml = `<details class='mt-2'><summary>Historial de envíos WhatsApp (${boleta.historialEnvio.length})</summary><ul class='list-group mt-2'>`;
+        historialHtml += `<details class='mt-2'><summary>Historial de envíos WhatsApp (${boleta.historialEnvio.length})</summary><ul class='list-group mt-2'>`;
         boleta.historialEnvio.slice().reverse().forEach(item => {
           historialHtml += `<li class='list-group-item'>
             <div><strong>Fecha:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString() : "-"}</div>
             <div><strong>Mensaje:</strong> <pre style='white-space:pre-wrap;font-size:12px;'>${item.mensaje || "-"}</pre></div>
             <div><strong>Respuesta:</strong> <pre style='white-space:pre-wrap;font-size:12px;'>${item.respuesta || "-"}</pre></div>
+          </li>`;
+        });
+        historialHtml += `</ul></details>`;
+      }
+      // Historial de comprobante
+      if (Array.isArray(boleta.historialComprobante) && boleta.historialComprobante.length > 0) {
+        historialHtml += `<details class='mt-2'><summary>Historial de comprobante (${boleta.historialComprobante.length})</summary><ul class='list-group mt-2'>`;
+        boleta.historialComprobante.slice().reverse().forEach(item => {
+          historialHtml += `<li class='list-group-item'>
+            <div><strong>Paso:</strong> ${item.paso || "-"}</div>
+            <div><strong>Fecha:</strong> ${item.fecha ? new Date(item.fecha).toLocaleString() : "-"}</div>
+            <div><strong>Mensaje:</strong> <pre style='white-space:pre-wrap;font-size:12px;'>${item.mensaje || "-"}</pre></div>
           </li>`;
         });
         historialHtml += `</ul></details>`;
