@@ -168,8 +168,10 @@ async function registrarAsistente(formElement) {
   let mensaje = "Boletas registradas con éxito";
 
   for (const grupo of grupos) {
-    const nombreAsistente = grupo.querySelector(".nombreAsistente").value;
-    const documento = grupo.querySelector(".documentoAsistente").value;
+  let nombreAsistente = grupo.querySelector(".nombreAsistente").value.trim();
+  nombreAsistente = nombreAsistente.replace(/\s+/g, '_');
+  let documento = grupo.querySelector(".documentoAsistente").value.trim();
+  documento = documento.replace(/\s+/g, '_');
     const tipoDocSelect = grupo.querySelector(".tipoDocumentoAsistente");
     const tipoDoc = tipoDocSelect.options[tipoDocSelect.selectedIndex].text;
     const promocionSelect = document.getElementById("promocion");
