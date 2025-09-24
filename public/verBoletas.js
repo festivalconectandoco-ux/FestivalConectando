@@ -49,7 +49,10 @@ function mostrarBoletasAgrupadas(lista) {
     container.innerHTML += `<p class="text-muted">No hay boletas registradas.</p>`;
     return;
   }
-  let totalVendidas = lista.length;
+  // Contador de niños
+  let totalNinos = lista.filter(b => b.Promocion === "Niño (No paga)" || b.tipoAsistente === "niño").length;
+  // Excluir niños del total de boletas vendidas
+  let totalVendidas = lista.length - totalNinos;
   let totalRecaudo = 0;
   lista.forEach(boleta => {
     const match = boleta.Promocion.match(/\$([\d.,]+)/);
@@ -72,7 +75,8 @@ function mostrarBoletasAgrupadas(lista) {
         </h2>
         <div id="collapseResumen" class="accordion-collapse collapse" aria-labelledby="headingResumen" data-bs-parent="#acordeonResumenVentas">
           <div class="accordion-body">
-            <p><strong>Total boletas vendidas:</strong> ${totalVendidas}</p>
+            <p><strong>Total boletas vendidas (pagas):</strong> ${totalVendidas}</p>
+            <p><strong>Total boletas niños (no pagan):</strong> ${totalNinos}</p>
             <p><strong>Total recaudado:</strong> $${totalRecaudo.toLocaleString("es-CO")}</p>
             <p><strong>Porcentaje de boletas vendidas:</strong> ${porcentajeVendidas}% (máximo ${maxBoletas})</p>
             <canvas id="graficoVentasSemana" height="100"></canvas>

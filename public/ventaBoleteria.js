@@ -207,6 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function registrarAsistente(formElement) {
+    let contador = 1;
   const formData = new FormData(formElement);
   const datosGenerales = Object.fromEntries(formData.entries());
   const indicativo = datosGenerales.paisTelefono || ""; 
@@ -222,7 +223,8 @@ async function registrarAsistente(formElement) {
       String(now.getHours()).padStart(2, '0') +
       String(now.getMinutes()).padStart(2, '0') +
       String(now.getSeconds()).padStart(2, '0') +
-      String(now.getMilliseconds()).padStart(3, '0');
+      String(now.getMilliseconds()).padStart(3, '0') +
+      contador;
   let asistentesFallidos = [];
   let mensaje = "Boletas registradas con éxito";
 
@@ -284,6 +286,7 @@ async function registrarAsistente(formElement) {
       edad: edad,
       valorBoleta: tipoAsistente === "niño" ? 0 : undefined
     });
+    contador=contador+1;
   }
 
   for (const asistente of asistentes) {
@@ -293,66 +296,62 @@ async function registrarAsistente(formElement) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(asistente)
       });
+
+      // Envío de WhatsApp y registro de historial solo para este asistente
+      let caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
+        `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
+        `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
+        `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
+        `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
+        `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
+      if (asistente.tipoAsistente === "niño") {
+        caption = `🧒 BOLETA NIÑO (menor de 12 años)\nEdad: ${asistente.edad}\n\n` + caption;
+      }
+
+      const reqGreen = {
+        urlFile: asistente.Boleta,
+        fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
+        caption: caption,
+        numero: '573058626761'//asistente.Celular
+      };
+      let respuestaServicio = "";
+      let envioOk = false;
+      try {
+        const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reqGreen)
+        });
+        try {
+          respuestaServicio = await resp.text();
+        } catch (e) {
+          respuestaServicio = "Error leyendo respuesta";
+        }
+        envioOk = resp.ok;
+      } catch (error) {
+        respuestaServicio = error?.message || "Error en envío";
+        envioOk = false;
+      }
+      asistente.EnvioWhatsapp = envioOk ? 1 : 0;
+      const historialEnvio = {
+        fecha: new Date().toISOString(),
+        mensaje: caption,
+        respuesta: respuestaServicio
+      };
+      await fetch("/actualizar-envio-whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: asistente.EnvioWhatsapp, historialEnvio })
+      });
     } catch (error) {
       console.error(`Error registrando boleta para ${asistente.nombreAsistente}:`, error);
       continue;
     }
-
-    // Envío de WhatsApp y registro de historialEnvio
-    let caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
-      `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
-      `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
-      `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
-      `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
-      `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
-    if (asistente.tipoAsistente === "niño") {
-      caption = `🧒 BOLETA NIÑO (menor de 12 años)\nEdad: ${asistente.edad}\n\n` + caption;
-    }
-
-    const reqGreen = {
-      urlFile: asistente.Boleta,
-      fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
-      caption: caption,
-      numero: '573058626761'//asistente.Celular
-    };
-    let respuestaServicio = "";
-    let envioOk = false;
-    try {
-      const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reqGreen)
-      });
-      try {
-        respuestaServicio = await resp.text();
-      } catch (e) {
-        respuestaServicio = "Error leyendo respuesta";
-      }
-      envioOk = resp.ok;
-    } catch (error) {
-      respuestaServicio = error?.message || "Error en envío";
-      envioOk = false;
-    }
-    asistente.EnvioWhatsapp = envioOk ? 1 : 0;
-    const historialEnvio = {
-      fecha: new Date().toISOString(),
-      mensaje: caption,
-      respuesta: respuestaServicio
-    };
-    await fetch("/actualizar-envio-whatsapp", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: asistente.EnvioWhatsapp, historialEnvio })
-    });
   }
 
   if (asistentesFallidos.length > 0) {
     mensaje += `\nNo se registraron los siguientes asistentes por error en el comprobante: ${asistentesFallidos.join(", ")}`;
   }
-  alert(mensaje);
-  formElement.reset();
-  document.getElementById("grupoAsistentes").innerHTML = "";
-  
   alert(mensaje);
   formElement.reset();
   document.getElementById("grupoAsistentes").innerHTML = "";
