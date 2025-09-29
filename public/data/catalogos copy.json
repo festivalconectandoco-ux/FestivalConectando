@@ -1,7 +1,4 @@
 {
-	"totalCostos": 12810000,
-	"reunidoPreviamente": 2780000,
-	"gananciaEsperada": 2000000,
 	"tiposDeDocumento":[
 		{
 			"id":"1",
@@ -26,8 +23,20 @@
 			"nombre":"Seleccione"
 		},
 		{
+			"id":"1",
+			"nombre":"Nequi"
+		},
+		{
+			"id":"2",
+			"nombre":"Daviplata"
+		},
+		{
+			"id":"3",
+			"nombre":"Transfiya"
+		},
+		{
 			"id":"4",
-			"nombre":"Llave Bre-B"
+			"nombre":"Llave"
 		},
 		{
 			"id":"5",
@@ -36,8 +45,16 @@
 	],
 	"responsables":[
 		{
+			"id":"0",
+			"nombre":"Seleccione"
+		},
+		{
 			"id":"1",
 			"nombre":"Jennifer"
+		},
+		{
+			"id":"2",
+			"nombre":"Camilo"
 		},
 		{
 			"id":"99",
@@ -47,47 +64,61 @@
   "Promocion": [
 	{
 	  "idPromocion": "1",
-	  "descripcion": "Preventa 18 Oct",
+	  "descripcion": "Preventa 5 Oct",
 	  "fechaInicial": "2025-09-15",
-	  "fechaFin": "2025-10-18",
-	  "precio": 120000,
+	  "fechaFin": "2025-10-05",
+	  "precio": 100000,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	},
 	{
 	  "idPromocion": "2",
 	  "descripcion": "Preventa 18 Nov",
-	  "fechaInicial": "2025-10-19",
+	  "fechaInicial": "2025-10-06",
 	  "fechaFin": "2025-11-18",
-	  "precio": 130000,
+	  "precio": 110000,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	},
 	{
 	  "idPromocion": "3",
 	  "descripcion": "Precio final",
-	  "fechaInicial": "2025-11-20",
+	  "fechaInicial": "2025-11-19",
 	  "fechaFin": "2025-11-29",
-	  "precio": 140000,
+	  "precio": 130000,
 	  "cantidadPersonas": 1,
 	  "activo": true
-	}
-  ],
-  "PromocionEmprendimientos": [
+	},
 	{
 	  "idPromocion": "4",
 	  "descripcion": "Emprendimimento",
 	  "fechaInicial": "2025-05-15",
 	  "fechaFin": "2025-11-29",
-	  "precio": 60000,
+	  "precio": 50000,
 	  "cantidadPersonas": 1,
 	  "activo": false
-	}
-  ],
-	"PromocionLogistica": [
+	},
 	{
 	  "idPromocion": "5",
 	  "descripcion": "Logistica",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-29",
+	  "precio": 0,
+	  "cantidadPersonas": 1,
+	  "activo": false
+	},
+	{
+	  "idPromocion": "5",
+	  "descripcion": "Artistas",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-29",
+	  "precio": 0,
+	  "cantidadPersonas": 1,
+	  "activo": false
+	},
+	{
+	  "idPromocion": "5",
+	  "descripcion": "Invitados artistas",
 	  "fechaInicial": "2025-05-15",
 	  "fechaFin": "2025-11-29",
 	  "precio": 0,
@@ -104,40 +135,7 @@
 	  "activo": false
 	}
   ],
-    "PromocionArtistas": [
-	{
-	  "idPromocion": "5",
-	  "descripcion": "Artistas",
-	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-29",
-	  "precio": 0,
-	  "cantidadPersonas": 1,
-	  "activo": false
-	},
-	{
-	  "idPromocion": "5",
-	  "descripcion": "Invitados artistas",
-	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-29",
-	  "precio": 60000,
-	  "cantidadPersonas": 1,
-	  "activo": false
-	}
-  ],
-	"categoriasFijas": [
-		"Artesanías",
-		"Comida",
-		"Bebidas",
-		"Ropa",
-		"Medicinas"
-	],
-	"redesOpciones": [
-		{ "nombre": "Facebook", "value": "facebook" },
-		{ "nombre": "Instagram", "value": "instagram" },
-		{ "nombre": "Whatsapp", "value": "whatsapp" },
-		{ "nombre": "Página Web", "value": "web" }
-	],
-	"indicativosTelefonicos": [
+  "indicativosTelefonicos": [
 	{
 	  "pais": "Colombia",
 	  "codigo": "+57"

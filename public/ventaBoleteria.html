@@ -10,19 +10,60 @@
       max-width: 100%;
       height: auto;
     }
+    :root {
+      --bs-primary: #240E45;
+      --bs-primary-rgb: 36, 14, 69;
+    }
+    .bg-primary {
+      background-color: #240E45 !important;
+    }
+    .text-primary {
+      color: #240E45 !important;
+    }
+    .border-primary {
+      border-color: #240E45 !important;
+    }
+    .btn-primary {
+        border-color: #240E45 !important;
+        background-color: #240E45 !important;
+    }
+    .btn-success{
+      border-color: #240E45 !important;
+      background-color: #240E45 !important;
+    }
   </style>
 </head>
 <body class="bg-light">
-  <canvas id="canvasBoleta" width="600" height="400" style="display:none;"></canvas>
-  <div class="container-fluid mt-3 px-3">
-    <div class="mb-3 text-end">
-      <a href="verBoletas.html" class="btn btn-primary">Ver Boletas Registradas</a>
+  <!-- Menú de navegación global -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom mb-3">
+    <div class="container-fluid">
+      <a class="navbar-brand text-primary fw-bold" href="#">Festival Conectando</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="menuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Navegación
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="menuDropdown">
+              <li><a class="dropdown-item" href="ventaBoleteria.html">Registrar Boletas</a></li>
+              <li><a class="dropdown-item" href="ventaEmprendimientos.html">Registrar Emprendimientos</a></li>
+              <li><a class="dropdown-item" href="verBoletas.html">Ver Boletas Registradas</a></li>
+              <li><a class="dropdown-item" href="verEmprendimientos.html">Ver Emprendimientos Registrados</a></li>
+              <li><a class="dropdown-item" href="Reportes.html">Ver Reportes</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
     </div>
-  </div>
+  </nav>
+  <canvas id="canvasBoleta" width="600" height="400" style="display:none;"></canvas>
   <div class="container-fluid mt-4 px-3">
     <div class="card shadow">
       <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">Formulario de Venta de Boletería</h4>
+        <h4 class="mb-0">Venta de Boletería Festival Conectando 2025</h4>
       </div>
       <div class="card-body">
         <form id="formVenta">

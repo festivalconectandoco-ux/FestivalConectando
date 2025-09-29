@@ -51,6 +51,65 @@ app.post("/registrar-boleta", async (req, res) => {
   }
 });
 
+app.post("/registrar-logistico", async (req, res) => {
+  try {
+    const nuevoLogistico = req.body;
+    nuevoLogistico.id = Date.now().toString();
+    await db.collection("logisticos").add(nuevoLogistico);
+    res.status(200).json({ mensaje: "Logistico registrada con éxito", id: nuevoLogistico.id });
+  } catch (error) {
+    console.error("Error guardando Logistico:", error);
+    res.status(500).json({ error: "Error al registrar Logistico" });
+  }
+});
+
+app.post("/registrar-artista", async (req, res) => {
+  try {
+    const nuevoArtista = req.body;
+    nuevoArtista.id = Date.now().toString();
+    await db.collection("artistas").add(nuevoArtista);
+    res.status(200).json({ mensaje: "Artista registrada con éxito", id: nuevoArtista.id });
+  } catch (error) {
+    console.error("Error guardando Artista:", error);
+    res.status(500).json({ error: "Error al registrar Artista" });
+  }
+});
+
+app.post("/registrar-emprendimiento", async (req, res) => {
+  try {
+    const nuevoArtista = req.body;
+    nuevoArtista.id = Date.now().toString();
+    await db.collection("emprendimientos").add(nuevoArtista);
+    res.status(200).json({ mensaje: "Emprendimiento registrada con éxito", id: nuevoArtista.id });
+  } catch (error) {
+    console.error("Error guardando Emprendimiento:", error);
+    res.status(500).json({ error: "Error al registrar Emprendimiento" });
+  }
+});
+
+app.get("/api/traer-todo", async (req, res) => {
+  try {
+    const [boletasSnap, emprendimientosSnap, artistasSnap, logisticosSnap] = await Promise.all([
+      db.collection("boletas").get(),
+      db.collection("emprendimientos").get(),
+      db.collection("artistas").get(),
+      db.collection("logisticos").get()
+    ]);
+    const boletas = boletasSnap.docs.map(doc => doc.data());
+    const emprendimientos = emprendimientosSnap.docs.map(doc => doc.data());
+    const artistas = artistasSnap.docs.map(doc => doc.data());
+    const logisticos = logisticosSnap.docs.map(doc => doc.data());
+    res.json({
+      boletas,
+      emprendimientos,
+      artistas,
+      logisticos
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener datos" });
+  }
+});
+
 app.get("/api/boletas", async (req, res) => {
   try {
     const snapshot = await db.collection("boletas").get();
@@ -64,33 +123,6 @@ app.get("/api/boletas", async (req, res) => {
 app.get("/favicon.ico", (req, res) => {
   const faviconPath = path.join(__dirname, "favicon.ico");
   res.sendFile(faviconPath);
-});
-
-
-app.post("/enviar-mensaje-boleta", async (req, res) => {
-  try {
-    const mensaje = req.body;
-    const message = await client.messages.create({
-      from: mensaje.from,
-      body: mensaje.body,
-      to: mensaje.to,
-      mediaUrl: [mensaje.mediaUrl],
-    });
-    if (message.error) {
-      console.warn("Twilio respondió con error lógico:", message);
-      return res.status(500).json({
-        error: message.error,
-      });
-    }
-    res.status(200).json({
-      mensaje: "mensaje enviado con éxito",
-      sid: message.sid,
-      status: message.status,
-    });
-  } catch (error) {
-    console.error("Error enviando boleta:", error);
-    res.status(500).json({ error: error.message });
-  }
 });
 
 app.post("/enviar-mensaje-boleta-greenapi", async (req, res) => {
