@@ -41,8 +41,11 @@
               <li><a class="dropdown-item" href="ventaBoleteria.html">Registrar Boletas</a></li>
               <li><a class="dropdown-item" href="ventaEmprendimientos.html">Registrar Emprendimientos</a></li>
               <li><a class="dropdown-item" href="ingresarLogisticos.html">Registrar Logísticos</a></li>
+              <li><a class="dropdown-item" href="ingresarMicAbierto.html">Registrar Micrófono Abierto</a></li>
               <li><a class="dropdown-item" href="verBoletas.html">Ver Boletas Registradas</a></li>
               <li><a class="dropdown-item" href="verEmprendimientos.html">Ver Emprendimientos Registrados</a></li>
+              <li><a class="dropdown-item" href="verLogisticos.html">Ver Logísticos Registrados</a></li>
+              <li><a class="dropdown-item" href="verMicAbierto.html">Ver Micrófono Abierto</a></li>
               <li><a class="dropdown-item" href="Reportes.html">Ver Reportes</a></li>
             </ul>
           </li>
@@ -71,10 +74,19 @@
         <label for="celular" class="form-label">Número celular</label>
         <input type="text" class="form-control" id="celular" name="celular" required>
       </div>
+        <div class="mb-3">
+          <label for="promocionLogistica" class="form-label">Promoción</label>
+          <select class="form-select" id="promocionLogistica" name="promocionLogistica" required>
+          </select>
+        </div>
       <div class="mb-3">
         <label class="form-label">Área de apoyo</label>
         <div id="areasApoyoContainer"></div>
       </div>
+        <div class="mb-3">
+          <label for="tareasLogistico" class="form-label">Tareas del logístico</label>
+          <textarea class="form-control" id="tareasLogistico" name="tareasLogistico" rows="2" placeholder="Describa las tareas que realizará el logístico"></textarea>
+        </div>
       <button type="submit" class="btn btn-primary">Guardar</button>
     </form>
     <div id="mensajeExito" class="alert alert-success mt-3 d-none">¡Logístico registrado exitosamente!</div>

@@ -87,23 +87,39 @@ app.post("/registrar-emprendimiento", async (req, res) => {
   }
 });
 
+app.post("/registrar-microfono-abierto", async (req, res) => {
+  try {
+    const nuevoArtista = req.body;
+    nuevoArtista.id = Date.now().toString();
+    await db.collection("micAbierto").add(nuevoArtista);
+    res.status(200).json({ mensaje: "Micrófono Abierto registrada con éxito", id: nuevoArtista.id });
+  } catch (error) {
+    console.error("Error guardando Micrófono Abierto:", error);
+    res.status(500).json({ error: "Error al registrar Micrófono Abierto" });
+  }
+});
+
+
 app.get("/api/traer-todo", async (req, res) => {
   try {
-    const [boletasSnap, emprendimientosSnap, artistasSnap, logisticosSnap] = await Promise.all([
+    const [boletasSnap, emprendimientosSnap, artistasSnap, logisticosSnap, micAbiertoSnap] = await Promise.all([
       db.collection("boletas").get(),
       db.collection("emprendimientos").get(),
       db.collection("artistas").get(),
-      db.collection("logisticos").get()
+      db.collection("logisticos").get(),
+      db.collection("micAbierto").get()
     ]);
     const boletas = boletasSnap.docs.map(doc => doc.data());
     const emprendimientos = emprendimientosSnap.docs.map(doc => doc.data());
     const artistas = artistasSnap.docs.map(doc => doc.data());
     const logisticos = logisticosSnap.docs.map(doc => doc.data());
+    const micAbierto = micAbiertoSnap.docs.map(doc => doc.data());
     res.json({
       boletas,
       emprendimientos,
       artistas,
-      logisticos
+      logisticos,
+      micAbierto
     });
   } catch (error) {
     res.status(500).json({ error: "Error al obtener datos" });

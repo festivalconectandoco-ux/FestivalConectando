@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Listado de Boletas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Micrófono Abierto</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
       --bs-primary: #240E45;
-      --bs-primary-rgb: 36, 14, 69;
     }
     .bg-primary {
       background-color: #240E45 !important;
@@ -15,21 +15,13 @@
     .text-primary {
       color: #240E45 !important;
     }
-    .border-primary {
-      border-color: #240E45 !important;
-    }
     .btn-primary {
-        border-color: #8155C2 !important;
-        background-color: #8155C2 !important;
-    }
-    .btn-success{
-      border-color: #8155C2 !important;
-      background-color: #8155C2 !important;
+      border-color: #240E45 !important;
+      background-color: #240E45 !important;
     }
   </style>
 </head>
 <body class="bg-light">
-  <!-- Menú de navegación global -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom mb-3">
     <div class="container-fluid">
       <a class="navbar-brand text-primary fw-bold" href="#">Festival Conectando</a>
@@ -59,17 +51,37 @@
     </div>
   </nav>
   <div class="container mt-5">
-    <div class="mb-3 text-end">
-      <a href="ventaBoleteria.html" class="btn btn-primary me-2">Registrar Boleta</a>
-      <button id="btnDescargarExcel" class="btn btn-success">Descargar reporte</button>
-    </div>
-    <h3 class="mb-4">Boletas registradas</h3>
-      <div class="container-fluid mt-3 px-3"> 
+    <h3 class="mb-4">Registro Micrófono Abierto</h3>
+    <form id="formMicAbierto" class="card p-4 shadow">
+      <div class="mb-3">
+        <label for="agrupacion" class="form-label">Agrupación</label>
+        <select class="form-select" id="agrupacion" name="agrupacion" required></select>
+      </div>
+      <div class="mb-3">
+        <label for="nombrePersona" class="form-label">Nombre de la persona</label>
+        <input type="text" class="form-control" id="nombrePersona" name="nombrePersona" required>
+      </div>
+      <div class="mb-3">
+        <label for="tipoDocumento" class="form-label">Tipo de documento</label>
+        <select class="form-select" id="tipoDocumento" name="tipoDocumento" required></select>
+      </div>
+      <div class="mb-3">
+        <label for="numeroDocumento" class="form-label">Número de documento</label>
+        <input type="text" class="form-control" id="numeroDocumento" name="numeroDocumento" required>
+      </div>
+      <div class="mb-3">
+        <label for="celular" class="form-label">Número celular</label>
+        <input type="text" class="form-control" id="celular" name="celular" required>
+      </div>
+      <div class="mb-3">
+        <label for="observaciones" class="form-label">Observaciones</label>
+        <textarea class="form-control" id="observaciones" name="observaciones" rows="2"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Registrar</button>
+    </form>
+    <div id="mensajeExito" class="alert alert-success mt-3 d-none">¡Artista de micrófono abierto registrado exitosamente!</div>
   </div>
-    <div id="boletasContainer" class="row g-3"></div>
-  </div>
+  <script src="ingresarMicAbierto.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="verBoletas.js"></script>
 </body>
 </html>

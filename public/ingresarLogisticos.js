@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const tipos = Array.isArray(data.tiposDeDocumento) ? data.tiposDeDocumento : [];
       const selectTipo = document.getElementById('tipoDocumento');
       if (selectTipo) {
-        selectTipo.innerHTML = '<option value="">Seleccione...</option>';
+        selectTipo.innerHTML = '';
         tipos.forEach(t => {
           const option = document.createElement("option");
           option.value = t.id || t.nombre;
@@ -28,6 +28,18 @@ document.addEventListener("DOMContentLoaded", function () {
           selectTipo.appendChild(option);
         });
       }
+        // Promociones logísticas
+        const promociones = Array.isArray(data.PromocionLogistica) ? data.PromocionLogistica : [];
+        const selectPromo = document.getElementById('promocionLogistica');
+        if (selectPromo) {
+          selectPromo.innerHTML = '';
+          promociones.forEach(p => {
+            const option = document.createElement("option");
+            option.value = p.idPromocion || p.descripcion;
+            option.textContent = p.descripcion;
+            selectPromo.appendChild(option);
+          });
+        }
     });
 
   // Registrar logístico usando el endpoint /registrar-logistico
@@ -39,10 +51,24 @@ document.addEventListener("DOMContentLoaded", function () {
   const tipoDocSelect = form.querySelector('#tipoDocumento');
   const tipoDocumento = tipoDocSelect.options[tipoDocSelect.selectedIndex].text;
       const numeroDocumento = form.numeroDocumento.value.trim();
-      const celular = form.celular.value.trim();
-      const areas = Array.from(form.querySelectorAll('input[name="areasApoyo"]:checked')).map(cb => cb.value);
-      if (!nombre || !tipoDocumento || !numeroDocumento || !celular || areas.length === 0) {
-        alert('Por favor complete todos los campos y seleccione al menos un área de apoyo.');
+  const celular = form.celular.value.trim();
+  const tareas = form.tareasLogistico ? form.tareasLogistico.value.trim() : '';
+        const promoSelect = form.querySelector('#promocionLogistica');
+        const promocion = promoSelect ? promoSelect.options[promoSelect.selectedIndex].text : '';
+      let areas = Array.from(form.querySelectorAll('input[name="areasApoyo"]:checked')).map(cb => cb.value);
+      // Si se seleccionó 'otro', agregar el valor escrito
+      if (areas.includes('otro')) {
+        const areaOtro = form.querySelector('#areaApoyoOtro').value.trim();
+        if (areaOtro) {
+          areas = areas.filter(a => a !== 'otro');
+          areas.push(areaOtro);
+        } else {
+          alert('Por favor escriba el área de apoyo personalizada.');
+          return;
+        }
+      }
+      if (!nombre || !tipoDocumento || !numeroDocumento || !celular || !promocion || areas.length === 0 || !tareas) {
+        alert('Por favor complete todos los campos, seleccione al menos un área de apoyo y promoción, y escriba las tareas.');
         return;
       }
       try {
@@ -56,6 +82,8 @@ document.addEventListener("DOMContentLoaded", function () {
             tipoDocumento,
             numeroDocumento,
             celular,
+            promocion,
+            tareas,
             areasApoyo: areas,
             fechaRegistro: new Date().toISOString()
           })

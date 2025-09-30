@@ -18,10 +18,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   try {
     // Traer boletas y emprendimientos
-    const resp = await fetch("/api/traer-todo");
-    const data = await resp.json();
-    const boletas = data.boletas || [];
-    const emprendimientos = data.emprendimientos || [];
+  const resp = await fetch("/api/traer-todo");
+  const data = await resp.json();
+  const boletas = data.boletas || [];
+  const emprendimientos = data.emprendimientos || [];
+  const logisticos = data.logisticos || [];
+  const micAbierto = data.micAbierto || [];
 
   // Boletas
   const boletasAdultos = boletas.filter(b => b.tipoAsistente !== "niño");
@@ -31,14 +33,18 @@ document.addEventListener("DOMContentLoaded", async function () {
   const totalBoletasVendidas = totalBoletas; // Solo adultos
   // Personas por boletas (adultos + niños)
   const totalPersonasBoletas = boletas.length;
-    // Emprendimientos
-    totalEmprendimientos = emprendimientos.length;
-    // Personas por emprendimientos (1 por emprendimiento)
-    const totalPersonasEmprendimientos = totalEmprendimientos;
-    // Total personas
-    // Para aforo, no contar niños
-    const totalPersonasAforo = boletasAdultos.length + totalPersonasEmprendimientos;
-    totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos;
+  // Emprendimientos
+  totalEmprendimientos = emprendimientos.length;
+  // Logísticos
+  const totalLogisticos = logisticos.length;
+  // Micrófono abierto
+  const totalMicAbierto = micAbierto.length;
+  // Personas por emprendimientos (1 por emprendimiento)
+  const totalPersonasEmprendimientos = totalEmprendimientos;
+  // Total personas
+  // Para aforo, no contar niños, pero sí logísticos y micAbierto
+  const totalPersonasAforo = boletasAdultos.length + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto;
+  totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto;
   // Total recaudado: boletas (solo adultos) + emprendimientos
   // Sumar el valor de boletas pagas (adultos) usando Promocion
   let recaudadoBoletas = 0;
@@ -65,7 +71,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             <div class="card-body text-center">
               <h5 class="card-title">Espacios libres</h5>
               <div class="display-6">${aforoMaximo - totalPersonasAforo}</div>
-              <small class="text-muted">Aforo máximo: ${aforoMaximo} (no se cuentan niños)</small>
+              <small class="text-muted">Aforo máximo: ${aforoMaximo}</small>
             </div>
           </div>
         </div>
@@ -74,7 +80,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             <div class="card-body text-center">
               <h5 class="card-title">Cantidad total personas</h5>
               <div class="display-6">${totalPersonas}</div>
-              <small class="text-muted">Incluye asistentes adultos, niños y emprendimientos</small>
+              <small class="text-muted">Asistentes, niños, emprendimientos, logísticos, artistas e invitados</small>
             </div>
           </div>
         </div>
@@ -87,7 +93,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             <div class="card-body text-center">
               <h5 class="card-title">Total recaudado</h5>
               <div class="display-6">$${totalRecaudado.toLocaleString('es-CO')}</div>
-              <small class="text-muted">Boletas (adultos) + emprendimientos</small>
+              <small class="text-muted">Boletas + emprendimientos</small>
             </div>
           </div>
         </div>
@@ -96,7 +102,6 @@ document.addEventListener("DOMContentLoaded", async function () {
             <div class="card-body text-center">
               <h5 class="card-title">Total boletas vendidas</h5>
               <div class="display-6">${totalBoletasVendidas}</div>
-              <small class="text-muted">Solo adultos (niños no pagan)</small>
             </div>
           </div>
         </div>
@@ -105,6 +110,22 @@ document.addEventListener("DOMContentLoaded", async function () {
             <div class="card-body text-center">
               <h5 class="card-title">Total emprendimientos</h5>
               <div class="display-6">${totalEmprendimientos}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Total logísticos</h5>
+              <div class="display-6">${totalLogisticos}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Micrófono Abierto</h5>
+              <div class="display-6">${totalMicAbierto}</div>
             </div>
           </div>
         </div>
@@ -144,23 +165,32 @@ document.addEventListener("DOMContentLoaded", async function () {
                 Boletas faltantes por vender: 
                 ${(() => {
                   const faltante = Math.max(totalCostos - totalRecaudado, 0);
-                  const ultimaBoleta = boletasAdultos.length > 0 ? (() => {
-                    const b = boletasAdultos[boletasAdultos.length - 1];
+                  let maxValor = 0;
+                  boletasAdultos.forEach(b => {
+                    let valor = 0;
                     if (b.Promocion) {
                       const match = b.Promocion.match(/\$([\d.,]+)/);
-                      if (match) return parseInt(match[1].replace(/[.,]/g, ""));
+                      if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
+                    } else if (b.valorBoleta) {
+                      valor = Number(b.valorBoleta);
                     }
-                    return b.valorBoleta ? Number(b.valorBoleta) : 0;
-                  })() : 0;
-                  return ultimaBoleta > 0 ? Math.ceil(faltante / ultimaBoleta) : '-';
+                    if (valor > maxValor) maxValor = valor;
+                  });
+                  return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
                 })()}
-                <small class="text-muted">(Valor última boleta: $${boletasAdultos.length > 0 ? (() => {
-                  const b = boletasAdultos[boletasAdultos.length - 1];
-                  if (b.Promocion) {
-                    const match = b.Promocion.match(/\$([\d.,]+)/);
-                    if (match) return parseInt(match[1].replace(/[.,]/g, "")).toLocaleString('es-CO');
-                  }
-                  return b.valorBoleta ? Number(b.valorBoleta).toLocaleString('es-CO') : '0';
+                <small class="text-muted">(Valor boleta: $${boletasAdultos.length > 0 ? (() => {
+                  let maxValor = 0;
+                  boletasAdultos.forEach(b => {
+                    let valor = 0;
+                    if (b.Promocion) {
+                      const match = b.Promocion.match(/\$([\d.,]+)/);
+                      if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
+                    } else if (b.valorBoleta) {
+                      valor = Number(b.valorBoleta);
+                    }
+                    if (valor > maxValor) maxValor = valor;
+                  });
+                  return maxValor.toLocaleString('es-CO');
                 })() : '0'})</small>
               </span>
             </div>
