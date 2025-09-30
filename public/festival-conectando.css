@@ -19,3 +19,11 @@
   border-color: #240E45 !important;
   background-color: #240E45 !important;
 }
+
+.btn-margin-abajo {
+  margin-bottom: 35px !important;
+}
+
+.dropdown-item.active, .dropdown-item:active {
+  background-color: #240E45 !important;
+}

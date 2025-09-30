@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   if (!document.getElementById('btnDescargarExcel')) {
     const btnExcel = document.createElement('button');
     btnExcel.id = 'btnDescargarExcel';
-    btnExcel.className = 'btn btn-success mb-3';
+  btnExcel.className = 'btn btn-success btn-margin-abajo';
     btnExcel.innerText = 'Descargar reporte Excel por grupo';
     btnExcel.onclick = async function() {
       // Esperar que SheetJS esté cargado

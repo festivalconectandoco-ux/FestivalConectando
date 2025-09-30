@@ -500,7 +500,7 @@ async function generarImagenBoleta({ nombre, documento, referencia, tipoAsistent
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = "/plantilla.png";
+    img.src = "/plantilla_boleteria.png";
 
     img.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
