@@ -1,4 +1,124 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  // Agregar SheetJS por CDN si no está presente
+  if (!window.XLSX) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
+    script.onload = function() {};
+    document.head.appendChild(script);
+  }
+  // Botón para descargar Excel
+  if (!document.getElementById('btnDescargarExcel')) {
+    const btnExcel = document.createElement('button');
+    btnExcel.id = 'btnDescargarExcel';
+    btnExcel.className = 'btn btn-success mb-3';
+    btnExcel.innerText = 'Descargar reporte Excel por grupo';
+    btnExcel.onclick = async function() {
+      // Esperar que SheetJS esté cargado
+      function waitForSheetJS(cb) {
+        if (window.XLSX) cb();
+        else setTimeout(() => waitForSheetJS(cb), 200);
+      }
+      waitForSheetJS(async function() {
+        const resp = await fetch("/api/traer-todo");
+        const data = await resp.json();
+        const boletas = data.boletas || [];
+        const emprendimientos = data.emprendimientos || [];
+        const logisticos = data.logisticos || [];
+        const micAbierto = data.micAbierto || [];
+        const artistas = data.artistas || [];
+
+        // Unificar asistentes y niños en una sola hoja "Boletas" con el esquema detallado
+        const boletasSheet = boletas
+          .map(b => ({
+            "Tipo de asistente": b.tipoAsistente === "niño" ? "Niño" : "Asistente",
+            "Nombre asistente": b.nombreAsistente || b.nombre || "",
+            "Tipo de documento": b.TipoDocumentoAsistente || b.tipoDocumento || "",
+            "Documento asistente": b.DocumentoAsistente || b.numeroDocumento || "",
+            "Edad": b.edad || "",
+            "Celular": b.celular || "",
+            "Promoción": b.Promocion || "",
+            "Nombre comprador": b.nombreComprador || "",
+            "Medio de pago": b.MedioPago || b.medioPago || "",
+            "Quien recibió": b.QuienRecibio || b.recibido || "",
+            "Referencia": b.Referencia || "",
+            "Fecha compra": b.FechaCompra || "",
+            "Valor boleta": b.valorBoleta || "",
+          }))
+          .sort((a, b) => {
+            if (a["Documento asistente"] === b["Documento asistente"]) {
+              return a["Nombre asistente"].localeCompare(b["Nombre asistente"]);
+            }
+            return a["Documento asistente"].localeCompare(b["Documento asistente"]);
+          });
+        // Logísticos
+        const logis = logisticos
+          .map(l => ({
+            "Tipo de asistente": "Logística",
+            "Nombre": l.nombre || "",
+            "Tipo de documento": l.tipoDocumento || "",
+            "Número de documento": l.numeroDocumento || "",
+            "Celular": l.celular || "",
+            "Promoción": l.promocion || "",
+            "Tareas": l.tareas || "",
+            "Áreas de apoyo": Array.isArray(l.areasApoyo) ? l.areasApoyo.join(", ") : "",
+          }))
+          .sort((a, b) => a["Nombre"].localeCompare(b["Nombre"]));
+        // Emprendimientos
+        const emps = emprendimientos
+          .map(e => ({
+            "Tipo de asistente": "Emprendimiento",
+            "Nombre emprendimiento": e.nombreEmprendimiento || "",
+            "Nombre persona": e.nombrePersona || "",
+            "Tipo de documento": e.tipoDocumento || "",
+            "Número de documento": e.numeroDocumento || "",
+            "Celular persona": e.celularPersona || "",
+            "Promoción": e.promocion || "",
+            "Valor promoción": e.valorPromocion || "",
+            "Categorías": Array.isArray(e.categorias) ? e.categorias.join(", ") : "",
+            "Productos": Array.isArray(e.productos) ? e.productos.join(", ") : "",
+            "Medio de pago": e.medioPago || "",
+            "Recibido por": e.recibidoPor || "",
+          }))
+          .sort((a, b) => a["Nombre emprendimiento"].localeCompare(b["Nombre emprendimiento"]));
+        // Micrófono abierto
+        const micros = micAbierto
+          .map(m => ({
+            "Tipo de asistente": "Micrófono Abierto",
+            "Agrupación": m.agrupacion || m.nombreAgrupacion || "",
+            "Nombre persona": m.nombrePersona || m.nombre || "",
+            "Tipo de documento": m.tipoDocumento || "",
+            "Número de documento": m.numeroDocumento || "",
+            "Celular": m.celular || "",
+            "Observaciones": m.observaciones || "",
+          }))
+          .sort((a, b) => a["Agrupación"].localeCompare(b["Agrupación"]));
+        // Artistas principales
+        const arts = artistas
+          .map(a => ({
+            "Tipo de asistente": "Artista Principal",
+            "Artista": a.artista || a.nombre || "",
+            "Nombre persona": a.nombrePersona || "",
+            "Tipo de documento": a.tipoDocumento || "",
+            "Número de documento": a.numeroDocumento || "",
+            "Celular": a.celular || "",
+            "Observaciones": a.observaciones || "",
+          }))
+          .sort((a, b) => a["Artista"].localeCompare(b["Artista"]));
+
+        // Crear workbook y hojas
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(boletasSheet), 'Boletas');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(emps), 'Emprendimientos');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(micros), 'Micrófono Abierto');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(arts), 'Artistas Principales');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logis), 'Logística');
+
+        // Descargar archivo
+        XLSX.writeFile(wb, 'reporte_asistentes_grupos.xlsx');
+      });
+    };
+    document.getElementById('reportesResumen').parentNode.insertBefore(btnExcel, document.getElementById('reportesResumen'));
+  }
   // Traer valores de costos y metas desde catalogos.json
   let totalCostos = 0, reunidoPreviamente = 0, gananciaEsperada = 0;
   try {

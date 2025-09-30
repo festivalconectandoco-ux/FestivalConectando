@@ -268,6 +268,15 @@ async function registrarAsistente(formElement) {
       asistentesFallidos.push(nombreAsistente);
       continue;
     }
+    let valorBoleta = 0;
+    if (tipoAsistente === "niño") {
+      valorBoleta = 0;
+    } else {
+      // Buscar el valor de la promoción seleccionada
+      const promoId = promocionSelect.value;
+      const promoObj = catalogosGlobales.Promocion.find(p => p.idPromocion == promoId);
+      valorBoleta = promoObj ? Number(promoObj.precio) : 0;
+    }
     asistentes.push({
       nombreComprador: datosGenerales.nombre,
       nombreAsistente: nombreAsistente,
@@ -276,15 +285,15 @@ async function registrarAsistente(formElement) {
       Promocion: promocionTexto,
       MedioPago: medioPagoTexto,
       QuienRecibio: quienRecibioTexto,
-        FechaCompra: now.toISOString(),
+      FechaCompra: now.toISOString(),
       Comprobante: comprobanteUrl,
       Celular: celularCompleto,
-        Referencia: referencia,
+      Referencia: referencia,
       Boleta: imagenBase64,
       EnvioWhatsapp: 0,
       tipoAsistente: tipoAsistente,
       edad: edad,
-      valorBoleta: tipoAsistente === "niño" ? 0 : undefined
+      valorBoleta: valorBoleta
     });
     contador=contador+1;
   }

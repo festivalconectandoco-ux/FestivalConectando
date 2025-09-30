@@ -1,0 +1,21 @@
+:root {
+  --bs-primary: #240E45;
+  --bs-primary-rgb: 36, 14, 69;
+}
+.bg-primary {
+  background-color: #240E45 !important;
+}
+.text-primary {
+  color: #240E45 !important;
+}
+.border-primary {
+  border-color: #240E45 !important;
+}
+.btn-primary {
+  border-color: #240E45 !important;
+  background-color: #240E45 !important;
+}
+.btn-success {
+  border-color: #240E45 !important;
+  background-color: #240E45 !important;
+}
