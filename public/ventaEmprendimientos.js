@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       selectPromo.appendChild(option);
     });
   }
-  
+
   btnAgregarProducto.addEventListener("click", function () {
     const div = document.createElement("div");
     div.className = "input-group mb-2 producto-item";
@@ -153,7 +153,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     const nombreEmprendimiento = document.getElementById("nombreEmprendimiento").value.trim();
     const categorias = Array.from(document.querySelectorAll('input[name="categorias"]:checked')).map(cb => cb.value);
     const nombrePersona = document.getElementById("nombrePersona").value.trim();
-    const tipoDocumento = document.getElementById("tipoDocumento").value;
+  const tipoDocSelect = document.getElementById("tipoDocumento");
+  const tipoDocumento = tipoDocSelect.options[tipoDocSelect.selectedIndex].text;
     const numeroDocumento = document.getElementById("numeroDocumento").value.trim();
     const celularPersona = document.getElementById("celularPersona").value.trim();
     const productos = Array.from(document.querySelectorAll('.producto-input')).map(inp => inp.value.trim()).filter(v => v);
