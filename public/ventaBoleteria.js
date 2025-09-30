@@ -258,7 +258,7 @@ async function registrarAsistente(formElement) {
     let comprobanteBase64, imagenBase64, comprobanteUrl;
     try {
       comprobanteBase64 = await convertirArchivoABase64(file);
-        imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia, tipoAsistente, edad });
+        imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia, tipoAsistente: promocionTexto, edad });
       comprobanteUrl = await subirComprobante(comprobanteBase64, documento);
       if (!comprobanteUrl) {
         asistentesFallidos.push(nombreAsistente);
@@ -375,80 +375,6 @@ function convertirArchivoABase64(file) {
   });
 }
 
-async function procesarBoletas(asistentes) {
-  for (const asistente of asistentes) {
-    try {
-      await fetch("/registrar-boleta", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(asistente)
-      });
-
-      const caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
-        `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
-        `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
-        `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
-        `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
-        `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
-
-      const reqGreen = {
-        urlFile: asistente.Boleta,
-        fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
-        caption: caption,
-        numero: '573058626761'//asistente.Celular
-      };
-      const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(reqGreen)
-      });
-        let respuestaServicio = "";
-        try {
-          respuestaServicio = await resp.text();
-        } catch (e) {
-            historialComprobante.push({ paso: "inicio", fecha: new Date().toISOString(), mensaje: "Inicio generación comprobante" });
-            comprobanteBase64 = await convertirArchivoABase64(file);
-            historialComprobante.push({ paso: "base64", fecha: new Date().toISOString(), mensaje: "Archivo convertido a base64" });
-            imagenBase64 = await generarImagenBoleta({ nombre: nombreAsistente, documento, referencia });
-            historialComprobante.push({ paso: "imagenBoleta", fecha: new Date().toISOString(), mensaje: "Imagen boleta generada" });
-            comprobanteUrl = await subirComprobante(comprobanteBase64, referencia);
-            historialComprobante.push({ paso: "subidaCloudinary", fecha: new Date().toISOString(), mensaje: comprobanteUrl ? "Comprobante subido correctamente" : "Error al subir comprobante" });
-            console.log('imagenBase64 ',imagenBase64 );
-            console.log('comprobanteUrl ',comprobanteUrl );
-            if (!comprobanteUrl) {
-              historialComprobante.push({ paso: "error", fecha: new Date().toISOString(), mensaje: "No se obtuvo URL de comprobante" });
-              asistentesFallidos.push(nombreAsistente);
-              continue;
-            }
-          mensaje: caption,
-            historialComprobante.push({ paso: "error", fecha: new Date().toISOString(), mensaje: error?.message || "Error desconocido" });
-            asistentesFallidos.push(nombreAsistente);
-            continue;
-        await fetch("/actualizar-envio-whatsapp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: asistente.EnvioWhatsapp, historialEnvio })
-        });
-        }
-    } catch (error) {
-      asistente.EnvioWhatsapp = 0;
-        const historialEnvio = {
-          fecha: new Date().toISOString(),
-          mensaje: caption,
-          respuesta: error?.message || "Error en envío"
-        };
-        await fetch("/actualizar-envio-whatsapp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-            EnvioWhatsapp: 0,
-            historialComprobante,
-            body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: 0, historialEnvio })
-        });
-      console.error(`Error procesando boleta para ${asistente.nombre}:`, error);
-    }
-  }
-}
-
 // Funciones auxiliares
 function cargarOpciones(lista, selectId) {
   const select = document.getElementById(selectId);
@@ -509,8 +435,8 @@ async function generarImagenBoleta({ nombre, documento, referencia, tipoAsistent
       ctx.fillStyle = "#ffff";
       ctx.fillText(`Nombre completo: ${nombre}`, 50, 340);
       ctx.fillText(`Número de documento: ${documento}`, 50, 350);
-      ctx.fillText(`Referencia: ${referencia}`, 50, 360);
-      if (tipoAsistente === "niño") {
+      ctx.fillText(`Referencia: ${tipoAsistente} ${referencia}`, 50, 360);
+      if (tipoAsistente === "niño" || (tipoAsistente && tipoAsistente.includes("Niño (No paga)"))) {
         ctx.fillText(`BOLETA NIÑO - Edad: ${edad}`, 50, 370);
       }
       const imagenBase64 = canvas.toDataURL("image/png");

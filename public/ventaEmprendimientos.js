@@ -1,3 +1,73 @@
+// Generar referencia única para emprendimiento
+function generarReferenciaEmprendimiento() {
+  const now = new Date();
+  return now.getFullYear().toString() +
+    String(now.getMonth() + 1).padStart(2, '0') +
+    String(now.getDate()).padStart(2, '0') +
+    String(now.getHours()).padStart(2, '0') +
+    String(now.getMinutes()).padStart(2, '0') +
+    String(now.getSeconds()).padStart(2, '0') +
+    String(now.getMilliseconds()).padStart(3, '0');
+}
+
+// Generar imagen boleta para emprendimiento
+async function generarImagenBoletaEmprendimiento({ nombreEmprendimiento, nombrePersona, documento, referencia, promocion }) {
+  return new Promise((resolve, reject) => {
+    const canvas = document.getElementById("canvasBoleta");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.src = "/plantilla_boleteria.png";
+
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      ctx.font = "bold 10px Arial";
+      ctx.fillStyle = "#ffff";
+      ctx.fillText(`Emprendimiento: ${nombreEmprendimiento}`, 50, 330);
+      ctx.fillText(`Nombre persona: ${nombrePersona}`, 50, 345);
+      ctx.fillText(`Número de documento: ${documento}`, 50, 360);
+      ctx.fillText(`Promoción: ${promocion}`, 50, 375);
+      ctx.fillText(`Referencia: ${referencia}`, 50, 390);
+
+      const imagenBase64 = canvas.toDataURL("image/png");
+      const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}${nombreEmprendimiento}` };
+      fetch("/subir-imagen-boleta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reqFb),
+      })
+        .then(res => res.json())
+        .then(data => {
+          resolve(data.url);
+        })
+        .catch(err => console.error("Error enviando boleta:", err));
+    };
+    img.onerror = () => reject("Error al cargar la plantilla");
+  });
+}
+
+// Ejemplo de integración en el flujo de registro de emprendimiento
+async function registrarEmprendimiento(formElement) {
+  const formData = new FormData(formElement);
+  const nombreEmprendimiento = formData.get('nombreEmprendimiento');
+  const nombrePersona = formData.get('nombrePersona');
+  const documento = formData.get('numeroDocumento');
+  const promocion = formData.get('promocionEmprendimiento');
+  const referencia = generarReferenciaEmprendimiento();
+
+  // Generar imagen boleta
+  const imagenUrl = await generarImagenBoletaEmprendimiento({
+    nombreEmprendimiento,
+    nombrePersona,
+    documento,
+    referencia,
+    promocion
+  });
+
+  // Aquí puedes continuar con el registro en tu backend, usando imagenUrl y referencia
+  // Ejemplo:
+  // await fetch('/registrar-emprendimiento', { ... })
+}
 document.addEventListener("DOMContentLoaded", async function () {
 
   // ...otros inicializadores...
@@ -187,6 +257,16 @@ document.addEventListener("DOMContentLoaded", async function () {
       alert("Error al subir archivos. Intenta nuevamente.");
       return;
     }
+    // Generar referencia y boleta antes de registrar
+    const referencia = generarReferenciaEmprendimiento();
+    const imagenUrl = await generarImagenBoletaEmprendimiento({
+      nombreEmprendimiento,
+      nombrePersona,
+      documento: numeroDocumento,
+      referencia,
+      promocion: promoText
+    });
+
     const emprendimiento = {
       nombreEmprendimiento,
       redes,
@@ -202,7 +282,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       recibidoPor,
       promocion: promoText,
       valorPromocion: promoValor ? Number(promoValor) : 0,
-      fechaRegistro: new Date().toISOString()
+      fechaRegistro: new Date().toISOString(),
+      referencia,
+      boleta: imagenUrl
     };
     try {
       const resp = await fetch("/registrar-emprendimiento", {
