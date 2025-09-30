@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const emprendimientos = data.emprendimientos || [];
   const logisticos = data.logisticos || [];
   const micAbierto = data.micAbierto || [];
+  const artistas = data.artistas || [];
 
   // Boletas
   const boletasAdultos = boletas.filter(b => b.tipoAsistente !== "niño");
@@ -39,12 +40,15 @@ document.addEventListener("DOMContentLoaded", async function () {
   const totalLogisticos = logisticos.length;
   // Micrófono abierto
   const totalMicAbierto = micAbierto.length;
+  // Artistas
+  const totalArtistas = artistas.length;
   // Personas por emprendimientos (1 por emprendimiento)
   const totalPersonasEmprendimientos = totalEmprendimientos;
   // Total personas
   // Para aforo, no contar niños, pero sí logísticos y micAbierto
-  const totalPersonasAforo = boletasAdultos.length + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto;
+  const totalPersonasAforo = boletasAdultos.length + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto + totalArtistas;
   totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto;
+  totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto + totalArtistas;
   // Total recaudado: boletas (solo adultos) + emprendimientos
   // Sumar el valor de boletas pagas (adultos) usando Promocion
   let recaudadoBoletas = 0;
@@ -88,16 +92,15 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       <!-- Grupo 2: Total recaudado, boletas, emprendimientos, niños -->
       <div class="row mb-3">
-        <div class="col-md-3">
+        <div class="col-md-3 mb-3">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Total recaudado</h5>
               <div class="display-6">$${totalRecaudado.toLocaleString('es-CO')}</div>
-              <small class="text-muted">Boletas + emprendimientos</small>
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-3">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Total boletas vendidas</h5>
@@ -105,7 +108,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-3">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Total emprendimientos</h5>
@@ -113,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-3">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Total logísticos</h5>
@@ -121,7 +124,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-3">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Micrófono Abierto</h5>
@@ -129,7 +132,15 @@ document.addEventListener("DOMContentLoaded", async function () {
             </div>
           </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 mb-3">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Artistas principales</h5>
+              <div class="display-6">${totalArtistas}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Total niños</h5>

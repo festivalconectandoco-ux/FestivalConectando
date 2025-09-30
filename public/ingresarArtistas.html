@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Ingresar Logísticos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Artistas</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
       --bs-primary: #240E45;
-      --bs-primary-rgb: 36, 14, 69;
     }
     .bg-primary {
       background-color: #240E45 !important;
@@ -15,12 +15,9 @@
     .text-primary {
       color: #240E45 !important;
     }
-    .border-primary {
-      border-color: #240E45 !important;
-    }
     .btn-primary {
-        border-color: #8155C2 !important;
-        background-color: #8155C2 !important;
+      border-color: #240E45 !important;
+      background-color: #240E45 !important;
     }
   </style>
 </head>
@@ -56,17 +53,19 @@
     </div>
   </nav>
   <div class="container mt-5">
-    <h3 class="mb-4">Ingresar Logísticos</h3>
-    <form id="formLogisticos" class="card p-4 shadow">
+    <h3 class="mb-4">Registro Artistas</h3>
+    <form id="formArtistas" class="card p-4 shadow">
       <div class="mb-3">
-        <label for="nombre" class="form-label">Nombre</label>
-        <input type="text" class="form-control" id="nombre" name="nombre" required>
+        <label for="artista" class="form-label">Artista o Agrupación</label>
+        <select class="form-select" id="artista" name="artista" required></select>
+      </div>
+      <div class="mb-3">
+        <label for="nombrePersona" class="form-label">Nombre de la persona</label>
+        <input type="text" class="form-control" id="nombrePersona" name="nombrePersona" required>
       </div>
       <div class="mb-3">
         <label for="tipoDocumento" class="form-label">Tipo de documento</label>
-        <select class="form-select" id="tipoDocumento" name="tipoDocumento" required>
-          <option value="">Seleccione...</option>
-        </select>
+        <select class="form-select" id="tipoDocumento" name="tipoDocumento" required></select>
       </div>
       <div class="mb-3">
         <label for="numeroDocumento" class="form-label">Número de documento</label>
@@ -76,24 +75,15 @@
         <label for="celular" class="form-label">Número celular</label>
         <input type="text" class="form-control" id="celular" name="celular" required>
       </div>
-        <div class="mb-3">
-          <label for="promocionLogistica" class="form-label">Promoción</label>
-          <select class="form-select" id="promocionLogistica" name="promocionLogistica" required>
-          </select>
-        </div>
       <div class="mb-3">
-        <label class="form-label">Área de apoyo</label>
-        <div id="areasApoyoContainer"></div>
+        <label for="observaciones" class="form-label">Observaciones</label>
+        <textarea class="form-control" id="observaciones" name="observaciones" rows="2"></textarea>
       </div>
-        <div class="mb-3">
-          <label for="tareasLogistico" class="form-label">Tareas del logístico</label>
-          <textarea class="form-control" id="tareasLogistico" name="tareasLogistico" rows="2" placeholder="Describa las tareas que realizará el logístico"></textarea>
-        </div>
-      <button type="submit" class="btn btn-primary">Guardar</button>
+      <button type="submit" class="btn btn-primary">Registrar</button>
     </form>
-    <div id="mensajeExito" class="alert alert-success mt-3 d-none">¡Logístico registrado exitosamente!</div>
+    <div id="mensajeExito" class="alert alert-success mt-3 d-none">¡Artista registrado exitosamente!</div>
   </div>
-  <script src="ingresarLogisticos.js"></script>
+  <script src="ingresarArtistas.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
