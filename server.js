@@ -39,6 +39,22 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
 app.use(express.static(path.join(__dirname, "public"))); // donde está tu ventaBoleteria.html
 
+async function obtenerReferenciaGlobalIncremental() {
+  const ref = admin.firestore().collection("contadores").doc("referenciaGlobal");
+  return await admin.firestore().runTransaction(async (t) => {
+    const doc = await t.get(ref);
+    let actual = doc.exists ? doc.data().valor : 0;
+    actual++;
+    t.set(ref, { valor: actual });
+    return actual;
+  });
+}
+
+app.get("/api/referencia-global", async (req, res) => {
+  const referencia = await obtenerReferenciaGlobalIncremental();
+  res.json({ referencia });
+});
+
 app.post("/registrar-boleta", async (req, res) => {
   try {
     const nuevaBoleta = req.body;
@@ -237,6 +253,37 @@ app.post("/actualizar-envio-whatsapp", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+app.post("/actualizar-emprendimientos-envio-whatsapp", async (req, res) => {
+  try {
+    const { referencia, EnvioWhatsapp, historialEnvio } = req.body;
+    if (!referencia) {
+      return res.status(400).json({ error: "Referencia requerida" });
+    }
+    const snapshot = await db.collection("emprendimientos").where("Referencia", "==", referencia).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "No se encontró el emprendimiento con esa referencia" });
+    }
+    const batch = db.batch();
+    snapshot.forEach(doc => {
+      const updateData = { EnvioWhatsapp };
+      if (historialEnvio) {
+        batch.update(doc.ref, {
+          ...updateData,
+          historialEnvio: admin.firestore.FieldValue.arrayUnion(historialEnvio)
+        });
+      } else {
+        batch.update(doc.ref, updateData);
+      }
+    });
+    await batch.commit();
+    res.status(200).json({ mensaje: "EnvioWhatsapp actualizado" });
+  } catch (error) {
+    console.error("Error actualizando EnvioWhatsapp:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

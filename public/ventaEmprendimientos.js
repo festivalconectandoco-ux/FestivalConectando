@@ -1,36 +1,42 @@
 // Generar referencia única para emprendimiento
-function generarReferenciaEmprendimiento() {
-  const now = new Date();
-  return now.getFullYear().toString() +
-    String(now.getMonth() + 1).padStart(2, '0') +
-    String(now.getDate()).padStart(2, '0') +
-    String(now.getHours()).padStart(2, '0') +
-    String(now.getMinutes()).padStart(2, '0') +
-    String(now.getSeconds()).padStart(2, '0') +
-    String(now.getMilliseconds()).padStart(3, '0');
+async function generarReferenciaEmprendimiento() {
+  const referencia = await obtenerReferenciaGlobal();
+  return referencia;
 }
 
 // Generar imagen boleta para emprendimiento
 async function generarImagenBoletaEmprendimiento({ nombreEmprendimiento, nombrePersona, documento, referencia, promocion }) {
   return new Promise((resolve, reject) => {
+
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
     const img = new Image();
     img.src = "/plantilla_boleteria.png";
 
     img.onload = () => {
+      canvas.width = img.width;   // 2000
+      canvas.height = img.height; // 647
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      ctx.font = "bold 10px Arial";
-      ctx.fillStyle = "#ffff";
-      ctx.fillText(`Emprendimiento: ${nombreEmprendimiento}`, 50, 330);
-      ctx.fillText(`Nombre persona: ${nombrePersona}`, 50, 345);
-      ctx.fillText(`Número de documento: ${documento}`, 50, 360);
-      ctx.fillText(`Promoción: ${promocion}`, 50, 375);
-      ctx.fillText(`Referencia: ${referencia}`, 50, 390);
+      ctx.drawImage(img, 0, 0); // sin redimensionar
+
+      ctx.font = "bold 20px Arial";
+      ctx.fillStyle = "#000000ff";
+      ctx.fillText(`Nombre completo:`, 1560, 275);
+      ctx.fillText(`${nombrePersona}`, 1560, 295);
+      ctx.fillText(`Número de documento:`, 1560, 315);
+      ctx.fillText(`${documento}`, 1560, 335);
+
+      ctx.font = "bold 25px Arial";
+      ctx.fillText(`Emprendimiento:`, 1560, 450);
+      ctx.fillText(`${nombreEmprendimiento}`, 1560, 490);
+      
+      ctx.font = "bold 35px Arial";
+      ctx.fillText(`# ${referencia}`, 1850, 170);
+      ctx.fillText(`Emprendimiento`, 1535, 170);
 
       const imagenBase64 = canvas.toDataURL("image/png");
-      const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}${nombreEmprendimiento}` };
+      const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}` };
       fetch("/subir-imagen-boleta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,28 +52,6 @@ async function generarImagenBoletaEmprendimiento({ nombreEmprendimiento, nombreP
   });
 }
 
-// Ejemplo de integración en el flujo de registro de emprendimiento
-async function registrarEmprendimiento(formElement) {
-  const formData = new FormData(formElement);
-  const nombreEmprendimiento = formData.get('nombreEmprendimiento');
-  const nombrePersona = formData.get('nombrePersona');
-  const documento = formData.get('numeroDocumento');
-  const promocion = formData.get('promocionEmprendimiento');
-  const referencia = generarReferenciaEmprendimiento();
-
-  // Generar imagen boleta
-  const imagenUrl = await generarImagenBoletaEmprendimiento({
-    nombreEmprendimiento,
-    nombrePersona,
-    documento,
-    referencia,
-    promocion
-  });
-
-  // Aquí puedes continuar con el registro en tu backend, usando imagenUrl y referencia
-  // Ejemplo:
-  // await fetch('/registrar-emprendimiento', { ... })
-}
 document.addEventListener("DOMContentLoaded", async function () {
 
   // ...otros inicializadores...
@@ -258,7 +242,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       return;
     }
     // Generar referencia y boleta antes de registrar
-    const referencia = generarReferenciaEmprendimiento();
+    const referencia = await generarReferenciaEmprendimiento();
+
     const imagenUrl = await generarImagenBoletaEmprendimiento({
       nombreEmprendimiento,
       nombrePersona,
@@ -284,7 +269,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       valorPromocion: promoValor ? Number(promoValor) : 0,
       fechaRegistro: new Date().toISOString(),
       referencia,
-      boleta: imagenUrl
+      boleta: imagenUrl,
+      EnvioWhatsapp: 0,
     };
     try {
       const resp = await fetch("/registrar-emprendimiento", {
@@ -292,12 +278,60 @@ document.addEventListener("DOMContentLoaded", async function () {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(emprendimiento)
       });
+      const data = await resp.json();
+
       if (resp.ok) {
+
+        // Envío de WhatsApp y registro de historial solo para este emprendimiento
+        let caption = `🎉 ¡Gracias ${emprendimiento.nombreEmprendimiento} ${emprendimiento.nombrePersona} por ser parte del Festival Conectando! 🎶✨\n\n` +
+          `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
+          `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
+          `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
+          `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
+          `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
+
+        const reqGreen = {
+          urlFile: emprendimiento.boleta,
+          fileName: `boleta_${emprendimiento.referencia}.png`,
+          caption: caption,
+          numero: '573058626761'//emprendimiento.Celular
+        };
+
+        let respuestaServicio = "";
+        let envioOk = false;
+        try {
+          const respGreen = await fetch("/enviar-mensaje-boleta-greenapi", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reqGreen)
+          });
+          try {
+            respuestaServicio = await respGreen.text();
+          } catch (e) {
+            respuestaServicio = "Error leyendo respuesta";
+          }
+          envioOk = respGreen.ok;
+        } catch (error) {
+          respuestaServicio = error?.message || "Error en envío";
+          envioOk = false;
+        }
+        emprendimiento.EnvioWhatsapp = envioOk ? 1 : 0;
+        const historialEnvio = {
+          fecha: new Date().toISOString(),
+          mensaje: caption,
+          respuesta: respuestaServicio
+        };
+        await fetch("/actualizar-emprendimientos-envio-whatsapp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ referencia: emprendimiento.referencia, EnvioWhatsapp: emprendimiento.EnvioWhatsapp, historialEnvio })
+        });
+
         alert("Emprendimiento registrado exitosamente.");
         this.reset();
         grupoRedes.innerHTML = "";
       } else {
-        alert("Error al registrar el emprendimiento.");
+        alert("Error al registrar el emprendimiento."+resp.ok);
       }
     } catch (err) {
       alert("Error de conexión al registrar el emprendimiento.");
@@ -329,3 +363,8 @@ function convertirArchivoABase64(file) {
 }
   });
 });
+async function obtenerReferenciaGlobal() {
+  const resp = await fetch("/api/referencia-global");
+  const data = await resp.json();
+  return data.referencia; // El backend debe responder { referencia: valor }
+}

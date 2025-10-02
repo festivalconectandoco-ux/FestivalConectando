@@ -217,18 +217,11 @@ async function registrarAsistente(formElement) {
     const grupos = document.querySelectorAll("#grupoAsistentes .row");
     // Generar referencia con formato yyyymmddhhmmss
     const now = new Date();
-    const referencia = now.getFullYear().toString() +
-      String(now.getMonth() + 1).padStart(2, '0') +
-      String(now.getDate()).padStart(2, '0') +
-      String(now.getHours()).padStart(2, '0') +
-      String(now.getMinutes()).padStart(2, '0') +
-      String(now.getSeconds()).padStart(2, '0') +
-      String(now.getMilliseconds()).padStart(3, '0') +
-      contador;
   let asistentesFallidos = [];
   let mensaje = "Boletas registradas con éxito";
 
   for (const grupo of grupos) {
+    const referencia = await obtenerReferenciaGlobal();
     let nombreAsistente = grupo.querySelector(".nombreAsistente").value.trim();
     nombreAsistente = nombreAsistente.replace(/\s+/g, '_');
     let documento = grupo.querySelector(".documentoAsistente").value.trim();
@@ -429,15 +422,25 @@ async function generarImagenBoleta({ nombre, documento, referencia, tipoAsistent
     img.src = "/plantilla_boleteria.png";
 
     img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      ctx.font = "bold 10px Arial";
-      ctx.fillStyle = "#ffff";
-      ctx.fillText(`Nombre completo: ${nombre}`, 50, 340);
-      ctx.fillText(`Número de documento: ${documento}`, 50, 350);
-      ctx.fillText(`Referencia: ${tipoAsistente} ${referencia}`, 50, 360);
+     canvas.width = img.width;   // 2000
+  canvas.height = img.height; // 647
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0); // sin redimensionar
+
+
+      ctx.font = "bold 25px Arial";
+      ctx.fillStyle = "#000000ff";
+      ctx.fillText(`Nombre completo:`, 1560, 290);
+      ctx.fillText(`${nombre}`, 1560, 330);
+      ctx.fillText(`Número de documento:`, 1560, 450);
+      ctx.fillText(`${documento}`, 1560, 490);
+      ctx.font = "bold 35px Arial";
+      ctx.fillText(`# ${referencia}`, 1850, 170);
       if (tipoAsistente === "niño" || (tipoAsistente && tipoAsistente.includes("Niño (No paga)"))) {
-        ctx.fillText(`BOLETA NIÑO - Edad: ${edad}`, 50, 370);
+        ctx.fillText(`Asistente Niño`, 1535, 170);
+      }else{
+        ctx.fillText(`Asistente`, 1535, 170);
       }
       const imagenBase64 = canvas.toDataURL("image/png");
 
@@ -474,4 +477,10 @@ async function subirComprobante(base64, referencia) {
     console.error("Error subiendo comprobante:", err);
     throw err;
   }
+}
+
+async function obtenerReferenciaGlobal() {
+  const resp = await fetch("/api/referencia-global");
+  const data = await resp.json();
+  return data.referencia; // El backend debe responder { referencia: valor }
 }
