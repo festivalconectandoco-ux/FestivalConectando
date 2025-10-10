@@ -125,8 +125,10 @@ app.post("/registrar-boleta", async (req, res) => {
   try {
     const nuevaBoleta = req.body;
     nuevaBoleta.id = Date.now().toString();
-    await db.collection("boletas").add(nuevaBoleta);
-    res.status(200).json({ mensaje: "Boleta registrada con éxito", id: nuevaBoleta.id });
+    if (!nuevaBoleta.Referencia) {
+      return res.status(400).json({ error: "Falta el campo Referencia" });
+    }
+await db.collection("boletas").doc(String(nuevaBoleta.Referencia)).set(nuevaBoleta);    res.status(200).json({ mensaje: "Boleta registrada con éxito", id: nuevaBoleta.Referencia });
   } catch (error) {
     console.error("Error guardando boleta:", error);
     res.status(500).json({ error: "Error al registrar boleta" });
