@@ -300,12 +300,13 @@ async function registrarAsistente(formElement) {
       });
 
       // Envío de WhatsApp y registro de historial solo para este asistente
-      let caption = `🎉 ¡Gracias ${asistente.nombreAsistente} por ser parte del Festival Conectando! 🎶✨\n\n` +
-        `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
-        `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
-        `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
-        `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
-        `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
+      let nombreAsistenteLimpio = asistente.nombreAsistente.replace(/_/g, ' ');
+      let caption = `🎉 ¡Gracias ${nombreAsistenteLimpio} por ser parte del Festival Conectando segunda edición! 🎶✨\n\n` +
+        `🗓 Te esperamos el 29 de noviembre en la maloca Kynza en Usme, Bogotá. El ingreso será a partir de las 9:00 a.m. allí  recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
+        `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de sustancias alucinógenas , cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
+        `Trae ropa adecuada para frío o caso de lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
+        `📲 síguenos en nuestras redes sociales (@FestivalConectando) para que estés al pendiente de nuestras actualizaciones y no te pierdas este hermoso compartir.\n\n` +
+        `🌞 ¡Nos vemos para celebrar la vida y hacer de esta segunda edición del festival algo inolvidable!🙌`;
       if (asistente.tipoAsistente === "niño") {
         caption = `🧒 BOLETA NIÑO (menor de 12 años)\nEdad: ${asistente.edad}\n\n` + caption;
       }
@@ -428,19 +429,22 @@ async function generarImagenBoleta({ nombre, documento, referencia, tipoAsistent
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(img, 0, 0); // sin redimensionar
 
+      let nombreAsistenteLimpio = nombre.replace(/_/g, ' ');
 
       ctx.font = "bold 25px Arial";
       ctx.fillStyle = "#000000ff";
       ctx.fillText(`Nombre completo:`, 1560, 290);
-      ctx.fillText(`${nombre}`, 1560, 330);
+      ctx.font = "bold 19px Arial";
+      ctx.fillText(`${nombreAsistenteLimpio}`, 1560, 330);
+      ctx.font = "bold 25px Arial";
       ctx.fillText(`Número de documento:`, 1560, 450);
       ctx.fillText(`${documento}`, 1560, 490);
       ctx.font = "bold 35px Arial";
-      ctx.fillText(`# ${referencia}`, 1850, 170);
+      ctx.fillText(`# ${referencia}`, 1850, 180);
       if (tipoAsistente === "niño" || (tipoAsistente && tipoAsistente.includes("Niño (No paga)"))) {
-        ctx.fillText(`Asistente Niño`, 1535, 170);
+        ctx.fillText(`Asistente Niño`, 1535, 180);
       }else{
-        ctx.fillText(`Asistente`, 1535, 170);
+        ctx.fillText(`Asistente`, 1535, 180);
       }
       const imagenBase64 = canvas.toDataURL("image/png");
 
