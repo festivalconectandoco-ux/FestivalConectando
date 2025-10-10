@@ -1,0 +1,22 @@
+{
+  "produccion": [
+    { "href": "ventaBoleteria.html", "label": "Registrar Asistentes" },
+    { "href": "ventaEmprendimientos.html", "label": "Registrar Emprendimientos" },
+    { "href": "verBoletas.html", "label": "Ver Asistentes" },
+    { "href": "verEmprendimientos.html", "label": "Ver Emprendimientos" },
+    { "href": "Reportes.html", "label": "Ver Reportes" }
+  ],
+  "local": [
+    { "href": "ventaBoleteria.html", "label": "Registrar Asistentes" },
+    { "href": "ventaEmprendimientos.html", "label": "Registrar Emprendimientos" },
+    { "href": "ingresarLogisticos.html", "label": "Registrar Logísticos" },
+    { "href": "ingresarMicAbierto.html", "label": "Registrar Micrófono Abierto" },
+    { "href": "ingresarArtistas.html", "label": "Registrar Artistas" },
+    { "href": "verBoletas.html", "label": "Ver Asistentes" },
+    { "href": "verEmprendimientos.html", "label": "Ver Emprendimientos" },
+    { "href": "verLogisticos.html", "label": "Ver Logísticos" },
+    { "href": "verMicAbierto.html", "label": "Ver Micrófono Abierto" },
+    { "href": "verArtistas.html", "label": "Ver Artistas principales" },
+    { "href": "Reportes.html", "label": "Ver Reportes" }
+  ]
+}
