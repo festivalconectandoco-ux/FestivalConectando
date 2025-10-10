@@ -61,7 +61,7 @@
 			"nombre":"Otro"
 		}
 	],
-  "Promocion": [
+  "promocion": [
 	{
 	  "idPromocion": "1",
 	  "descripcion": "Preventa 5 Oct",

@@ -26,52 +26,54 @@ document.addEventListener("DOMContentLoaded", async function () {
         const logisticos = data.logisticos || [];
         const micAbierto = data.micAbierto || [];
         const artistas = data.artistas || [];
-
+        console.log(boletas)
         // Unificar asistentes y niños en una sola hoja "Boletas" con el esquema detallado
         const boletasSheet = boletas
           .map(b => ({
+            "Referencia": b.referencia || "",
             "Tipo de asistente": b.tipoAsistente === "niño" ? "Niño" : "Asistente",
             "Nombre asistente": b.nombreAsistente || b.nombre || "",
-            "Tipo de documento": b.TipoDocumentoAsistente || b.tipoDocumento || "",
-            "Documento asistente": b.DocumentoAsistente || b.numeroDocumento || "",
+            "Tipo de documento": b.tipoDocumentoAsistente || b.tipoDocumento || "",
+            "Documento asistente": b.documentoAsistente || b.numeroDocumento || "",
             "Edad": b.edad || "",
             "Celular": b.celular || "",
-            "Promoción": b.Promocion || "",
+            "Promoción": b.promocion || "",
             "Nombre comprador": b.nombreComprador || "",
-            "Medio de pago": b.MedioPago || b.medioPago || "",
-            "Quien recibió": b.QuienRecibio || b.recibido || "",
-            "Referencia": b.Referencia || "",
-            "Fecha compra": b.FechaCompra || "",
+            "Medio de pago": b.medioPago || b.medioPago || "",
+            "Quien recibió": b.quienRecibio || b.recibido || "",
+            "Fecha compra": b.fechaCompra || "",
             "Valor boleta": b.valorBoleta || "",
           }))
           .sort((a, b) => {
-            if (a["Documento asistente"] === b["Documento asistente"]) {
-              return a["Nombre asistente"].localeCompare(b["Nombre asistente"]);
+            if (a["Referencia"] === b["Referencia"]) {
+              return a["Documento asistente"].localeCompare(b["Documento asistente"]);
             }
-            return a["Documento asistente"].localeCompare(b["Documento asistente"]);
+            return String(a["Referencia"]).localeCompare(String(b["Referencia"]));
           });
         // Logísticos
         const logis = logisticos
           .map(l => ({
+            "Referencia": l.referencia || "",
             "Tipo de asistente": "Logística",
             "Nombre": l.nombre || "",
             "Tipo de documento": l.tipoDocumento || "",
             "Número de documento": l.numeroDocumento || "",
-            "Celular": l.celular || "",
+            "celular": l.celular || "",
             "Promoción": l.promocion || "",
             "Tareas": l.tareas || "",
             "Áreas de apoyo": Array.isArray(l.areasApoyo) ? l.areasApoyo.join(", ") : "",
           }))
-          .sort((a, b) => a["Nombre"].localeCompare(b["Nombre"]));
+          .sort((a, b) => String(a["referencia"]).localeCompare(String(b["referencia"])));
         // Emprendimientos
         const emps = emprendimientos
           .map(e => ({
+            "Referencia": e.referencia || "",
             "Tipo de asistente": "Emprendimiento",
             "Nombre emprendimiento": e.nombreEmprendimiento || "",
             "Nombre persona": e.nombrePersona || "",
             "Tipo de documento": e.tipoDocumento || "",
             "Número de documento": e.numeroDocumento || "",
-            "Celular persona": e.celularPersona || "",
+            "celular persona": e.celularPersona || "",
             "Promoción": e.promocion || "",
             "Valor promoción": e.valorPromocion || "",
             "Categorías": Array.isArray(e.categorias) ? e.categorias.join(", ") : "",
@@ -79,39 +81,72 @@ document.addEventListener("DOMContentLoaded", async function () {
             "Medio de pago": e.medioPago || "",
             "Recibido por": e.recibidoPor || "",
           }))
-          .sort((a, b) => a["Nombre emprendimiento"].localeCompare(b["Nombre emprendimiento"]));
+          .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
         // Micrófono abierto
         const micros = micAbierto
           .map(m => ({
+            "Referencia": m.referencia || "",
             "Tipo de asistente": "Micrófono Abierto",
             "Agrupación": m.agrupacion || m.nombreAgrupacion || "",
             "Nombre persona": m.nombrePersona || m.nombre || "",
             "Tipo de documento": m.tipoDocumento || "",
             "Número de documento": m.numeroDocumento || "",
-            "Celular": m.celular || "",
+            "celular": m.celular || "",
             "Observaciones": m.observaciones || "",
           }))
-          .sort((a, b) => a["Agrupación"].localeCompare(b["Agrupación"]));
+          .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
         // Artistas principales
         const arts = artistas
           .map(a => ({
+            "Referencia": a.referencia || "",
             "Tipo de asistente": "Artista Principal",
             "Artista": a.artista || a.nombre || "",
             "Nombre persona": a.nombrePersona || "",
             "Tipo de documento": a.tipoDocumento || "",
             "Número de documento": a.numeroDocumento || "",
-            "Celular": a.celular || "",
+            "celular": a.celular || "",
             "Observaciones": a.observaciones || "",
           }))
-          .sort((a, b) => a["Artista"].localeCompare(b["Artista"]));
+          .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
 
-        // Crear workbook y hojas
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(boletasSheet), 'Boletas');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(emps), 'Emprendimientos');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(micros), 'Micrófono Abierto');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(arts), 'Artistas Principales');
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(logis), 'Logística');
+        // Función para crear hoja tipo tabla y ajustar ancho
+        function crearHojaTabla(data) {
+          if (!data || !data.length) return XLSX.utils.aoa_to_sheet([[]]);
+          const headers = Object.keys(data[0]);
+          const aoa = [headers].concat(data.map(obj => headers.map(h => obj[h])));
+          const ws = XLSX.utils.aoa_to_sheet(aoa);
+          // Ajustar ancho de columnas
+          const cols = headers.map((h, i) => {
+            let maxLen = h.length;
+            data.forEach(row => {
+              const val = row[h] ? String(row[h]) : "";
+              if (val.length > maxLen) maxLen = val.length;
+            });
+            return { wch: maxLen + 2 };
+          });
+          ws['!cols'] = cols;
+          // Agregar autofiltro en la primera fila
+          ws['!autofilter'] = { ref: XLSX.utils.encode_range({s: {c:0, r:0}, e: {c: headers.length-1, r: aoa.length-1}}) };
+          // Colorear encabezados (solo algunos lectores lo muestran)
+          headers.forEach((h, i) => {
+            const cell = ws[XLSX.utils.encode_cell({c: i, r: 0})];
+            if (cell) {
+              cell.s = {
+                fill: { fgColor: { rgb: "D9E1F2" } }, // azul claro
+                font: { bold: true }
+              };
+            }
+          });
+          return ws;
+        }
+
+        // Crear workbook y hojas tipo tabla
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, crearHojaTabla(boletasSheet), 'Boletas');
+        XLSX.utils.book_append_sheet(wb, crearHojaTabla(emps), 'Emprendimientos');
+        XLSX.utils.book_append_sheet(wb, crearHojaTabla(micros), 'Micrófono Abierto');
+        XLSX.utils.book_append_sheet(wb, crearHojaTabla(arts), 'Artistas Principales');
+        XLSX.utils.book_append_sheet(wb, crearHojaTabla(logis), 'Logística');
 
         // Descargar archivo
         XLSX.writeFile(wb, 'reporte_asistentes_grupos.xlsx');
@@ -170,11 +205,11 @@ document.addEventListener("DOMContentLoaded", async function () {
   totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto;
   totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto + totalArtistas;
   // Total recaudado: boletas (solo adultos) + emprendimientos
-  // Sumar el valor de boletas pagas (adultos) usando Promocion
+  // Sumar el valor de boletas pagas (adultos) usando promocion
   let recaudadoBoletas = 0;
   boletasAdultos.forEach(b => {
-    if (b.Promocion) {
-      const match = b.Promocion.match(/\$([\d.,]+)/);
+    if (b.promocion) {
+      const match = b.promocion.match(/\$([\d.,]+)/);
       if (match) {
         const valor = parseInt(match[1].replace(/[.,]/g, ""));
         recaudadoBoletas += valor;
@@ -299,8 +334,8 @@ document.addEventListener("DOMContentLoaded", async function () {
                   let maxValor = 0;
                   boletasAdultos.forEach(b => {
                     let valor = 0;
-                    if (b.Promocion) {
-                      const match = b.Promocion.match(/\$([\d.,]+)/);
+                    if (b.promocion) {
+                      const match = b.promocion.match(/\$([\d.,]+)/);
                       if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
                     } else if (b.valorBoleta) {
                       valor = Number(b.valorBoleta);
@@ -313,8 +348,8 @@ document.addEventListener("DOMContentLoaded", async function () {
                   let maxValor = 0;
                   boletasAdultos.forEach(b => {
                     let valor = 0;
-                    if (b.Promocion) {
-                      const match = b.Promocion.match(/\$([\d.,]+)/);
+                    if (b.promocion) {
+                      const match = b.promocion.match(/\$([\d.,]+)/);
                       if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
                     } else if (b.valorBoleta) {
                       valor = Number(b.valorBoleta);

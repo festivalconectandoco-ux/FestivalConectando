@@ -20,7 +20,7 @@ function renderTablaMicAbierto(micAbierto) {
         <th>Nombre</th>
         <th>Documento</th>
         <th>Tipo de documento</th>
-        <th>Celular</th>
+        <th>celular</th>
         <th>Grupo/Agrupación</th>
         <th>Fecha registro</th>
         <th>Observaciones</th>

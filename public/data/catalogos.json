@@ -44,7 +44,7 @@
 			"nombre":"Otro"
 		}
 	],
-  "Promocion": [
+  "promocion": [
 	{
 	  "idPromocion": "1",
 	  "descripcion": "Preventa 18 Oct",
@@ -89,6 +89,15 @@
 	  "fechaInicial": "2025-05-15",
 	  "fechaFin": "2025-11-29",
 	  "precio": 50000,
+	  "cantidadPersonas": 1,
+	  "activo": true
+	},
+	{
+	  "idPromocion": "2",
+	  "descripcion": "Emprendimimento invitado",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-29",
+	  "precio": 0,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	}
@@ -196,5 +205,13 @@
 	"Ave Angelica",
 	"Willkhuyay",
 	"Euliven Ortiz"
+],
+  "MensajesWhatsapp": [
+	{
+		"asistentes":"🎉 ¡Gracias {nombrePersona} por ser parte del Festival Conectando segunda edición! 🎶✨\n\n 🗓 Te esperamos el 29 de noviembre en la maloca Kynza en Usme, Bogotá. El ingreso será a partir de las 9:00 a.m. allí  recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de sustancias alucinógenas , cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\nTrae ropa adecuada para frío o caso de lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n📲 síguenos en nuestras redes sociales (@FestivalConectando) para que estés al pendiente de nuestras actualizaciones y no te pierdas este hermoso compartir.\n\n🌞 ¡Nos vemos para celebrar la vida y hacer de esta segunda edición del festival algo inolvidable!🙌",
+		"emprendimientos":"🌟 ¡Hola {nombrePersona}! Gracias por ser parte del Festival Conectando segunda edición con tu emprendimiento \"{nombreEmprendimiento}\". 🎉✨\n\n🗓 Te esperamos el 29 de noviembre en la maloca Kynza en Usme, Bogotá. El ingreso será a partir de las 8:00 a.m. para que puedas instalar tu espacio y compartir tu talento con todos los asistentes. \n\n🍔 Habrá una gran variedad de emprendimientos con alimentos y bebidas para que todos disfruten. Recuerda traer tu vaso reutilizable para contribuir al cuidado del medio ambiente. 🌎💚\n\n📲 Síguenos en nuestras redes sociales (@FestivalConectando) para estar al tanto de todas las novedades y actualizaciones del evento.\n\n🌞 ¡Nos vemos pronto para celebrar la vida y hacer de esta segunda edición del festival algo inolvidable! 🙌",
+		"logisticos":"🌟 ¡Hola {nombrePersona}! Gracias por ser parte del equipo de apoyo logístico del Festival Conectando segunda edición. 🎉✨\n\n🗓 Te esperamos el 29 de noviembre en la maloca Kynza en Usme, Bogotá. El ingreso será a partir de las 9:00 a.m., pero recuerda que tu horario de llegada es el pactado previamente con el equipo del festival. \n\n🤝 Tu colaboración es fundamental para el éxito del evento y estamos muy agradecidos por tu disposición para ayudar.\n\nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de sustancias alucinógenas , cannabis u hongos. 🚫🍫🚫🌿🚫🍄 \n\n📲 Síguenos en nuestras redes sociales (@FestivalConectando) para estar al tanto de todas las novedades y actualizaciones del evento.\n\n🌞 ¡Nos vemos pronto para celebrar la vida y hacer de esta segunda edición del festival algo inolvidable! 🙌",
+		"invitados":"🌟 ¡Hola {nombrePersona}! Gracias por ser parte del Festival Conectando segunda edición. 🎉✨\n\n🗓 Te esperamos el 29 de noviembre en la maloca Kynza en Usme, Bogotá. El ingreso será a partir de las 9:00 a.m., pero recuerda que tu horario de llegada es el pactado previamente con el equipo del festival. \n\n🤝 Tu colaboración es fundamental para el éxito del evento y estamos muy agradecidos por tu disposición para ayudar.\n\nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de sustancias alucinógenas , cannabis u hongos. 🚫🍫🚫🌿🚫🍄 \n\n📲 Síguenos en nuestras redes sociales (@FestivalConectando) para estar al tanto de todas las novedades y actualizaciones del evento.\n\n🌞 ¡Nos vemos pronto para celebrar la vida y hacer de esta segunda edición del festival algo inolvidable! 🙌"
+	}
 ]
 }

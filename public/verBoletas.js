@@ -1,12 +1,19 @@
+let catalogosGlobales = null;
 document.addEventListener("DOMContentLoaded", () => {
   let asistentesGlobal = [];
-  fetch("/api/boletas")
+  fetch("data/catalogos.json")
     .then(res => res.json())
-    .then(data => {
-      asistentesGlobal = data.Asistentes;
-      mostrarBoletasAgrupadas(data.Asistentes);
+    .then(catalogos => {
+      catalogosGlobales = catalogos;
+      fetch("/api/boletas")
+        .then(res => res.json())
+        .then(data => {
+          asistentesGlobal = data.Asistentes;
+          mostrarBoletasAgrupadas(data.Asistentes);
+        })
+        .catch(err => console.error("Error cargando boletas:", err));
     })
-    .catch(err => console.error("Error cargando boletas:", err));
+    .catch(err => console.error("Error cargando catálogo:", err));
 
   document.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'btnDescargarExcel') {
@@ -17,17 +24,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const dataExcel = asistentesGlobal.map(a => ({
         'Nombre comprador': a.nombreComprador,
         'Nombre asistente': a.nombreAsistente,
-        'Tipo documento': a.TipoDocumentoAsistente,
-        'Documento': a.DocumentoAsistente,
-        'Promoción': a.Promocion,
-        'Medio de pago': a.MedioPago,
-        'Recibido por': a.QuienRecibio,
-        'Fecha compra': a.FechaCompra,
-        'Celular': a.Celular,
-        'Referencia': a.Referencia,
-        'Envíos WhatsApp': a.EnvioWhatsapp,
-        'Comprobante': a.Comprobante,
-        'Boleta': a.Boleta
+        'Tipo documento': a.tipoDocumentoAsistente,
+        'Documento': a.documentoAsistente,
+        'Promoción': a.promocion,
+        'Medio de pago': a.medioPago,
+        'Recibido por': a.quienRecibio,
+        'Fecha compra': a.fechaCompra,
+        'celular': a.celular,
+        'referencia': a.referencia,
+        'Envíos WhatsApp': a.envioWhatsapp,
+        'comprobante': a.comprobante,
+        'boleta': a.boleta
       }));
       const ws = XLSX.utils.json_to_sheet(dataExcel);
       const wb = XLSX.utils.book_new();
@@ -49,10 +56,10 @@ function mostrarBoletasAgrupadas(lista) {
     container.innerHTML += `<p class="text-muted">No hay boletas registradas.</p>`;
     return;
   }
-  lista.sort((a, b) => new Date(b.FechaCompra) - new Date(a.FechaCompra));
+  lista.sort((a, b) => new Date(b.fechaCompra) - new Date(a.fechaCompra));
   const grupos = {};
   lista.forEach(boleta => {
-    const clave = `${boleta.nombreComprador} - ${boleta.Celular}`;
+    const clave = `${boleta.nombreComprador} - ${boleta.celular}`;
     if (!grupos[clave]) grupos[clave] = [];
     grupos[clave].push(boleta);
   });
@@ -64,7 +71,7 @@ function mostrarBoletasAgrupadas(lista) {
       <div class="card border-primary mb-3">
         <div class="card-header bg-primary text-white">
           <strong>Comprador:</strong> ${boletas[0].nombreComprador}<br>
-          <strong>Celular:</strong> ${boletas[0].Celular}
+          <strong>celular:</strong> ${boletas[0].celular}
         </div>
         <div class="card-body">
           <div class="row g-3" id="grupo-${clave.replace(/\s+/g, "-")}"></div>
@@ -74,15 +81,15 @@ function mostrarBoletasAgrupadas(lista) {
     container.appendChild(grupoDiv);
     const grupoContainer = grupoDiv.querySelector(".row");
     boletas.forEach(boleta => {
-      const urlBoleta = boleta.Boleta ? boleta.Boleta.replace("/upload/", `/upload/fl_attachment/`) : '';
-      const urlComprobante = boleta.Comprobante.replace("/upload/", `/upload/fl_attachment/`);
+      const urlBoleta = boleta.boleta ? boleta.boleta.replace("/upload/", `/upload/fl_attachment/`) : '';
+      const urlComprobante = boleta.comprobante.replace("/upload/", `/upload/fl_attachment/`);
       const card = document.createElement("div");
       card.className = "col-12 col-md-6 tarjeta-boleta";
       card.dataset.nombre = boleta.nombreAsistente.toLowerCase();
-      card.dataset.documento = boleta.DocumentoAsistente.toLowerCase();
-      card.dataset.celular = boleta.Celular.toLowerCase();
-      card.dataset.referencia = boleta.Referencia ? String(boleta.Referencia).toLowerCase() : "";
-      const enviosWhatsapp = boleta.EnvioWhatsapp && !isNaN(boleta.EnvioWhatsapp) ? boleta.EnvioWhatsapp : 0;
+      card.dataset.documento = boleta.documentoAsistente.toLowerCase();
+      card.dataset.celular = boleta.celular.toLowerCase();
+      card.dataset.referencia = boleta.referencia ? String(boleta.referencia).toLowerCase() : "";
+      const enviosWhatsapp = boleta.envioWhatsapp && !isNaN(boleta.envioWhatsapp) ? boleta.envioWhatsapp : 0;
       let historialHtml = "";
       // Historial de envíos WhatsApp
       if (Array.isArray(boleta.historialEnvio) && boleta.historialEnvio.length > 0) {
@@ -112,12 +119,12 @@ function mostrarBoletasAgrupadas(lista) {
         <div class="card shadow-sm">
           <div class="card-body">
             <h5 class="card-title">${boleta.nombreAsistente}</h5>
-            <p class="mb-1"><strong>Documento:</strong> ${boleta.DocumentoAsistente}</p>
-            <p class="mb-1"><strong>Promoción:</strong> ${boleta.Promocion}</p>
-            <p class="mb-1"><strong>Medio de pago:</strong> ${boleta.MedioPago}</p>
-            <p class="mb-1"><strong>Recibido por:</strong> ${boleta.QuienRecibio}</p>
-            <p class="mb-1"><strong>Fecha:</strong> ${new Date(boleta.FechaCompra).toLocaleString()}</p>
-            <p class="mb-1"><strong>Referencia:</strong> ${boleta.Referencia}</p>
+            <p class="mb-1"><strong>Documento:</strong> ${boleta.documentoAsistente}</p>
+            <p class="mb-1"><strong>Promoción:</strong> ${boleta.promocion}</p>
+            <p class="mb-1"><strong>Medio de pago:</strong> ${boleta.medioPago}</p>
+            <p class="mb-1"><strong>Recibido por:</strong> ${boleta.quienRecibio}</p>
+            <p class="mb-1"><strong>Fecha:</strong> ${new Date(boleta.fechaCompra).toLocaleString()}</p>
+            <p class="mb-1"><strong>referencia:</strong> ${boleta.referencia}</p>
             <p class="mb-1"><strong>Envíos WhatsApp:</strong> <span class="contador-wp">${enviosWhatsapp}</span></p>
             <button class="btn btn-sm btn-success mt-2 reenviar-wp">Reenviar WhatsApp</button>
             <button class="btn btn-sm btn-primary mt-2 ver-imagen-modal" data-img="${urlBoleta}">Ver boleta PNG</button>
@@ -144,22 +151,19 @@ function mostrarBoletasAgrupadas(lista) {
           return;
         }
         let nombreAsistenteLimpio = boleta.nombreAsistente.replace(/_/g, ' ');
-        let caption = `🎉 ¡Gracias ${nombreAsistenteLimpio} por ser parte del Festival Conectando segunda edición! 🎶✨\n\n` +
-          `🗓 Te esperamos el 29 de noviembre en la maloca Kynza en Usme, Bogotá. El ingreso será a partir de las 9:00 a.m. allí  recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
-          `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de sustancias alucinógenas , cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
-          `Trae ropa adecuada para frío o caso de lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
-          `📲 síguenos en nuestras redes sociales (@FestivalConectando) para que estés al pendiente de nuestras actualizaciones y no te pierdas este hermoso compartir.\n\n` +
-          `🌞 ¡Nos vemos para celebrar la vida y hacer de esta segunda edición del festival algo inolvidable!🙌`;
+        let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].asistentes;
+        let caption = mensajeBase.replace('{nombrePersona}', nombreAsistenteLimpio);
+
         if (boleta.tipoAsistente === "niño") {
           caption = `🧒 BOLETA NIÑO (menor de 12 años)\nEdad: ${boleta.edad}\n\n` + caption;
         }
         let respuestaServicio = "";
         try {
           const reqGreen = {
-            urlFile: boleta.Boleta,
+            urlFile: boleta.boleta,
             fileName: `boleta_${boleta.nombreAsistente.replace(/\s+/g, '_')}.png`,
             caption: caption,
-            numero: '573058626761'//boleta.Celular
+            numero: '573143300821'//boleta.celular
           };
           const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
             method: "POST",
@@ -175,7 +179,7 @@ function mostrarBoletasAgrupadas(lista) {
           if (resp.ok) {
             actual++;
             contadorSpan.textContent = actual;
-            boleta.EnvioWhatsapp = actual;
+            boleta.envioWhatsapp = actual;
           }
           const historialEnvio = {
             fecha: new Date().toISOString(),
@@ -185,7 +189,7 @@ function mostrarBoletasAgrupadas(lista) {
           await fetch("/actualizar-envio-whatsapp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ referencia: boleta.Referencia, EnvioWhatsapp: boleta.EnvioWhatsapp, historialEnvio })
+            body: JSON.stringify({ referencia: boleta.referencia, envioWhatsapp: boleta.envioWhatsapp, historialEnvio })
           });
           if (resp.ok) {
             alert('Mensaje reenviado exitosamente');
@@ -201,7 +205,7 @@ function mostrarBoletasAgrupadas(lista) {
           await fetch("/actualizar-envio-whatsapp", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ referencia: boleta.Referencia, EnvioWhatsapp: boleta.EnvioWhatsapp, historialEnvio })
+            body: JSON.stringify({ referencia: boleta.referencia, envioWhatsapp: boleta.envioWhatsapp, historialEnvio })
           });
           alert('Error al reenviar WhatsApp.');
         }

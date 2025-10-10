@@ -125,10 +125,11 @@ app.post("/registrar-boleta", async (req, res) => {
   try {
     const nuevaBoleta = req.body;
     nuevaBoleta.id = Date.now().toString();
-    if (!nuevaBoleta.Referencia) {
-      return res.status(400).json({ error: "Falta el campo Referencia" });
+    if (!nuevaBoleta.referencia) {
+      return res.status(400).json({ error: "Falta el campo referencia" });
     }
-await db.collection("boletas").doc(String(nuevaBoleta.Referencia)).set(nuevaBoleta);    res.status(200).json({ mensaje: "Boleta registrada con éxito", id: nuevaBoleta.Referencia });
+    await db.collection("boletas").doc(String(nuevaBoleta.referencia)).set(nuevaBoleta);    
+    res.status(200).json({ mensaje: "boleta registrada con éxito", id: nuevaBoleta.referencia });
   } catch (error) {
     console.error("Error guardando boleta:", error);
     res.status(500).json({ error: "Error al registrar boleta" });
@@ -139,8 +140,8 @@ app.post("/registrar-logistico", async (req, res) => {
   try {
     const nuevoLogistico = req.body;
     nuevoLogistico.id = Date.now().toString();
-    await db.collection("logisticos").add(nuevoLogistico);
-    res.status(200).json({ mensaje: "Logistico registrada con éxito", id: nuevoLogistico.id });
+    await db.collection("logisticos").doc(String(nuevoLogistico.referencia)).set(nuevoLogistico);
+    res.status(200).json({ mensaje: "Logistico registrada con éxito", id: nuevoLogistico.referencia });
   } catch (error) {
     console.error("Error guardando Logistico:", error);
     res.status(500).json({ error: "Error al registrar Logistico" });
@@ -161,10 +162,10 @@ app.post("/registrar-artista", async (req, res) => {
 
 app.post("/registrar-emprendimiento", async (req, res) => {
   try {
-    const nuevoArtista = req.body;
-    nuevoArtista.id = Date.now().toString();
-    await db.collection("emprendimientos").add(nuevoArtista);
-    res.status(200).json({ mensaje: "Emprendimiento registrada con éxito", id: nuevoArtista.id });
+    const nuevoEmprendimiento = req.body;
+    nuevoEmprendimiento.id = Date.now().toString();
+    await db.collection("emprendimientos").doc(String(nuevoEmprendimiento.referencia)).set(nuevoEmprendimiento);
+    res.status(200).json({ mensaje: "Emprendimiento registrada con éxito", id: nuevoEmprendimiento.referencia });
   } catch (error) {
     console.error("Error guardando Emprendimiento:", error);
     res.status(500).json({ error: "Error al registrar Emprendimiento" });
@@ -229,7 +230,7 @@ app.post("/enviar-mensaje-boleta-greenapi", async (req, res) => {
   try {
     let { urlFile, fileName, caption, numero } = req.body;
     const url = process.env.URL_GREENAPI;
-    if (!numero) numero = "573058626761";
+    if (!numero) numero = "573143300821";
     numero = numero.replace(/[^\d]/g, "");
     const chatId = `${numero}@c.us`;
     const payload = {
@@ -294,17 +295,17 @@ app.post("/subir-comprobante", async (req, res) => {
 
 app.post("/actualizar-envio-whatsapp", async (req, res) => {
   try {
-    const { referencia, EnvioWhatsapp, historialEnvio } = req.body;
+    const { referencia, envioWhatsapp, historialEnvio } = req.body;
     if (!referencia) {
-      return res.status(400).json({ error: "Referencia requerida" });
+      return res.status(400).json({ error: "referencia requerida" });
     }
-    const snapshot = await db.collection("boletas").where("Referencia", "==", referencia).get();
+    const snapshot = await db.collection("boletas").where("referencia", "==", referencia).get();
     if (snapshot.empty) {
       return res.status(404).json({ error: "No se encontró la boleta con esa referencia" });
     }
     const batch = db.batch();
     snapshot.forEach(doc => {
-      const updateData = { EnvioWhatsapp };
+      const updateData = { envioWhatsapp };
       if (historialEnvio) {
         batch.update(doc.ref, {
           ...updateData,
@@ -315,26 +316,56 @@ app.post("/actualizar-envio-whatsapp", async (req, res) => {
       }
     });
     await batch.commit();
-    res.status(200).json({ mensaje: "EnvioWhatsapp actualizado" });
+    res.status(200).json({ mensaje: "envioWhatsapp actualizado" });
   } catch (error) {
-    console.error("Error actualizando EnvioWhatsapp:", error);
+    console.error("Error actualizando envioWhatsapp:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/actualizar-envio-whatsapp-logistica", async (req, res) => {
+  try {
+    const { referencia, envioWhatsapp, historialEnvio } = req.body;
+    if (!referencia) {
+      return res.status(400).json({ error: "referencia requerida" });
+    }
+    const snapshot = await db.collection("logisticos").where("referencia", "==", referencia).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "No se encontró la boleta con esa referencia" });
+    }
+    const batch = db.batch();
+    snapshot.forEach(doc => {
+      const updateData = { envioWhatsapp };
+      if (historialEnvio) {
+        batch.update(doc.ref, {
+          ...updateData,
+          historialEnvio: admin.firestore.FieldValue.arrayUnion(historialEnvio)
+        });
+      } else {
+        batch.update(doc.ref, updateData);
+      }
+    });
+    await batch.commit();
+    res.status(200).json({ mensaje: "envioWhatsapp actualizado" });
+  } catch (error) {
+    console.error("Error actualizando envioWhatsapp:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
 app.post("/actualizar-emprendimientos-envio-whatsapp", async (req, res) => {
   try {
-    const { referencia, EnvioWhatsapp, historialEnvio } = req.body;
+    const { referencia, envioWhatsapp, historialEnvio } = req.body;
     if (!referencia) {
-      return res.status(400).json({ error: "Referencia requerida" });
+      return res.status(400).json({ error: "referencia requerida" });
     }
-    const snapshot = await db.collection("emprendimientos").where("Referencia", "==", referencia).get();
+    const snapshot = await db.collection("emprendimientos").where("referencia", "==", referencia).get();
     if (snapshot.empty) {
       return res.status(404).json({ error: "No se encontró el emprendimiento con esa referencia" });
     }
     const batch = db.batch();
     snapshot.forEach(doc => {
-      const updateData = { EnvioWhatsapp };
+      const updateData = { envioWhatsapp };
       if (historialEnvio) {
         batch.update(doc.ref, {
           ...updateData,
@@ -345,9 +376,9 @@ app.post("/actualizar-emprendimientos-envio-whatsapp", async (req, res) => {
       }
     });
     await batch.commit();
-    res.status(200).json({ mensaje: "EnvioWhatsapp actualizado" });
+    res.status(200).json({ mensaje: "envioWhatsapp actualizado" });
   } catch (error) {
-    console.error("Error actualizando EnvioWhatsapp:", error);
+    console.error("Error actualizando envioWhatsapp:", error);
     res.status(500).json({ error: error.message });
   }
 });

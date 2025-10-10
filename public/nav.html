@@ -1,5 +1,31 @@
 <!-- nav.html: Menú de navegación global reutilizable para Festival Conectando -->
 <link rel="stylesheet" href="festival-conectando.css">
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si estamos en localhost
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    
+    // Lista de elementos que solo se mostrarán en producción
+    const productionOnlyItems = [
+      'ventaBoleteria.html',
+      'verBoletas.html',
+      'ventaEmprendimientos.html',
+      'verEmprendimientos.html',
+      'Reportes.html'
+      // Agrega aquí más URLs de páginas que quieres que solo aparezcan en producción
+    ];
+
+    // Ocultar elementos según el entorno
+    if (!isLocalhost) {
+      document.querySelectorAll('.dropdown-item').forEach(item => {
+        const href = item.getAttribute('href');
+        if (!productionOnlyItems.includes(href)) {
+          item.style.display = 'none';
+        }
+      });
+    }
+  });
+</script>
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom mb-3">
   <div class="container-fluid">
     <a class="navbar-brand text-primary fw-bold" href="#">Festival Conectando</a>

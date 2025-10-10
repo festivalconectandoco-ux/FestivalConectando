@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           <th>Nombre</th>
           <th>Tipo de documento</th>
           <th>Número de documento</th>
-          <th>Celular</th>
+          <th>celular</th>
           <th>Áreas de apoyo</th>
           <th>Promoción</th>
           <th>Tareas</th>

@@ -1,7 +1,48 @@
-// Generar referencia única para emprendimiento
-async function generarReferenciaEmprendimiento() {
-  const referencia = await obtenerReferenciaGlobal();
-  return referencia;
+
+// Funciones para el overlay
+function mostrarOverlay(mensaje = 'Procesando...') {
+  const overlay = document.createElement('div');
+  overlay.id = 'overlay';
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  `;
+  
+  const contenido = document.createElement('div');
+  contenido.style.cssText = `
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+  `;
+  
+  const spinner = document.createElement('div');
+  spinner.className = 'spinner-border text-primary';
+  spinner.setAttribute('role', 'status');
+  
+  const texto = document.createElement('div');
+  texto.style.marginTop = '10px';
+  texto.textContent = mensaje;
+  
+  contenido.appendChild(spinner);
+  contenido.appendChild(texto);
+  overlay.appendChild(contenido);
+  document.body.appendChild(overlay);
+}
+
+function ocultarOverlay() {
+  const overlay = document.getElementById('overlay');
+  if (overlay) {
+    overlay.remove();
+  }
 }
 
 // Generar imagen boleta para emprendimiento
@@ -32,8 +73,8 @@ async function generarImagenBoletaEmprendimiento({ nombreEmprendimiento, nombreP
       ctx.fillText(`${nombreEmprendimiento}`, 1560, 490);
       
       ctx.font = "bold 35px Arial";
-      ctx.fillText(`# ${referencia}`, 1850, 170);
-      ctx.fillText(`Emprendimiento`, 1535, 170);
+      ctx.fillText(`# ${referencia}`, 1850, 180);
+      ctx.fillText(`Emprendimiento`, 1535, 180);
 
       const imagenBase64 = canvas.toDataURL("image/png");
       const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}` };
@@ -156,6 +197,62 @@ document.addEventListener("DOMContentLoaded", async function () {
     `;
     contenedorCheckboxes.appendChild(div);
   });
+  // Manejar la visibilidad de la sección de pago según la promoción
+  const promoSelect = document.getElementById("promocionEmprendimiento");
+  
+  function togglePagoVisibility() {
+    const selectedPromoId = promoSelect.value;
+    
+    // Buscar el título "Pago de inscripción" y el separador
+    const tituloPago = Array.from(document.getElementsByTagName('h5')).find(h => h.textContent === 'Pago de inscripción');
+    if (!tituloPago) return;
+
+    const separadorPago = tituloPago.previousElementSibling;
+    const seccionPago = tituloPago.nextElementSibling;
+
+    // Obtener campos de pago
+    const medioPagoSelect = document.getElementById("medioPago");
+    const recibidoPorSelect = document.getElementById("recibidoPor");
+    const recibidoPorOtroInput = document.getElementById("recibidoPorOtro");
+    const comprobanteInput = document.getElementById("comprobantePago");
+
+    if (selectedPromoId === "2") {
+      // Ocultar sección de pago
+      tituloPago.style.display = "none";
+      if (separadorPago) separadorPago.style.display = "none";
+      if (seccionPago) seccionPago.style.display = "none";
+
+      // Remover requerimientos y limpiar campos de pago
+      medioPagoSelect?.removeAttribute("required");
+      recibidoPorSelect?.removeAttribute("required");
+      comprobanteInput?.removeAttribute("required");
+      if (recibidoPorOtroInput) {
+        recibidoPorOtroInput.removeAttribute("required");
+        recibidoPorOtroInput.value = "";
+      }
+
+      medioPagoSelect.value = "";
+      recibidoPorSelect.value = "";
+      comprobanteInput.value = "";
+    } else {
+      // Mostrar sección de pago
+      tituloPago.style.display = "";
+      if (separadorPago) separadorPago.style.display = "";
+      if (seccionPago) seccionPago.style.display = "";
+
+      // Restablecer requerimientos de campos de pago
+      medioPagoSelect?.setAttribute("required", "required");
+      recibidoPorSelect?.setAttribute("required", "required");
+      comprobanteInput?.setAttribute("required", "required");
+    }
+  }
+
+  // Llamar la función al cargar la página y cuando cambie la promoción
+  if (promoSelect) {
+    promoSelect.addEventListener("change", togglePagoVisibility);
+    togglePagoVisibility();
+  }
+
   // Cargar tipos de documento
   if (catalogosGlobales && catalogosGlobales.tiposDeDocumento) {
     const selectTipoDoc = document.getElementById("tipoDocumento");
@@ -198,12 +295,22 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   // Formulario submit
   document.getElementById("formEmprendimiento").addEventListener("submit", async function (e) {
-  // Obtener promoción seleccionada
+    e.preventDefault();
+    
+    // Obtener el botón de submit y deshabilitarlo
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+    }
+
+    // Mostrar overlay
+    mostrarOverlay('Registrando emprendimiento...');
+
+    // Obtener promoción seleccionada
   const promoSelect = document.getElementById("promocionEmprendimiento");
   const promoId = promoSelect.value;
   const promoText = promoSelect.options[promoSelect.selectedIndex].text;
   const promoValor = promoSelect.options[promoSelect.selectedIndex].dataset.precio;
-    e.preventDefault();
     const nombreEmprendimiento = document.getElementById("nombreEmprendimiento").value.trim();
     const categorias = Array.from(document.querySelectorAll('input[name="categorias"]:checked')).map(cb => cb.value);
     const nombrePersona = document.getElementById("nombrePersona").value.trim();
@@ -221,28 +328,58 @@ document.addEventListener("DOMContentLoaded", async function () {
       }
     });
     // Logo y comprobante de pago
-    const logoFile = document.getElementById("logoEmprendimiento").files[0];
-    const comprobanteFile = document.getElementById("comprobantePago").files[0];
-    const medioPago = document.getElementById("medioPago").value;
+    let logoFile = document.getElementById("logoEmprendimiento").files[0];
+    let comprobanteFile = document.getElementById("comprobantePago").files[0];
+    let medioPago = document.getElementById("medioPago").value;
     let recibidoPor = document.getElementById("recibidoPor").value;
     if (recibidoPor === "Otro") {
       recibidoPor = document.getElementById("recibidoPorOtro").value.trim();
     }
-    if (!nombreEmprendimiento || categorias.length === 0 || !nombrePersona || !tipoDocumento || !numeroDocumento || !celularPersona || productos.length === 0 || !logoFile || !comprobanteFile || !medioPago || !recibidoPor) {
-      alert("Por favor completa todos los campos obligatorios, incluyendo archivos e información de pago.");
+    // Validación base siempre requerida
+    if (!nombreEmprendimiento || categorias.length === 0 || !nombrePersona || !tipoDocumento || !numeroDocumento || !celularPersona || productos.length === 0 || !logoFile) {
+      alert("Por favor completa todos los campos obligatorios.");
       return;
     }
+
+    // Validar campos de pago solo si la promoción no es id 2
+    if (promoId !== "2") {
+      if (!medioPago || !recibidoPor || !comprobanteFile) {
+        alert("Por favor completa todos los campos de pago.");
+        return;
+      }
+    }
+
     // Subir archivos a Cloudinary (o tu endpoint de imágenes)
     let logoUrl = "", comprobanteUrl = "";
     try {
+      // Siempre subir el logo
+      console.log('logoFile ', logoFile);
       logoUrl = await subirArchivoCloudinary(logoFile);
-      comprobanteUrl = await subirArchivoCloudinary(comprobanteFile);
+      console.log('logoUrl ', logoUrl);
+      console.log('promoId ', promoId);
+      if (promoId === "2") {
+        // Si es promoción id 2, asignar valores vacíos a los campos de pago
+        medioPago = "";
+        recibidoPor = "";
+        comprobanteUrl = "";
+      } else {
+        // Solo intentar subir el comprobante si no es promoción id 2
+        try {
+          console.log('comprobanteFile ', comprobanteFile);
+          comprobanteUrl = await subirArchivoCloudinary(comprobanteFile);
+          console.log('comprobanteUrl ', comprobanteUrl);
+        } catch (err) {
+          alert("Error al subir el comprobante de pago. Intenta nuevamente.");
+          return;
+        }
+      }
     } catch (err) {
-      alert("Error al subir archivos. Intenta nuevamente.");
+      console.log(err)
+      alert("Error al subir el logo del emprendimiento. Intenta nuevamente.");
       return;
     }
     // Generar referencia y boleta antes de registrar
-    const referencia = await generarReferenciaEmprendimiento();
+    const referencia = await generarReferencia();
 
     const imagenUrl = await generarImagenBoletaEmprendimiento({
       nombreEmprendimiento,
@@ -270,7 +407,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       fechaRegistro: new Date().toISOString(),
       referencia,
       boleta: imagenUrl,
-      EnvioWhatsapp: 0,
+      envioWhatsapp: 0,
     };
     try {
       const resp = await fetch("/registrar-emprendimiento", {
@@ -283,18 +420,15 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (resp.ok) {
 
         // Envío de WhatsApp y registro de historial solo para este emprendimiento
-        let caption = `🎉 ¡Gracias ${emprendimiento.nombreEmprendimiento} ${emprendimiento.nombrePersona} por ser parte del Festival Conectando! 🎶✨\n\n` +
-          `🗓 Te esperamos el 29 de noviembre en el Restaurante Campestre Villa Valeria en Usme, Bogotá. Las puertas abren a las 9:00 a.m. En el ingreso recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
-          `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de drogas, cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
-          `Trae impermeable o sombrilla para la lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
-          `📲 Mantente pendiente de nuestras redes sociales para actualizaciones.\n\n` +
-          `🌞 ¡Nos para celebrar la vida y hacer de esta primera edición del festival algo inolvidable! 🙌🌈`;
+
+        let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].emprendimientos;
+        let caption = mensajeBase.replace('{nombreEmprendimiento}', emprendimiento.nombreEmprendimiento).replace('{nombrePersona}', emprendimiento.nombrePersona);
 
         const reqGreen = {
           urlFile: emprendimiento.boleta,
           fileName: `boleta_${emprendimiento.referencia}.png`,
           caption: caption,
-          numero: '573058626761'//emprendimiento.Celular
+          numero: '573058626761'//emprendimiento.celular
         };
 
         let respuestaServicio = "";
@@ -315,7 +449,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           respuestaServicio = error?.message || "Error en envío";
           envioOk = false;
         }
-        emprendimiento.EnvioWhatsapp = envioOk ? 1 : 0;
+        emprendimiento.envioWhatsapp = envioOk ? 1 : 0;
         const historialEnvio = {
           fecha: new Date().toISOString(),
           mensaje: caption,
@@ -324,17 +458,23 @@ document.addEventListener("DOMContentLoaded", async function () {
         await fetch("/actualizar-emprendimientos-envio-whatsapp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ referencia: emprendimiento.referencia, EnvioWhatsapp: emprendimiento.EnvioWhatsapp, historialEnvio })
+          body: JSON.stringify({ referencia: emprendimiento.referencia, envioWhatsapp: emprendimiento.envioWhatsapp, historialEnvio })
         });
 
+        ocultarOverlay();
         alert("Emprendimiento registrado exitosamente.");
         this.reset();
         grupoRedes.innerHTML = "";
+        if (submitBtn) submitBtn.disabled = false;
       } else {
+        ocultarOverlay();
         alert("Error al registrar el emprendimiento."+resp.ok);
+        if (submitBtn) submitBtn.disabled = false;
       }
     } catch (err) {
+      ocultarOverlay();
       alert("Error de conexión al registrar el emprendimiento.");
+      if (submitBtn) submitBtn.disabled = false;
     }
 // Función para subir archivos a Cloudinary (o tu endpoint)
 async function subirArchivoCloudinary(file) {
@@ -363,6 +503,13 @@ function convertirArchivoABase64(file) {
 }
   });
 });
+
+// Generar referencia única para emprendimiento
+async function generarReferencia() {
+  const referencia = await obtenerReferenciaGlobal();
+  return referencia;
+}
+
 async function obtenerReferenciaGlobal() {
   const resp = await fetch("/api/referencia-global?tipo=emprendimientos");
   const data = await resp.json();

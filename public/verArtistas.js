@@ -21,7 +21,7 @@ function renderTablaArtistas(artistas) {
         <th>Nombre persona</th>
         <th>Tipo de documento</th>
         <th>Número de documento</th>
-        <th>Celular</th>
+        <th>celular</th>
         <th>Observaciones</th>
         <th>Fecha registro</th>
       </tr>

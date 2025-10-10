@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       cargarOpciones(data.mediosDePago, "medioPago");
       cargarIndicativos(data.indicativosTelefonicos, "paisTelefono");
       cargarOpciones(data.responsables, "quienRecibio");
-      cargarPromociones(data.Promocion, "promocion");
+      cargarPromociones(data.promocion, "promocion");
     })
     .catch(error => console.error("Error cargando catalogos.json:", error));
   await cargarAsistenteInicial();
@@ -267,23 +267,23 @@ async function registrarAsistente(formElement) {
     } else {
       // Buscar el valor de la promoción seleccionada
       const promoId = promocionSelect.value;
-      const promoObj = catalogosGlobales.Promocion.find(p => p.idPromocion == promoId);
+      const promoObj = catalogosGlobales.promocion.find(p => p.idPromocion == promoId);
       valorBoleta = promoObj ? Number(promoObj.precio) : 0;
     }
     asistentes.push({
       nombreComprador: datosGenerales.nombre,
       nombreAsistente: nombreAsistente,
-      TipoDocumentoAsistente: tipoDoc,
-      DocumentoAsistente: documento,
-      Promocion: promocionTexto,
-      MedioPago: medioPagoTexto,
-      QuienRecibio: quienRecibioTexto,
-      FechaCompra: now.toISOString(),
-      Comprobante: comprobanteUrl,
-      Celular: celularCompleto,
-      Referencia: referencia,
-      Boleta: imagenBase64,
-      EnvioWhatsapp: 0,
+      tipoDocumentoAsistente: tipoDoc,
+      documentoAsistente: documento,
+      promocion: promocionTexto,
+      medioPago: medioPagoTexto,
+      quienRecibio: quienRecibioTexto,
+      fechaCompra: now.toISOString(),
+      comprobante: comprobanteUrl,
+      celular: celularCompleto,
+      referencia: referencia,
+      boleta: imagenBase64,
+      envioWhatsapp: 0,
       tipoAsistente: tipoAsistente,
       edad: edad,
       valorBoleta: valorBoleta
@@ -301,21 +301,17 @@ async function registrarAsistente(formElement) {
 
       // Envío de WhatsApp y registro de historial solo para este asistente
       let nombreAsistenteLimpio = asistente.nombreAsistente.replace(/_/g, ' ');
-      let caption = `🎉 ¡Gracias ${nombreAsistenteLimpio} por ser parte del Festival Conectando segunda edición! 🎶✨\n\n` +
-        `🗓 Te esperamos el 29 de noviembre en la maloca Kynza en Usme, Bogotá. El ingreso será a partir de las 9:00 a.m. allí  recibirás un cupón para reclamar una bebida (chicha, té de coca, café o agua) . No olvides tu vaso reutilizable. 🌎💚\n\n` +
-        `Habrá emprendimientos con alimentos y almuerzo. 🍔🥙 \nNo se permite el ingreso de alimentos y/o bebidas, ni el consumo de sustancias alucinógenas , cannabis u hongos. 🚫🍫🚫🌿🚫🍄\n\n` +
-        `Trae ropa adecuada para frío o caso de lluvia 🌧☔ y, si puedes, un cojín 🛋 o colchoneta para sentarte. \n🪑Las sillas serán prioridad para las personas mayores, mujeres embarazadas, y niños de brazos. 👵🤰👶\n\n` +
-        `📲 síguenos en nuestras redes sociales (@FestivalConectando) para que estés al pendiente de nuestras actualizaciones y no te pierdas este hermoso compartir.\n\n` +
-        `🌞 ¡Nos vemos para celebrar la vida y hacer de esta segunda edición del festival algo inolvidable!🙌`;
+      let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].asistentes;
+      let caption = mensajeBase.replace('{nombrePersona}', nombreAsistenteLimpio);
       if (asistente.tipoAsistente === "niño") {
         caption = `🧒 BOLETA NIÑO (menor de 12 años)\nEdad: ${asistente.edad}\n\n` + caption;
       }
 
       const reqGreen = {
-        urlFile: asistente.Boleta,
+        urlFile: asistente.boleta,
         fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
         caption: caption,
-        numero: '573058626761'//asistente.Celular
+        numero: '573143300821'//asistente.celular
       };
       let respuestaServicio = "";
       let envioOk = false;
@@ -335,7 +331,7 @@ async function registrarAsistente(formElement) {
         respuestaServicio = error?.message || "Error en envío";
         envioOk = false;
       }
-      asistente.EnvioWhatsapp = envioOk ? 1 : 0;
+      asistente.envioWhatsapp = envioOk ? 1 : 0;
       const historialEnvio = {
         fecha: new Date().toISOString(),
         mensaje: caption,
@@ -344,7 +340,7 @@ async function registrarAsistente(formElement) {
       await fetch("/actualizar-envio-whatsapp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ referencia: asistente.Referencia, EnvioWhatsapp: asistente.EnvioWhatsapp, historialEnvio })
+        body: JSON.stringify({ referencia: asistente.referencia, envioWhatsapp: asistente.envioWhatsapp, historialEnvio })
       });
     } catch (error) {
       console.error(`Error registrando boleta para ${asistente.nombreAsistente}:`, error);
