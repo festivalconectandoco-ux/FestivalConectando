@@ -39,8 +39,52 @@ app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
 app.use(express.static(path.join(__dirname, "public"))); // donde está tu ventaBoleteria.html
 
-async function obtenerReferenciaGlobalIncremental() {
-  const ref = admin.firestore().collection("contadores").doc("referenciaGlobal");
+async function obtenerReferenciaArtistas() {
+  const ref = admin.firestore().collection("contadores").doc("referenciaArtistas");
+  return await admin.firestore().runTransaction(async (t) => {
+    const doc = await t.get(ref);
+    let actual = doc.exists ? doc.data().valor : 0;
+    actual++;
+    t.set(ref, { valor: actual });
+    return actual;
+  });
+}
+
+async function obtenerReferenciaAsistentes() {
+  const ref = admin.firestore().collection("contadores").doc("referenciaAsistentes");
+  return await admin.firestore().runTransaction(async (t) => {
+    const doc = await t.get(ref);
+    let actual = doc.exists ? doc.data().valor : 0;
+    actual++;
+    t.set(ref, { valor: actual });
+    return actual;
+  });
+}
+
+async function obtenerReferenciaEmprendimientos() {
+  const ref = admin.firestore().collection("contadores").doc("referenciaEmprendimientos");
+  return await admin.firestore().runTransaction(async (t) => {
+    const doc = await t.get(ref);
+    let actual = doc.exists ? doc.data().valor : 0;
+    actual++;
+    t.set(ref, { valor: actual });
+    return actual;
+  });
+}
+
+async function obtenerReferenciaLogisticos() {
+  const ref = admin.firestore().collection("contadores").doc("referenciaLogisticos");
+  return await admin.firestore().runTransaction(async (t) => {
+    const doc = await t.get(ref);
+    let actual = doc.exists ? doc.data().valor : 0;
+    actual++;
+    t.set(ref, { valor: actual });
+    return actual;
+  });
+}
+
+async function obtenerReferenciaMicAbierto() {
+  const ref = admin.firestore().collection("contadores").doc("referenciaMicAbierto");
   return await admin.firestore().runTransaction(async (t) => {
     const doc = await t.get(ref);
     let actual = doc.exists ? doc.data().valor : 0;
@@ -51,7 +95,29 @@ async function obtenerReferenciaGlobalIncremental() {
 }
 
 app.get("/api/referencia-global", async (req, res) => {
-  const referencia = await obtenerReferenciaGlobalIncremental();
+  const tipo = req.query.tipo || "global";
+  let referencia;
+  switch (tipo) {
+    case "artistas":
+      referencia = await obtenerReferenciaArtistas();
+      break;
+    case "asistentes":
+      referencia = await obtenerReferenciaAsistentes();
+      break;
+    case "emprendimientos":
+      referencia = await obtenerReferenciaEmprendimientos();
+      break;
+    case "logisticos":
+      referencia = await obtenerReferenciaLogisticos();
+      break;
+    case "micabierto":
+      referencia = await obtenerReferenciaMicAbierto();
+      break;
+    case "global":
+    default:
+      referencia = await obtenerReferenciaGlobalIncremental();
+      break;
+  }
   res.json({ referencia });
 });
 

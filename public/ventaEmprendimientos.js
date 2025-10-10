@@ -364,7 +364,7 @@ function convertirArchivoABase64(file) {
   });
 });
 async function obtenerReferenciaGlobal() {
-  const resp = await fetch("/api/referencia-global");
+  const resp = await fetch("/api/referencia-global?tipo=emprendimientos");
   const data = await resp.json();
   return data.referencia; // El backend debe responder { referencia: valor }
 }

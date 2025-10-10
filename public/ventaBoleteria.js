@@ -484,7 +484,7 @@ async function subirComprobante(base64, referencia) {
 }
 
 async function obtenerReferenciaGlobal() {
-  const resp = await fetch("/api/referencia-global");
+  const resp = await fetch("/api/referencia-global?tipo=asistentes");
   const data = await resp.json();
   return data.referencia; // El backend debe responder { referencia: valor }
 }

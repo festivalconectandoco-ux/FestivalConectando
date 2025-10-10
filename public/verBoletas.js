@@ -120,8 +120,8 @@ function mostrarBoletasAgrupadas(lista) {
             <p class="mb-1"><strong>Referencia:</strong> ${boleta.Referencia}</p>
             <p class="mb-1"><strong>Envíos WhatsApp:</strong> <span class="contador-wp">${enviosWhatsapp}</span></p>
             <button class="btn btn-sm btn-success mt-2 reenviar-wp">Reenviar WhatsApp</button>
-            <a href="${urlBoleta}" class="btn btn-sm btn-primary mt-2">Descargar boleta PNG</a>
-            <a href="${urlComprobante}" class="btn btn-sm btn-primary mt-2">Descargar comprobante de pago</a>
+            <button class="btn btn-sm btn-primary mt-2 ver-imagen-modal" data-img="${urlBoleta}">Ver boleta PNG</button>
+            <button class="btn btn-sm btn-primary mt-2 ver-imagen-modal" data-img="${urlComprobante}">Ver comprobante de pago</button>
             ${historialHtml}
           </div>
         </div>
@@ -228,6 +228,39 @@ function mostrarBoletasAgrupadas(lista) {
       });
       grupo.style.display = visible ? "block" : "none";
     });
+  });
+  // Insertar el modal al final del container si no existe
+  if (!document.getElementById('modalImagenBoleta')) {
+    const modalHtml = `
+      <div id="modalImagenBoleta" class="modal-imagen-boleta" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center;">
+        <div style="position:relative;max-width:90vw;max-height:90vh;">
+          <button id="cerrarModalBoleta" style="position:absolute;top:10px;right:10px;z-index:2;" class="btn btn-danger">Cerrar</button>
+          <img id="imgModalBoleta" src="" alt="Imagen boleta" style="max-width:100%;max-height:80vh;display:block;margin:auto;border-radius:8px;box-shadow:0 0 10px #000;" />
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    // Eventos para cerrar el modal
+    document.getElementById('cerrarModalBoleta').addEventListener('click', () => {
+      document.getElementById('modalImagenBoleta').style.display = 'none';
+      document.getElementById('imgModalBoleta').src = '';
+    });
+    document.getElementById('modalImagenBoleta').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        document.getElementById('modalImagenBoleta').style.display = 'none';
+        document.getElementById('imgModalBoleta').src = '';
+      }
+    });
+  }
+  // Delegación para abrir el modal al hacer click en los botones
+  container.addEventListener('click', function(e) {
+    if (e.target.classList.contains('ver-imagen-modal')) {
+      const url = e.target.getAttribute('data-img');
+      const modal = document.getElementById('modalImagenBoleta');
+      const img = document.getElementById('imgModalBoleta');
+      img.src = url;
+      modal.style.display = 'flex';
+    }
   });
 }
 
