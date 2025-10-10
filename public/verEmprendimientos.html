@@ -15,6 +15,15 @@
       .then(response => response.text())
       .then(html => {
         document.getElementById('nav-container').innerHTML = html;
+        // Esperar a que el HTML se inserte y luego inicializar el menú
+        if (window.initFestivalNavMenu) {
+          window.initFestivalNavMenu();
+        } else {
+          // Si el script aún no se ha cargado, esperar y reintentar
+          setTimeout(() => {
+            if (window.initFestivalNavMenu) window.initFestivalNavMenu();
+          }, 200);
+        }
       });
   </script>
   <div class="container py-4">
