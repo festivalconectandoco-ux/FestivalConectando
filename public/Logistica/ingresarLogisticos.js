@@ -202,13 +202,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-// Generar referencia única para emprendimiento
-async function generarReferencia() {
-  const referencia = await obtenerReferenciaGlobal();
-  return referencia;
-}
-
-
 async function obtenerReferenciaGlobal() {
   const resp = await fetch("/api/referencia-global?tipo=logisticos");
   const data = await resp.json();
@@ -220,7 +213,7 @@ async function generarImagenBoleta({ nombre, documento, referencia, areas }) {
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = "../data/plantilla_boleta.png";
+    img.src = "../data/plantilla_boletas.png";
 
     img.onload = () => {
      canvas.width = img.width;   // 2000

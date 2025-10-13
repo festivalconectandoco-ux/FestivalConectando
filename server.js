@@ -110,7 +110,7 @@ app.get("/api/referencia-global", async (req, res) => {
     case "logisticos":
       referencia = await obtenerReferenciaLogisticos();
       break;
-    case "micabierto":
+    case "micAbierto":
       referencia = await obtenerReferenciaMicAbierto();
       break;
     case "global":
@@ -176,8 +176,9 @@ app.post("/registrar-microfono-abierto", async (req, res) => {
   try {
     const nuevoArtista = req.body;
     nuevoArtista.id = Date.now().toString();
-    await db.collection("micAbierto").add(nuevoArtista);
-    res.status(200).json({ mensaje: "Micrófono Abierto registrada con éxito", id: nuevoArtista.id });
+    await db.collection("micAbierto").doc(String(nuevoArtista.id)).set(nuevoArtista);
+    res.status(200).json({ mensaje: "Micrófono Abierto registrada con éxito", id: nuevoArtista.referencia });
+
   } catch (error) {
     console.error("Error guardando Micrófono Abierto:", error);
     res.status(500).json({ error: "Error al registrar Micrófono Abierto" });
@@ -383,6 +384,35 @@ app.post("/actualizar-emprendimientos-envio-whatsapp", async (req, res) => {
   }
 });
 
+app.post("/actualizar-microfono-abierto-envio-whatsapp", async (req, res) => {
+  try {
+    const { referencia, envioWhatsapp, historialEnvio } = req.body;
+    if (!referencia) {
+      return res.status(400).json({ error: "referencia requerida" });
+    }
+    const snapshot = await db.collection("micAbierto").where("referencia", "==", referencia).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "No se encontró el micrófono abierto con esa referencia" });
+    }
+    const batch = db.batch();
+    snapshot.forEach(doc => {
+      const updateData = { envioWhatsapp };
+      if (historialEnvio) {
+        batch.update(doc.ref, {
+          ...updateData,
+          historialEnvio: admin.firestore.FieldValue.arrayUnion(historialEnvio)
+        });
+      } else {
+        batch.update(doc.ref, updateData);
+      }
+    });
+    await batch.commit();
+    res.status(200).json({ mensaje: "envioWhatsapp actualizado" });
+  } catch (error) {
+    console.error("Error actualizando envioWhatsapp:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

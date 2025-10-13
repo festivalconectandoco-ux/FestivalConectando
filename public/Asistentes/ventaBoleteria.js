@@ -416,7 +416,7 @@ async function generarImagenBoleta({ nombre, documento, referencia, tipoAsistent
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = "../data/plantilla_boleta.png";
+    img.src = "../data/plantilla_boletas.png";
 
     img.onload = () => {
      canvas.width = img.width;   // 2000
