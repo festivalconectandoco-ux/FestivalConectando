@@ -1,7 +1,7 @@
 let catalogosGlobales = null;
 document.addEventListener("DOMContentLoaded", function () {
   let asistentesGlobal = [];
-  fetch("data/catalogos.json")
+  fetch("../data/catalogos.json")
     .then(res => res.json())
     .then(catalogos => {
       catalogosGlobales = catalogos;
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Cargar áreas de apoyo y tipos de documento desde catalogos.json
-  fetch('data/catalogos.json')
+  fetch('../data/catalogos.json')
     .then(resp => resp.json())
     .then(data => {
       // Áreas de apoyo
@@ -220,7 +220,7 @@ async function generarImagenBoleta({ nombre, documento, referencia, areas }) {
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = "/plantilla_boleteria.png";
+    img.src = "../data/plantilla_boleta.png";
 
     img.onload = () => {
      canvas.width = img.width;   // 2000

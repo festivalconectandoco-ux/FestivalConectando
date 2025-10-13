@@ -52,7 +52,7 @@ async function generarImagenBoletaEmprendimiento({ nombreEmprendimiento, nombreP
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = "/plantilla_boleteria.png";
+    img.src = "../data/plantilla_boleta.png";
 
     img.onload = () => {
       canvas.width = img.width;   // 2000
@@ -102,7 +102,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     let catalogosGlobales = null;
   try {
-    const resp = await fetch("data/catalogos.json");
+    const resp = await fetch("../data/catalogos.json");
     catalogosGlobales = await resp.json();
   } catch (e) {
     catalogosGlobales = {};

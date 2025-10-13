@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Traer valores de costos y metas desde catalogos.json
   let totalCostos = 0, reunidoPreviamente = 0, gananciaEsperada = 0;
   try {
-    const respCat = await fetch("data/catalogos.json");
+    const respCat = await fetch("../data/catalogos.json");
     const cat = await respCat.json();
     totalCostos = cat.totalCostos || 0;
     reunidoPreviamente = cat.reunidoPreviamente || 0;

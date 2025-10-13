@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
   quienRecibio.addEventListener("change", toggleCampoOtro);
   toggleCampoOtro();
-    await fetch("data/catalogos.json")
+    await fetch("../data/catalogos.json")
     .then(response => response.json())
     .then(data => {
       catalogosGlobales = data;
@@ -416,7 +416,7 @@ async function generarImagenBoleta({ nombre, documento, referencia, tipoAsistent
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
     const img = new Image();
-    img.src = "/plantilla_boleteria.png";
+    img.src = "../data/plantilla_boleta.png";
 
     img.onload = () => {
      canvas.width = img.width;   // 2000

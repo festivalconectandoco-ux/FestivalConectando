@@ -9,7 +9,7 @@ window.initFestivalNavMenu = async function () {
     return;
   }
   try {
-    const resp = await fetch('data/menu.json');
+    const resp = await fetch('../data/menu.json');
     const menuData = await resp.json();
     const items = isLocalhost ? menuData.local : menuData.produccion;
     menuList.innerHTML = '';

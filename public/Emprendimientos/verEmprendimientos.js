@@ -1,7 +1,7 @@
 let catalogosGlobales = null;
 document.addEventListener("DOMContentLoaded", async function () {
   let asistentesGlobal = [];
-  fetch("data/catalogos.json")
+  fetch("../data/catalogos.json")
     .then(res => res.json())
     .then(catalogos => {
       catalogosGlobales = catalogos;

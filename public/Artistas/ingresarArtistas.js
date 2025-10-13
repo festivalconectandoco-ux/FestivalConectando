@@ -1,18 +1,18 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // Cargar agrupaciones y tipos de documento desde catalogos.json
-  fetch('data/catalogos.json')
+  // Cargar artistas y tipos de documento desde catalogos.json
+  fetch('../data/catalogos.json')
     .then(resp => resp.json())
     .then(data => {
-      // Agrupaciones microfonoAbierto
-      const agrupaciones = Array.isArray(data.microfonoAbierto) ? data.microfonoAbierto : [];
-      const selectAgrupacion = document.getElementById('agrupacion');
-      if (selectAgrupacion) {
-        selectAgrupacion.innerHTML = '';
-        agrupaciones.forEach(a => {
+      // Artistas o agrupaciones
+      const artistas = Array.isArray(data.Artistas) ? data.Artistas : [];
+      const selectArtista = document.getElementById('artista');
+      if (selectArtista) {
+        selectArtista.innerHTML = '';
+        artistas.forEach(a => {
           const option = document.createElement("option");
-          option.value = a.id || a.nombre || a;
-          option.textContent = a.nombre || a;
-          selectAgrupacion.appendChild(option);
+          option.value = a;
+          option.textContent = a;
+          selectArtista.appendChild(option);
         });
       }
       // Tipos de documento
@@ -29,31 +29,31 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
 
-  // Registrar artista de micrófono abierto
-  const form = document.getElementById('formMicAbierto');
+  // Registrar artista
+  const form = document.getElementById('formArtistas');
   if (form) {
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
-      const agrupacionSelect = form.querySelector('#agrupacion');
-      const agrupacion = agrupacionSelect ? agrupacionSelect.options[agrupacionSelect.selectedIndex].text : '';
+      const artistaSelect = form.querySelector('#artista');
+      const artista = artistaSelect ? artistaSelect.options[artistaSelect.selectedIndex].text : '';
       const nombrePersona = form.nombrePersona.value.trim();
       const tipoDocSelect = form.querySelector('#tipoDocumento');
       const tipoDocumento = tipoDocSelect ? tipoDocSelect.options[tipoDocSelect.selectedIndex].text : '';
       const numeroDocumento = form.numeroDocumento.value.trim();
       const celular = form.celular.value.trim();
       const observaciones = form.observaciones.value.trim();
-      if (!agrupacion || !nombrePersona || !tipoDocumento || !numeroDocumento || !celular) {
+      if (!artista || !nombrePersona || !tipoDocumento || !numeroDocumento || !celular) {
         alert('Por favor complete todos los campos obligatorios.');
         return;
       }
       try {
-        const resp = await fetch('/registrar-microfono-abierto', {
+        const resp = await fetch('/registrar-artista', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            agrupacion,
+            artista,
             nombrePersona,
             tipoDocumento,
             numeroDocumento,
