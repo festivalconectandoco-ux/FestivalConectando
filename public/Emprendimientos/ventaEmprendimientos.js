@@ -411,13 +411,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(emprendimiento)
       });
-      const data = await resp.json();
-
       if (resp.ok) {
 
         // Envío de WhatsApp y registro de historial solo para este emprendimiento
 
         let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].emprendimientos;
+
         let caption = mensajeBase.replace('{nombreEmprendimiento}', emprendimiento.nombreEmprendimiento).replace('{nombrePersona}', emprendimiento.nombrePersona);
 
         const reqGreen = {
@@ -425,7 +424,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           fileName: `boleta_${emprendimiento.nombrePersona.replace(/\s+/g, '_')}.png`,
           caption: caption,
           numero: (() => {
-            let num = emprendimiento.celular.trim();
+            let num = emprendimiento.celularPersona.trim();
             if (/^(\+|57|58|51|52|53|54|55|56|591|593|595|598|1|44|34)/.test(num)) {
               return num.replace(/[^\d+]/g, '');
             } else {
