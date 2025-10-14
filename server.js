@@ -1,43 +1,27 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const fs = require("fs");
 const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const admin = require("firebase-admin");
 const cloudinary = require("cloudinary").v2;
+const db = admin.firestore();
+const serviceAccount = JSON.parse(process.env.FIREBASE_KEY_JSON);
 
 require("dotenv").config();
-const twilio = require("twilio");
-
-const client = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
-
-let serviceAccount;
-
-if (process.env.NODE_ENV === "production") {
-  serviceAccount = JSON.parse(process.env.FIREBASE_KEY_JSON);
-} else {
-  serviceAccount = require("./firebaseKey.json");
-}
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
+app.use(express.static('public'));
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
-
-const db = admin.firestore();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
-
-app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
-app.use(express.static('public'));
 
 app.get("/api/referencia-global", async (req, res) => {
   const tipo = req.query.tipo || "global";
@@ -83,8 +67,22 @@ app.post("/registrar-boleta/:tipo", async (req, res) => {
     if (!nuevaBoleta.referencia) {
       return res.status(400).json({ error: "Falta el campo referencia" });
     }
+    const camposAReemplazar = [
+      "nombreAsistente",
+      "nombrePersona",
+      "artista",
+      "nombreComprador",
+      "nombreEmprendimiento",
+      "nombre",
+      "agrupacion"
+    ];
 
-    // Mapeo de tipo a colección y mensaje
+    camposAReemplazar.forEach((campo) => {
+      if (nuevaBoleta[campo] && typeof nuevaBoleta[campo] === "string") {
+        nuevaBoleta[campo] = nuevaBoleta[campo].trim().replace(/\s+/g, "_");
+      }
+    });
+
     const tipoMap = {
       asistente: { coleccion: "boletas", mensaje: "Boleta registrada con éxito" },
       logistico: { coleccion: "logisticos", mensaje: "Logístico registrado con éxito" },
@@ -93,7 +91,7 @@ app.post("/registrar-boleta/:tipo", async (req, res) => {
       artista: { coleccion: "artistas", mensaje: "Artista registrado con éxito" },
     };
 
-    const { coleccion, mensaje } = tipoMap[tipo] || tipoMap["asistente"]; // Default a "boletas"
+    const { coleccion, mensaje } = tipoMap[tipo] || tipoMap["asistente"];
 
     await db.collection(coleccion).doc(String(nuevaBoleta.referencia)).set(nuevaBoleta);
 
@@ -155,11 +153,33 @@ app.get("/api/traer-todo", async (req, res) => {
       db.collection("logisticos").get(),
       db.collection("micAbierto").get()
     ]);
-    const boletas = boletasSnap.docs.map(doc => doc.data());
-    const emprendimientos = emprendimientosSnap.docs.map(doc => doc.data());
-    const artistas = artistasSnap.docs.map(doc => doc.data());
-    const logisticos = logisticosSnap.docs.map(doc => doc.data());
-    const micAbierto = micAbiertoSnap.docs.map(doc => doc.data());
+
+    const camposARevertir = [
+      "nombreAsistente",
+      "nombrePersona",
+      "artista",
+      "nombreComprador",
+      "nombreEmprendimiento",
+      "nombre",
+      "agrupacion"
+    ];
+
+    const revertirCampos = (doc) => {
+      const nuevoDoc = { ...doc };
+      camposARevertir.forEach((campo) => {
+        if (nuevoDoc[campo] && typeof nuevoDoc[campo] === "string") {
+          nuevoDoc[campo] = nuevoDoc[campo].replace(/_/g, " ");
+        }
+      });
+      return nuevoDoc;
+    };
+
+    const boletas = boletasSnap.docs.map(doc => revertirCampos(doc.data()));
+    const emprendimientos = emprendimientosSnap.docs.map(doc => revertirCampos(doc.data()));
+    const artistas = artistasSnap.docs.map(doc => revertirCampos(doc.data()));
+    const logisticos = logisticosSnap.docs.map(doc => revertirCampos(doc.data()));
+    const micAbierto = micAbiertoSnap.docs.map(doc => revertirCampos(doc.data()));
+
     res.json({
       boletas,
       emprendimientos,
@@ -168,6 +188,7 @@ app.get("/api/traer-todo", async (req, res) => {
       micAbierto
     });
   } catch (error) {
+    console.error("Error al obtener datos:", error);
     res.status(500).json({ error: "Error al obtener datos" });
   }
 });
