@@ -406,7 +406,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       envioWhatsapp: 0,
     };
     try {
-      const resp = await fetch("/registrar-emprendimiento", {
+      const resp = await fetch("/registrar-boleta-emprendimiento", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(emprendimiento)
@@ -451,7 +451,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           mensaje: caption,
           respuesta: respuestaServicio
         };
-        await fetch("/actualizar-emprendimientos-envio-whatsapp", {
+        await fetch("/actualizar-boleta/emprendimiento", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ referencia: emprendimiento.referencia, envioWhatsapp: emprendimiento.envioWhatsapp, historialEnvio })

@@ -114,7 +114,7 @@ function ocultarOverlay() {
           fechaRegistro: new Date().toISOString()
         };
 
-        const resp = await fetch('/registrar-artista', {
+        const resp = await fetch('/registrar-boleta/artista', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -160,7 +160,7 @@ function ocultarOverlay() {
           mensaje: caption,
           respuesta: respuestaServicio
         };
-        await fetch("/actualizar-artistas-envio-whatsapp", {
+        await fetch("/actualizar-boleta/artista", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ referencia: artistaAsistente.referencia, envioWhatsapp: artistaAsistente.envioWhatsapp, historialEnvio })

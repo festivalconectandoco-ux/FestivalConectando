@@ -130,7 +130,7 @@ function renderTablaMicAbierto(micAbierto) {
           mensaje: caption,
           respuesta: respuestaServicio
         };
-        await fetch('/actualizar-microfono-abierto-envio-whatsapp', {
+        await fetch('/actualizar-boleta/micAbierto', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ referencia: artista.referencia, envioWhatsapp: artista.envioWhatsapp, historialEnvio })

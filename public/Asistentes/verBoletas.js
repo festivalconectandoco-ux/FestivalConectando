@@ -183,7 +183,7 @@ async function mostrarBoletasAgrupadas(lista) {
             mensaje: caption,
             respuesta: respuestaServicio
           };
-          await fetch("/actualizar-envio-whatsapp", {
+          await fetch("/actualizar-boleta/asistente", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ referencia: boleta.referencia, envioWhatsapp: boleta.envioWhatsapp, historialEnvio })
@@ -199,7 +199,7 @@ async function mostrarBoletasAgrupadas(lista) {
             mensaje: caption,
             respuesta: err?.message || "Error en envío"
           };
-          await fetch("/actualizar-envio-whatsapp", {
+          await fetch("/actualizar-boleta/asistente", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ referencia: boleta.referencia, envioWhatsapp: boleta.envioWhatsapp, historialEnvio })

@@ -93,6 +93,19 @@ document.addEventListener("DOMContentLoaded", async function () {
             } catch (e) {
               respuestaServicio = "Error leyendo respuesta";
             }
+            // Actualizar contador y historial de WhatsApp en Firestore
+            const envioOk = resp.ok;
+            emp.envioWhatsapp = envioOk ? (emp.envioWhatsapp ? emp.envioWhatsapp + 1 : 1) : emp.envioWhatsapp || 0;
+            const historialEnvio = {
+              fecha: new Date().toISOString(),
+              mensaje: caption,
+              respuesta: respuestaServicio
+            };
+            await fetch('/actualizar-boleta/emprendimiento', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ referencia: emp.referencia, envioWhatsapp: emp.envioWhatsapp, historialEnvio })
+            });
             if (resp.ok) {
               alert('Mensaje reenviado exitosamente');
             } else {

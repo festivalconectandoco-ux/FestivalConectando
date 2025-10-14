@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             fechaRegistro: new Date().toISOString()
         };
 
-        const resp = await fetch('/registrar-microfono-abierto', {
+        const resp = await fetch('/registrar-boleta-micAbierto', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           mensaje: caption,
           respuesta: respuestaServicio
         };
-        await fetch("/actualizar-microfono-abierto-envio-whatsapp", {
+        await fetch("/actualizar-boleta/micAbierto", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ referencia: micAbiertoAsistente.referencia, envioWhatsapp: micAbiertoAsistente.envioWhatsapp, historialEnvio })

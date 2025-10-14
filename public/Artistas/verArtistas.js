@@ -114,7 +114,7 @@ function renderTablaArtistas(artistas) {
           mensaje: caption,
           respuesta: respuestaServicio
         };
-        await fetch('/actualizar-artistas-envio-whatsapp', {
+        await fetch('/actualizar-boleta/artista', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ referencia: artista.referencia, envioWhatsapp: artista.envioWhatsapp, historialEnvio })

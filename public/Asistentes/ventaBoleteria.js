@@ -293,7 +293,7 @@ async function registrarAsistente(formElement) {
 
   for (const asistente of asistentes) {
     try {
-      await fetch("/registrar-boleta", {
+      await fetch("/registrar-boleta/asistente", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(asistente)
@@ -337,7 +337,7 @@ async function registrarAsistente(formElement) {
         mensaje: caption,
         respuesta: respuestaServicio
       };
-      await fetch("/actualizar-envio-whatsapp", {
+      await fetch("/actualizar-boleta/asistente", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ referencia: asistente.referencia, envioWhatsapp: asistente.envioWhatsapp, historialEnvio })

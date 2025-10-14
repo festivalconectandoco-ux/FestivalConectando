@@ -74,7 +74,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-  // Registrar logístico usando el endpoint /registrar-logistico
   if (form) {
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -120,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
           envioWhatsapp: 0,
           fechaRegistro: new Date().toISOString(),
         };
-        const resp = await fetch('/registrar-logistico', {
+        const resp = await fetch('/registrar-boleta-logistico', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -172,7 +171,7 @@ document.addEventListener("DOMContentLoaded", function () {
               mensaje: caption,
               respuesta: respuestaServicio
             };
-            await fetch("/actualizar-envio-whatsapp-logistica", {
+            await fetch("/actualizar-boleta/logistico", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ referencia:asistente.referencia, envioWhatsapp: asistente.envioWhatsapp, historialEnvio })
