@@ -1,17 +1,9 @@
 let catalogosGlobales = null;
 document.addEventListener("DOMContentLoaded", async function () {
-  let asistentesGlobal = [];
   fetch("../data/catalogos.json")
     .then(res => res.json())
     .then(catalogos => {
       catalogosGlobales = catalogos;
-      fetch("/api/boletas")
-        .then(res => res.json())
-        .then(data => {
-          asistentesGlobal = data.Asistentes;
-          mostrarBoletasAgrupadas(data.Asistentes);
-        })
-        .catch(err => console.error("Error cargando boletas:", err));
     })
     .catch(err => console.error("Error cargando catálogo:", err));
     

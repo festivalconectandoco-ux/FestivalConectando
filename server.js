@@ -38,6 +38,7 @@ cloudinary.config({
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
 app.use(express.static('public'));
+
 async function obtenerReferenciaArtistas() {
   const ref = admin.firestore().collection("contadores").doc("referenciaArtistas");
   return await admin.firestore().runTransaction(async (t) => {
@@ -184,7 +185,6 @@ app.post("/registrar-microfono-abierto", async (req, res) => {
   }
 });
 
-
 app.get("/api/traer-todo", async (req, res) => {
   try {
     const [boletasSnap, emprendimientosSnap, artistasSnap, logisticosSnap, micAbiertoSnap] = await Promise.all([
@@ -211,16 +211,6 @@ app.get("/api/traer-todo", async (req, res) => {
   }
 });
 
-app.get("/api/boletas", async (req, res) => {
-  try {
-    const snapshot = await db.collection("boletas").get();
-    const boletas = snapshot.docs.map(doc => doc.data());
-    res.json({ Asistentes: boletas });
-  } catch (error) {
-    res.status(500).json({ error: "Error al obtener boletas" });
-  }
-});
-
 app.get("/favicon.ico", (req, res) => {
   const faviconPath = path.join(__dirname, "favicon.ico");
   res.sendFile(faviconPath);
@@ -229,6 +219,7 @@ app.get("/favicon.ico", (req, res) => {
 app.post("/enviar-mensaje-boleta-greenapi", async (req, res) => {
   try {
     let { urlFile, fileName, caption, numero } = req.body;
+    caption = caption.replace('_', ' ');
     const url = process.env.URL_GREENAPI;
     if (!numero) numero = "573143300821";
     numero = numero.replace(/[^\d]/g, "");

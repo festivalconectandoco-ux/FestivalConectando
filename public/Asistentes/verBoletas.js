@@ -1,17 +1,14 @@
 let catalogosGlobales = null;
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   let asistentesGlobal = [];
   fetch("../data/catalogos.json")
     .then(res => res.json())
-    .then(catalogos => {
+    .then(async catalogos => {
       catalogosGlobales = catalogos;
-      fetch("/api/boletas")
-        .then(res => res.json())
-        .then(data => {
-          asistentesGlobal = data.Asistentes;
-          mostrarBoletasAgrupadas(data.Asistentes);
-        })
-        .catch(err => console.error("Error cargando boletas:", err));
+          const resp = await fetch("/api/traer-todo");
+          const data = await resp.json();
+          asistentesGlobal = data.boletas;
+          await mostrarBoletasAgrupadas(asistentesGlobal);
     })
     .catch(err => console.error("Error cargando catálogo:", err));
 
@@ -44,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-function mostrarBoletasAgrupadas(lista) {
+async function mostrarBoletasAgrupadas(lista) {
   const container = document.getElementById("boletasContainer");
   if (!container) return;
   container.innerHTML = `
