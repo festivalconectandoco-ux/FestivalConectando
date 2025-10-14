@@ -355,10 +355,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     let logoUrl = "", comprobanteUrl = "";
     try {
       // Siempre subir el logo
-      console.log('logoFile ', logoFile);
       logoUrl = await subirArchivoCloudinary(logoFile);
-      console.log('logoUrl ', logoUrl);
-      console.log('promoId ', promoId);
       if (promoId === "2") {
         // Si es promoción id 2, asignar valores vacíos a los campos de pago
         medioPago = "";
@@ -367,16 +364,13 @@ document.addEventListener("DOMContentLoaded", async function () {
       } else {
         // Solo intentar subir el comprobante si no es promoción id 2
         try {
-          console.log('comprobanteFile ', comprobanteFile);
           comprobanteUrl = await subirArchivoCloudinary(comprobanteFile);
-          console.log('comprobanteUrl ', comprobanteUrl);
         } catch (err) {
           alert("Error al subir el comprobante de pago. Intenta nuevamente.");
           return;
         }
       }
     } catch (err) {
-      console.log(err)
       alert("Error al subir el logo del emprendimiento. Intenta nuevamente.");
       return;
     }

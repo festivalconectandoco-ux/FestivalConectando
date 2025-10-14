@@ -26,7 +26,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         const logisticos = data.logisticos || [];
         const micAbierto = data.micAbierto || [];
         const artistas = data.artistas || [];
-        console.log(boletas)
         // Unificar asistentes y niños en una sola hoja "Boletas" con el esquema detallado
         const boletasSheet = boletas
           .map(b => ({

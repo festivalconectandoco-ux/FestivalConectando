@@ -1,7 +1,4 @@
-console.log('festival-conectando-nav.js cargado');
-
 window.initFestivalNavMenu = async function () {
-  console.log('initFestivalNavMenu ejecutado');
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const menuList = document.getElementById('menuDropdownList');
   if (!menuList) {

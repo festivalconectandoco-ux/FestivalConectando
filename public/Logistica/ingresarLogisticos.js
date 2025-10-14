@@ -86,10 +86,10 @@ document.addEventListener("DOMContentLoaded", function () {
   if (form) {
     form.addEventListener('submit', async function(e) {
       e.preventDefault();
-      const nombre = form.nombre.value.trim();
+      const nombre = form.nombre.value.trim().replace(/\s+/g, '_');
       const tipoDocSelect = form.querySelector('#tipoDocumento');
       const tipoDocumento = tipoDocSelect.options[tipoDocSelect.selectedIndex].text;
-      const numeroDocumento = form.numeroDocumento.value.trim();
+      const numeroDocumento = form.numeroDocumento.value.trim().replace(/\s+/g, '_');
       const celular = form.celular.value.trim();
       const tareas = form.tareasLogistico ? form.tareasLogistico.value.trim() : '';
       const promoSelect = form.querySelector('#promocionLogistica');
