@@ -1,27 +1,37 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const fs = require("fs");
 const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const admin = require("firebase-admin");
 const cloudinary = require("cloudinary").v2;
-const db = admin.firestore();
-const serviceAccount = JSON.parse(process.env.FIREBASE_KEY_JSON);
 
 require("dotenv").config();
-app.use(bodyParser.json({ limit: "50mb" }));
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
-app.use(express.static('public'));
+
+let serviceAccount;
+
+if (process.env.NODE_ENV === "production") {
+  serviceAccount = JSON.parse(process.env.FIREBASE_KEY_JSON);
+} else {
+  serviceAccount = require("./firebaseKey.json");
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
+
+const db = admin.firestore();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
+app.use(express.static('public'));
 
 app.get("/api/referencia-global", async (req, res) => {
   const tipo = req.query.tipo || "global";
