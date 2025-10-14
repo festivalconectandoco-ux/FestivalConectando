@@ -95,9 +95,16 @@ function renderTablaArtistas(artistas) {
           urlFile: artista.boleta || '',
           fileName: `boleta_${(artista.artista || '').replace(/\s+/g, '_')}_${(artista.nombrePersona || '').replace(/\s+/g, '_')}.png`,
           caption: caption,
-          numero: artista.celular ? `57${artista.celular.replace(/[^\d]/g, '')}` : '573143300821'
+          numero: (() => {
+            let num = artista.celular.trim();
+            if (/^(\+|57|58|51|52|53|54|55|56|591|593|595|598|1|44|34)/.test(num)) {
+              return num.replace(/[^\d+]/g, '');
+            } else {
+              return '+57' + num.replace(/[^\d]/g, '');
+            }
+          })()
         };
-        const resp = await fetch('/enviar-mensaje-boleta-greenapi', {
+        const resp = await fetch('/enviar-whatsapp/reenvio', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(reqGreen)
@@ -119,7 +126,6 @@ function renderTablaArtistas(artistas) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ referencia: artista.referencia, envioWhatsapp: artista.envioWhatsapp, historialEnvio })
         });
-        btn.nextElementSibling.textContent = artista.envioWhatsapp;
         alert(envioOk ? 'Mensaje reenviado exitosamente' : 'No se pudo reenviar el mensaje de WhatsApp.');
       } catch (err) {
         alert('Error al reenviar WhatsApp.');

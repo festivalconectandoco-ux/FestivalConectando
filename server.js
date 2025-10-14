@@ -203,31 +203,29 @@ app.get("/api/traer-todo", async (req, res) => {
   }
 });
 
-app.get("/favicon.ico", (req, res) => {
-  const faviconPath = path.join(__dirname, "favicon.ico");
-  res.sendFile(faviconPath);
-});
-
-app.post("/enviar-mensaje-boleta-greenapi", async (req, res) => {
+app.post("/enviar-whatsapp/:tipo", async (req, res) => {
   try {
     let { urlFile, fileName, caption, numero } = req.body;
-    caption = caption.replace(/_/g, ' ');
+    const { tipo } = req.params;
+
+    if (caption && typeof caption === "string") {
+      caption = caption.replace(/_/g, " ");
+    }
+
+    const modo = tipo === "reenvio" ? process.env.REENVIO_WHATSAPP : process.env.MENSAJE_WHATSAPP;
     const url = process.env.URL_GREENAPI;
-    if (!numero) numero = "573143300821";
-    numero = numero.replace(/[^\d]/g, "");
+    numero = modo === "camilo" ? "573058626761" : modo === "festival" ? "573143300821" :  modo === "asistente" ? numero.replace(/[^\d]/g, "") : "573143300821";
+
     const chatId = `${numero}@c.us`;
-    const payload = {
-      chatId,
-      urlFile,
-      fileName,
-      caption
-    };
-    const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+    const payload = { chatId, urlFile, fileName, caption };
+
+    const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+
     const data = await response.json();
     if (response.ok) {
       res.status(200).json({ mensaje: "Archivo enviado con éxito", data });
@@ -274,6 +272,11 @@ app.post("/subir-comprobante", async (req, res) => {
     console.error("Error subiendo imagen:", error);
     res.status(500).json({ error: "Error al subir imagen a Cloudinary" });
   }
+});
+
+app.get("/favicon.ico", (req, res) => {
+  const faviconPath = path.join(__dirname, "favicon.ico");
+  res.sendFile(faviconPath);
 });
 
 app.listen(PORT, () => {

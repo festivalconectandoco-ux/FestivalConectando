@@ -311,12 +311,19 @@ async function registrarAsistente(formElement) {
         urlFile: asistente.boleta,
         fileName: `boleta_${asistente.nombreAsistente.replace(/\s+/g, '_')}.png`,
         caption: caption,
-        numero: '573143300821'//asistente.celular
+          numero: (() => {
+            let num = asistente.celular.trim();
+            if (/^(\+|57|58|51|52|53|54|55|56|591|593|595|598|1|44|34)/.test(num)) {
+              return num.replace(/[^\d+]/g, '');
+            } else {
+              return '+57' + num.replace(/[^\d]/g, '');
+            }
+          })()
       };
       let respuestaServicio = "";
       let envioOk = false;
       try {
-        const resp = await fetch("/enviar-mensaje-boleta-greenapi", {
+        const resp = await fetch("/enviar-whatsapp/envio", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(reqGreen)
