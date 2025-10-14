@@ -444,7 +444,7 @@ async function generarImagenBoleta({ nombre, documento, referencia, tipoAsistent
       }
       const imagenBase64 = canvas.toDataURL("image/png");
 
-      const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}${nombre}`};
+      const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}_${nombre}`};
       fetch("/subir-imagen-boleta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

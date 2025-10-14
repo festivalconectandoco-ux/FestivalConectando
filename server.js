@@ -414,6 +414,36 @@ app.post("/actualizar-microfono-abierto-envio-whatsapp", async (req, res) => {
   }
 });
 
+app.post("/actualizar-artistas-envio-whatsapp", async (req, res) => {
+  try {
+    const { referencia, envioWhatsapp, historialEnvio } = req.body;
+    if (!referencia) {
+      return res.status(400).json({ error: "referencia requerida" });
+    }
+    const snapshot = await db.collection("artistas").where("referencia", "==", referencia).get();
+    if (snapshot.empty) {
+      return res.status(404).json({ error: "No se encontró el artista con esa referencia" });
+    }
+    const batch = db.batch();
+    snapshot.forEach(doc => {
+      const updateData = { envioWhatsapp };
+      if (historialEnvio) {
+        batch.update(doc.ref, {
+          ...updateData,
+          historialEnvio: admin.firestore.FieldValue.arrayUnion(historialEnvio)
+        });
+      } else {
+        batch.update(doc.ref, updateData);
+      }
+    });
+    await batch.commit();
+    res.status(200).json({ mensaje: "envioWhatsapp actualizado" });
+  } catch (error) {
+    console.error("Error actualizando envioWhatsapp:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

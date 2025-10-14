@@ -53,6 +53,8 @@ async function generarImagenBoletaEmprendimiento({ nombreEmprendimiento, nombreP
     const ctx = canvas.getContext("2d");
     const img = new Image();
     img.src = "../data/plantilla_boletas.png";
+    let nombreEmprendimientoLimpio = nombreEmprendimiento.replace(/_/g, ' ');
+    let nombreAsistenteLimpio = nombrePersona.replace(/_/g, ' ');
 
     img.onload = () => {
       canvas.width = img.width;   // 2000
@@ -64,20 +66,20 @@ async function generarImagenBoletaEmprendimiento({ nombreEmprendimiento, nombreP
       ctx.font = "bold 20px Arial";
       ctx.fillStyle = "#000000ff";
       ctx.fillText(`Nombre completo:`, 1560, 275);
-      ctx.fillText(`${nombrePersona}`, 1560, 295);
+      ctx.fillText(`${nombreAsistenteLimpio}`, 1560, 295);
       ctx.fillText(`Número de documento:`, 1560, 315);
       ctx.fillText(`${documento}`, 1560, 335);
 
       ctx.font = "bold 25px Arial";
       ctx.fillText(`Emprendimiento:`, 1560, 450);
-      ctx.fillText(`${nombreEmprendimiento}`, 1560, 490);
+      ctx.fillText(`${nombreEmprendimientoLimpio}`, 1560, 490);
       
       ctx.font = "bold 35px Arial";
       ctx.fillText(`# ${referencia}`, 1850, 180);
       ctx.fillText(`Emprendimiento`, 1535, 180);
 
       const imagenBase64 = canvas.toDataURL("image/png");
-      const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}` };
+      const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}_${nombrePersona}` };
       fetch("/subir-imagen-boleta", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
