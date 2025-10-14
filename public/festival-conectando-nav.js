@@ -1,26 +1,36 @@
 window.initFestivalNavMenu = async function () {
   const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const menuList = document.getElementById('menuDropdownList');
-  if (!menuList) {
-    console.warn('menuDropdownList no encontrado');
+  const menuMobileList = document.getElementById('menuMobileList');
+  const menuDesktopList = document.getElementById('menuDesktopList');
+
+  if (!menuMobileList || !menuDesktopList) {
+    console.warn('Contenedores de menú no encontrados');
     return;
   }
+
   try {
     const resp = await fetch('../data/menu.json');
     const menuData = await resp.json();
     const items = isLocalhost ? menuData.local : menuData.produccion;
-    menuList.innerHTML = '';
+
+    menuMobileList.innerHTML = '';
+    menuDesktopList.innerHTML = '';
+
     items.forEach(item => {
-      const li = document.createElement('li');
-      const a = document.createElement('a');
-      a.className = 'dropdown-item';
-      a.href = item.href;
-      a.textContent = item.label;
-      li.appendChild(a);
-      menuList.appendChild(li);
+      // Mobile: ítems como nav-link
+      const mobileItem = document.createElement('li');
+      mobileItem.className = 'nav-item';
+      mobileItem.innerHTML = `<a class="nav-link" href="${item.href}">${item.label}</a>`;
+      menuMobileList.appendChild(mobileItem);
+
+      // Desktop: ítems como dropdown-item
+      const desktopItem = document.createElement('li');
+      desktopItem.innerHTML = `<a class="dropdown-item" href="${item.href}">${item.label}</a>`;
+      menuDesktopList.appendChild(desktopItem);
     });
   } catch (err) {
     console.error('Error cargando menú:', err);
-    menuList.innerHTML = '<li><span class="dropdown-item text-danger">Error al cargar menú</span></li>';
+    menuMobileList.innerHTML = '<li class="nav-item"><span class="nav-link text-danger">Error al cargar menú</span></li>';
+    menuDesktopList.innerHTML = '<li><span class="dropdown-item text-danger">Error al cargar menú</span></li>';
   }
 };
