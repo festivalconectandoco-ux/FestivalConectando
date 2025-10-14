@@ -238,6 +238,47 @@ app.post("/enviar-whatsapp/:tipo", async (req, res) => {
   }
 });
 
+app.post("/masivo-whatsapp", async (req, res) => {
+  try {
+    let { urlFile, fileName, caption, numero } = req.body;
+
+    if (caption && typeof caption === "string") {
+      caption = caption.replace(/_/g, " ");
+    }
+
+    const modo = process.env.MASIVO_WHATSAPP;
+    const url = process.env.URL_GREENAPI;
+
+    numero = modo === "camilo" ? "573058626761" : modo === "festival" ? "573143300821" : modo === "asistente" ? numero.replace(/[^\d]/g, "") : "573143300821";
+
+    const chatId = `${numero}@c.us`;
+
+    const payload = { chatId };
+    if (caption) payload.caption = caption;
+    if (urlFile) payload.urlFile = urlFile;
+    if (fileName) payload.fileName = fileName;
+
+    const fetch = (...args) =>
+      import("node-fetch").then(({ default: fetch }) => fetch(...args));
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      res.status(200).json({ mensaje: "Archivo enviado con éxito", data });
+    } else {
+      res.status(500).json({ error: data });
+    }
+  } catch (error) {
+    console.error("Error enviando archivo por GreenAPI:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post("/subir-imagen-boleta", async (req, res) => {
   try {
     const { imagenBase64, referencia } = req.body;
@@ -265,6 +306,24 @@ app.post("/subir-comprobante", async (req, res) => {
     const resultado = await cloudinary.uploader.upload(imagenBase64, {
       folder: "comprobantes",
       public_id: `comprobante_${referencia}`,
+      overwrite: true
+    });    
+    res.status(200).json({ url: resultado.secure_url });
+  } catch (error) {
+    console.error("Error subiendo imagen:", error);
+    res.status(500).json({ error: "Error al subir imagen a Cloudinary" });
+  }
+});
+
+app.post("/subir-masivo", async (req, res) => {
+  try {
+    const { imagenBase64, fileName } = req.body;
+    if (!imagenBase64 || !fileName) {
+      return res.status(400).json({ error: "Faltan datos" });
+    }
+    const resultado = await cloudinary.uploader.upload(imagenBase64, {
+      folder: "masivo",
+      public_id: `masivo_${fileName}`,
       overwrite: true
     });    
     res.status(200).json({ url: resultado.secure_url });
