@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           try {
             const reqGreen = {
               urlFile: emp.boleta || "",
-              fileName: `comprobante_${nombreEmprendimiento.replace(/\s+/g, '_')}.png`,
+              fileName: `boleta_${nombreEmprendimiento.replace(/\s+/g, '_')}.png`,
               caption: caption,
               numero: '573143300821' //emp.celularPersona ? `57${emp.celularPersona.replace(/[^\d]/g, '')}` : '573143300821'
             };

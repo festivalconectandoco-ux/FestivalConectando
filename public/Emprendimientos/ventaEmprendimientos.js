@@ -309,16 +309,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     mostrarOverlay('Registrando emprendimiento...');
 
     // Obtener promoción seleccionada
-  const promoSelect = document.getElementById("promocionEmprendimiento");
-  const promoId = promoSelect.value;
-  const promoText = promoSelect.options[promoSelect.selectedIndex].text;
-  const promoValor = promoSelect.options[promoSelect.selectedIndex].dataset.precio;
-    const nombreEmprendimiento = document.getElementById("nombreEmprendimiento").value.trim();
+    const promoSelect = document.getElementById("promocionEmprendimiento");
+    const promoId = promoSelect.value;
+    const promoText = promoSelect.options[promoSelect.selectedIndex].text;
+    const promoValor = promoSelect.options[promoSelect.selectedIndex].dataset.precio;
+    const nombreEmprendimiento = document.getElementById("nombreEmprendimiento").value.trim().replace(/\s+/g, '_');
     const categorias = Array.from(document.querySelectorAll('input[name="categorias"]:checked')).map(cb => cb.value);
-    const nombrePersona = document.getElementById("nombrePersona").value.trim();
-  const tipoDocSelect = document.getElementById("tipoDocumento");
-  const tipoDocumento = tipoDocSelect.options[tipoDocSelect.selectedIndex].text;
-    const numeroDocumento = document.getElementById("numeroDocumento").value.trim();
+    const nombrePersona = document.getElementById("nombrePersona").value.trim().replace(/\s+/g, '_');
+    const tipoDocSelect = document.getElementById("tipoDocumento");
+    const tipoDocumento = tipoDocSelect.options[tipoDocSelect.selectedIndex].text;
+    const numeroDocumento = document.getElementById("numeroDocumento").value.trim().replace(/\s+/g, '_');
     const celularPersona = document.getElementById("celularPersona").value.trim();
     const productos = Array.from(document.querySelectorAll('.producto-input')).map(inp => inp.value.trim()).filter(v => v);
     const redes = [];
@@ -428,7 +428,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const reqGreen = {
           urlFile: emprendimiento.boleta,
-          fileName: `boleta_${emprendimiento.referencia}.png`,
+          fileName: `boleta_${emprendimiento.nombrePersona.replace(/\s+/g, '_')}.png`,
           caption: caption,
           numero: '573058626761'//emprendimiento.celular
         };
