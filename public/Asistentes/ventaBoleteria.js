@@ -425,8 +425,10 @@ function cargarPromociones(lista, selectId) {
     .filter(promo => {
       if (!promo.activo || !promo.fechaInicial || !promo.fechaFin) return false;
       const fechaInicio = new Date(promo.fechaInicial);
+      fechaInicio.setHours(0, 0, 0, 0); // Establece a las 00:00:00.000
       const fechaFin = new Date(promo.fechaFin);
-      return fechaInicio <= hoy && hoy < fechaFin;
+      fechaFin.setHours(23, 59, 59, 999); // Establece a las 23:59:59.999
+      return fechaInicio <= hoy && hoy <= fechaFin;
     })
     .forEach(promo => {
       const option = document.createElement("option");
