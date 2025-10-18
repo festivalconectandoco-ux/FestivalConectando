@@ -149,12 +149,13 @@ async function mostrarBoletasAgrupadas(lista) {
         }
         let nombreAsistenteLimpio = boleta.nombreAsistente.replace(/_/g, ' ');
         let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].asistentes;
+        let mensajeBaseTransporte = catalogosGlobales.MensajesWhatsapp[0].transporte;
+        let captionTransporte = mensajeBaseTransporte.replace('{nombrePersona}', nombreAsistenteLimpio);
         let caption = mensajeBase.replace('{nombrePersona}', nombreAsistenteLimpio);
 
         if (boleta.tipoAsistente === "niño") {
           caption = `🧒 BOLETA NIÑO (menor de 12 años)\nEdad: ${boleta.edad}\n\n` + caption;
         }
-        let respuestaServicio = "";
         try {
           const reqGreen = {
             urlFile: boleta.boleta,
@@ -169,10 +170,27 @@ async function mostrarBoletasAgrupadas(lista) {
               }
             })()
           };
+          const reqGreenTransporte = {
+            message: captionTransporte,
+              numero: (() => {
+                let num = boleta.celular.trim();
+                if (/^(\+|57|58|51|52|53|54|55|56|591|593|595|598|1|44|34)/.test(num)) {
+                  return num.replace(/[^\d+]/g, '');
+                } else {
+                  return '+57' + num.replace(/[^\d]/g, '');
+                }
+              })()
+          };
+          let respuestaServicio = "", respuestaServicioTransporte = "";
           const resp = await fetch("/enviar-whatsapp/reenvio", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(reqGreen)
+          });
+          const respTransporte = await fetch("/enviar-whatsapp-mensaje/reenvio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(reqGreenTransporte)
           });
           try {
             respuestaServicio = await resp.text();

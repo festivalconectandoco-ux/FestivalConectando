@@ -302,6 +302,8 @@ async function registrarAsistente(formElement) {
       // Envío de WhatsApp y registro de historial solo para este asistente
       let nombreAsistenteLimpio = asistente.nombreAsistente.replace(/_/g, ' ');
       let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].asistentes;
+      let mensajeBaseTransporte = catalogosGlobales.MensajesWhatsapp[0].transporte;
+      let captionTransporte = mensajeBaseTransporte.replace('{nombrePersona}', nombreAsistenteLimpio);
       let caption = mensajeBase.replace('{nombrePersona}', nombreAsistenteLimpio);
       if (asistente.tipoAsistente === "niño") {
         caption = `🧒 BOLETA NIÑO (menor de 12 años)\nEdad: ${asistente.edad}\n\n` + caption;
@@ -320,7 +322,19 @@ async function registrarAsistente(formElement) {
             }
           })()
       };
-      let respuestaServicio = "";
+
+      const reqGreenTransporte = {
+        message: captionTransporte,
+          numero: (() => {
+            let num = asistente.celular.trim();
+            if (/^(\+|57|58|51|52|53|54|55|56|591|593|595|598|1|44|34)/.test(num)) {
+              return num.replace(/[^\d+]/g, '');
+            } else {
+              return '+57' + num.replace(/[^\d]/g, '');
+            }
+          })()
+      };
+      let respuestaServicio = "", respuestaServicioTransporte = "";
       let envioOk = false;
       try {
         const resp = await fetch("/enviar-whatsapp/envio", {
@@ -337,6 +351,21 @@ async function registrarAsistente(formElement) {
       } catch (error) {
         respuestaServicio = error?.message || "Error en envío";
         envioOk = false;
+      }
+      try {
+        const resp = await fetch("/enviar-whatsapp-mensaje/envio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(reqGreenTransporte)
+        });
+        console.log('Respuesta transporte:', resp);
+        try {
+          respuestaServicioTransporte = await resp.text();
+        } catch (e) {
+          respuestaServicioTransporte = "Error leyendo respuesta";
+        }
+      } catch (error) {
+        respuestaServicioTransporte = error?.message || "Error en envío";
       }
       asistente.envioWhatsapp = envioOk ? 1 : 0;
       const historialEnvio = {

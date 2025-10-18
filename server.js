@@ -238,6 +238,43 @@ app.post("/enviar-whatsapp/:tipo", async (req, res) => {
   }
 });
 
+app.post("/enviar-whatsapp-mensaje/:tipo", async (req, res) => {
+  try {
+    let { message, numero } = req.body;
+    const { tipo } = req.params;
+
+    if (message && typeof message === "string") {
+      message = message.replace(/_/g, " ");
+    }
+
+    const modo = tipo === "reenvio" ? process.env.REENVIO_WHATSAPP : process.env.MENSAJE_WHATSAPP;
+    const url = process.env.URL_GREENAPI_MESSAGE;
+    numero = modo === "camilo" ? "573058626761" : modo === "festival" ? "573143300821" :  modo === "asistente" ? numero.replace(/[^\d]/g, "") : "573143300821";
+
+    const chatId = `${numero}@c.us`;
+    const payload = { chatId, message };
+    const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    console.log('response mensaje:', response);
+
+    if (response.ok) {
+      res.status(200).json({ mensaje: "Archivo enviado con éxito", data });
+    } else {
+      res.status(500).json({ error: data });
+    }
+  } catch (error) {
+    console.error("Error enviando archivo por GreenAPI:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 app.post("/masivo-whatsapp", async (req, res) => {
   try {
     let { urlFile, fileName, caption, numero } = req.body;
