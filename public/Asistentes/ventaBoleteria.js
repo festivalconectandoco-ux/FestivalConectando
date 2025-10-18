@@ -426,7 +426,7 @@ function cargarPromociones(lista, selectId) {
       if (!promo.activo || !promo.fechaInicial || !promo.fechaFin) return false;
       const fechaInicio = new Date(promo.fechaInicial);
       const fechaFin = new Date(promo.fechaFin);
-      return fechaInicio <= hoy && hoy <= fechaFin;
+      return fechaInicio <= hoy && hoy < fechaFin;
     })
     .forEach(promo => {
       const option = document.createElement("option");
