@@ -45,7 +45,7 @@
 	  "idPromocion": "1",
 	  "descripcion": "Preventa 18 Oct",
 	  "fechaInicial": "2025-09-15",
-	  "fechaFin": "2025-10-18",
+	  "fechaFin": "2025-10-19",
 	  "precio": 120000,
 	  "cantidadPersonas": 1,
 	  "activo": true
@@ -53,8 +53,8 @@
 	{
 	  "idPromocion": "2",
 	  "descripcion": "Preventa 18 Nov",
-	  "fechaInicial": "2025-10-19",
-	  "fechaFin": "2025-11-18",
+	  "fechaInicial": "2025-10-20",
+	  "fechaFin": "2025-11-19",
 	  "precio": 130000,
 	  "cantidadPersonas": 1,
 	  "activo": true
@@ -63,7 +63,7 @@
 	  "idPromocion": "3",
 	  "descripcion": "Precio final",
 	  "fechaInicial": "2025-11-20",
-	  "fechaFin": "2025-11-29",
+	  "fechaFin": "2025-11-30",
 	  "precio": 140000,
 	  "cantidadPersonas": 1,
 	  "activo": true
@@ -72,7 +72,7 @@
 	  "idPromocion": "5",
 	  "descripcion": "Invitados artistas",
 	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-29",
+	  "fechaFin": "2025-11-30",
 	  "precio": 60000,
 	  "cantidadPersonas": 1,
 	  "activo": true
@@ -83,7 +83,7 @@
 	  "idPromocion": "1",
 	  "descripcion": "Emprendimimento",
 	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-29",
+	  "fechaFin": "2025-11-30",
 	  "precio": 50000,
 	  "cantidadPersonas": 1,
 	  "activo": true
@@ -92,7 +92,7 @@
 	  "idPromocion": "2",
 	  "descripcion": "Emprendimimento invitado",
 	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-29",
+	  "fechaFin": "2025-11-30",
 	  "precio": 0,
 	  "cantidadPersonas": 1,
 	  "activo": true
@@ -103,7 +103,7 @@
 	  "idPromocion": "1",
 	  "descripcion": "Logistica",
 	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-29",
+	  "fechaFin": "2025-11-30",
 	  "precio": 0,
 	  "cantidadPersonas": 1,
 	  "activo": true
@@ -112,7 +112,7 @@
 	  "idPromocion": "2",
 	  "descripcion": "Invitados festival",
 	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-29",
+	  "fechaFin": "2025-11-30",
 	  "precio": 0,
 	  "cantidadPersonas": 1,
 	  "activo": true
@@ -123,7 +123,7 @@
 	  "idPromocion": "1",
 	  "descripcion": "Artistas",
 	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-29",
+	  "fechaFin": "2025-11-30",
 	  "precio": 0,
 	  "cantidadPersonas": 1,
 	  "activo": true
