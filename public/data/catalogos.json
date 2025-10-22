@@ -76,6 +76,15 @@
 	  "precio": 60000,
 	  "cantidadPersonas": 1,
 	  "activo": true
+	},
+	{
+	  "idPromocion": "6",
+	  "descripcion": "Preventa inicial",
+	  "fechaInicial": "2025-09-15",
+	  "fechaFin": "2025-11-30",
+	  "precio": 120000,
+	  "cantidadPersonas": 1,
+	  "activo": true
 	}
   ],
   "PromocionEmprendimientos": [
