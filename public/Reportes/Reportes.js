@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         const logisticos = data.logisticos || [];
         const micAbierto = data.micAbierto || [];
         const artistas = data.artistas || [];
+        const transporte = data.transporte || [];
         // Unificar asistentes y niños en una sola hoja "Boletas" con el esquema detallado
         const boletasSheet = boletas
           .map(b => ({
@@ -107,6 +108,18 @@ document.addEventListener("DOMContentLoaded", async function () {
             "Observaciones": a.observaciones || "",
           }))
           .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
+        
+          // Artistas principales
+        const transp = transporte
+          .map(a => ({
+            "Referencia": a.referencia || "",
+            "Tipo de asistente": "Artista Principal",
+            "Nombre persona": a.nombrePersona || "",
+            "Tipo de documento": a.tipoDocumento || "",
+            "Número de documento": a.numeroDocumento || "",
+            "celular": a.celular || "",
+          }))
+          .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
 
         // Función para crear hoja tipo tabla y ajustar ancho
         function crearHojaTabla(data) {
@@ -146,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(micros), 'Micrófono Abierto');
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(arts), 'Artistas Principales');
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(logis), 'Logística');
-
+        XLSX.utils.book_append_sheet(wb, crearHojaTabla(transp), 'Transporte');
         // Descargar archivo
         XLSX.writeFile(wb, 'reporte_asistentes_grupos.xlsx');
       });
@@ -178,7 +191,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const emprendimientos = data.emprendimientos || [];
   const logisticos = data.logisticos || [];
   const micAbierto = data.micAbierto || [];
-  const artistas = data.artistas || [];
 
   // Boletas
   const boletasAdultos = boletas.filter(b => b.tipoAsistente !== "niño");
