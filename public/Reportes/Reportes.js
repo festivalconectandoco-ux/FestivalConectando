@@ -192,7 +192,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const logisticos = data.logisticos || [];
   const micAbierto = data.micAbierto || [];
   const artistas = data.artistas || [];
-  
+  const transporte = data.transporte || [];
+
   // Boletas
   const boletasAdultos = boletas.filter(b => b.tipoAsistente !== "niño");
   const boletasNinos = boletas.filter(b => b.tipoAsistente === "niño");
@@ -209,6 +210,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const totalMicAbierto = micAbierto.length;
   // Artistas
   const totalArtistas = artistas.length;
+  // Transportes
+  const totalTransportes = transporte.length;
   // Personas por emprendimientos (1 por emprendimiento)
   const totalPersonasEmprendimientos = totalEmprendimientos;
   // Total personas
@@ -312,6 +315,14 @@ document.addEventListener("DOMContentLoaded", async function () {
             <div class="card-body text-center">
               <h5 class="card-title">Total niños</h5>
               <div class="display-6">${totalNinos}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Total transporte</h5>
+              <div class="display-6">${totalTransportes}</div>
             </div>
           </div>
         </div>
