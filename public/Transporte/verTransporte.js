@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tabla = document.getElementById('tablaTransporteContainer');
     if (tabla) {
       tabla.addEventListener('click', function(e) {
-        if (e.target && e.target.classList && e.target.classList.contains('ver-imagen-modal-mic')) {
+        if (e.target && e.target.classList && e.target.classList.contains('ver-imagen-modal-transp')) {
           const url = e.target.getAttribute('data-img');
           const modal = document.getElementById('modalImagenBoletaTransporte');
           const img = document.getElementById('imgModalBoletaTransporte');
@@ -74,16 +74,16 @@ function renderTablaTransporte(Transporte) {
       <td>${item.tipoDocumento || ''}</td>
       <td>${item.celular || ''}</td>
       <td>${item.fechaRegistro ? new Date(item.fechaRegistro).toLocaleString() : ''}</td>
-      <td style="white-space:nowrap;">${item.comprobanteUrl ? `<button class="btn btn-sm btn-primary ver-imagen-modal-mic" data-img="${item.comprobanteUrl.replace('/upload/', '/upload/fl_attachment/')}">Ver comprobante</button>` : ''}</td>
-      <td style="white-space:nowrap;">${item.boleta ? `<button class="btn btn-sm btn-primary ver-imagen-modal-mic" data-img="${item.boleta.replace('/upload/', '/upload/fl_attachment/')}">Ver boleta</button>` : ''}</td>
-      <td><button class="btn btn-sm btn-success reenviar-wp-mic">Reenviar WhatsApp</button></td>
+      <td style="white-space:nowrap;">${item.comprobanteUrl ? `<button class="btn btn-sm btn-primary ver-imagen-modal-transp" data-img="${item.comprobanteUrl.replace('/upload/', '/upload/fl_attachment/')}">Ver comprobante</button>` : ''}</td>
+      <td style="white-space:nowrap;">${item.boleta ? `<button class="btn btn-sm btn-primary ver-imagen-modal-transp" data-img="${item.boleta.replace('/upload/', '/upload/fl_attachment/')}">Ver boleta</button>` : ''}</td>
+      <td><button class="btn btn-sm btn-success reenviar-wp-transp">Reenviar WhatsApp</button></td>
     </tr>`;
   });
   html += '</tbody></table></div>';
   document.getElementById('tablaTransporteContainer').innerHTML = html;
 
   // Manejador para reenviar WhatsApp
-  document.querySelectorAll('.reenviar-wp-mic').forEach((btn, idx) => {
+  document.querySelectorAll('.reenviar-wp-transp').forEach((btn, idx) => {
     btn.addEventListener('click', async () => {
       btn.disabled = true;
       btn.textContent = 'Enviando...';
@@ -99,9 +99,9 @@ function renderTablaTransporte(Transporte) {
         btn.textContent = 'Reenviar WhatsApp';
         return;
       }
-      let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].Transporte;
+      let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].transporteComprado;
       let caption = mensajeBase
-        .replace('{nombreAgrupacion}', artista.agrupacion || '-')
+        .replace('{ruta}', artista.ruta || '-')
         .replace('{nombreIntegrante}', artista.nombrePersona || '-');
       let respuestaServicio = '';
       try {
