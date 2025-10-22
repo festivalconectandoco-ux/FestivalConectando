@@ -266,7 +266,6 @@ app.post("/enviar-whatsapp-mensaje/:tipo", async (req, res) => {
     });
 
     const data = await response.json();
-    console.log('response mensaje:', response);
 
     if (response.ok) {
       res.status(200).json({ mensaje: "Archivo enviado con éxito", data });

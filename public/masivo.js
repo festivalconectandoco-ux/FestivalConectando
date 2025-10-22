@@ -133,11 +133,11 @@ async function subirImagenBoleta(nombreArchivo) {
     if (response.ok && data.url) {
       return data.url;
     } else {
-      console.error("❌ Error al subir imagen:", data.error || data);
+      console.error("Error al subir imagen:", data.error || data);
       return null;
     }
   } catch (err) {
-    console.error("⚠️ Fallo en la subida:", err.message);
+    console.error("Fallo en la subida:", err.message);
     return null;
   }
 }

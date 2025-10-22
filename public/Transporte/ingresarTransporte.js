@@ -56,7 +56,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
     const rutas = Array.isArray(catalogosGlobales.Rutas) ? catalogosGlobales.Rutas : [];
-    console.log('rutas: ', rutas);
     const selectRutas = document.getElementById('ruta');
     if (selectRutas) {
       selectRutas.innerHTML = '';
@@ -71,19 +70,26 @@ document.addEventListener("DOMContentLoaded", async function () {
     const response = await fetch('/api/traer-todo');
     const data = await response.json();
     asistentes = data.boletas || [];
-    console.log('asistentes: ', asistentes);
 
     const selectAsistentes = document.getElementById('asistentes');
     if (selectAsistentes) {
       selectAsistentes.innerHTML = '';
       asistentes.forEach(t => {
         const option = document.createElement("option");
-        option.value = t.nombreAsistente || t.nombreAsistente;
+        option.value = t.nombreAsistente;
         option.textContent = t.nombreAsistente;
         selectAsistentes.appendChild(option);
       });
+
+      // Inicializa Select2
+      $(selectAsistentes).select2({
+        placeholder: "Busca un asistente",
+        allowClear: true,
+        width: '100%' // Asegura que se vea bien
+      });
     }
-  // Registrar artista de micrófono abierto
+
+  // Registrar Transporte
   const form = document.getElementById('formTransporte');
   if (form) {
     form.addEventListener('submit', async function(e) {
@@ -91,20 +97,34 @@ document.addEventListener("DOMContentLoaded", async function () {
       mostrarOverlay('Registrando transporte...');
       const rutaSelect = form.querySelector('#ruta');
       const ruta = rutaSelect ? rutaSelect.options[rutaSelect.selectedIndex].text : '';
+      let comprobanteFile = document.getElementById("comprobantePago").files[0];
       const nombreAsistente = form.asistentes.value.trim();
 
       const asistenteEncontrado = asistentes.find(a => a.nombreAsistente === nombreAsistente);
-      console.log('asistenteEncontrado: ', asistenteEncontrado);
       let nombrePersona = asistenteEncontrado ? (asistenteEncontrado.nombreAsistente || '') : '';
       let tipoDocumento = asistenteEncontrado ? (asistenteEncontrado.tipoDocumentoAsistente || '') : '';
       let numeroDocumento = asistenteEncontrado ? (asistenteEncontrado.documentoAsistente || '') : '';
       let celular = asistenteEncontrado ? (asistenteEncontrado.celular || '') : '';
 
+      if (!comprobanteFile) {
+        alert("Por favor completa todos los campos de pago.");
+        return;
+      }
+
       if (asistenteEncontrado) {
         try {
+
+          // Subir archivos a Cloudinary (o tu endpoint de imágenes)
+          let comprobanteUrl = "";
+          // Solo intentar subir el comprobante si no es promoción id 2
+          try {
+            comprobanteUrl = await subirArchivoCloudinary(comprobanteFile);
+          } catch (err) {
+            alert("Error al subir el comprobante de pago. Intenta nuevamente.");
+            return;
+          }
+
           const referencia = await obtenerReferenciaGlobal();
-          console.log('2.nombrePersona: ', nombrePersona);
-          console.log('2.documento: ', numeroDocumento);
           imagenBase64 = await generarImagenBoletaTransporte({ ruta, nombrePersona: nombrePersona, documento: numeroDocumento, referencia });
 
           let transporteAsistente = { 
@@ -115,6 +135,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             celular,
             referencia, 
             boleta: imagenBase64, 
+            comprobanteUrl,
             envioWhatsapp: 0,
             fechaRegistro: new Date().toISOString()
           };
@@ -129,65 +150,65 @@ document.addEventListener("DOMContentLoaded", async function () {
           const data = await resp.json();
           if (resp.ok) {
 
-          // Envío de WhatsApp y registro de historial solo para este artista
+            // Envío de WhatsApp y registro de historial solo para este artista
 
-          let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].transporteComprado;
-          let caption = mensajeBase.replace('{ruta}', transporteAsistente.ruta).replace('{nombrePersona}', transporteAsistente.nombrePersona);
+            let mensajeBase = catalogosGlobales.MensajesWhatsapp[0].transporteComprado;
+            let caption = mensajeBase.replace('{ruta}', transporteAsistente.ruta).replace('{nombrePersona}', transporteAsistente.nombrePersona);
 
-          const reqGreen = {
-            urlFile: transporteAsistente.boleta,
-            fileName: `boletaTransporte_${transporteAsistente.nombrePersona.replace(/\s+/g, '_')}.png`,
-            caption: caption,
-            numero: (() => {
-              let num = transporteAsistente.celular.trim();
-              if (/^(\+|57|58|51|52|53|54|55|56|591|593|595|598|1|44|34)/.test(num)) {
-                return num.replace(/[^\d+]/g, '');
-              } else {
-                return '+57' + num.replace(/[^\d]/g, '');
+            const reqGreen = {
+              urlFile: transporteAsistente.boleta,
+              fileName: `boletaTransporte_${transporteAsistente.nombrePersona.replace(/\s+/g, '_')}.png`,
+              caption: caption,
+              numero: (() => {
+                let num = transporteAsistente.celular.trim();
+                if (/^(\+|57|58|51|52|53|54|55|56|591|593|595|598|1|44|34)/.test(num)) {
+                  return num.replace(/[^\d+]/g, '');
+                } else {
+                  return '+57' + num.replace(/[^\d]/g, '');
+                }
+              })()
+            };
+
+            let respuestaServicio = "";
+            let envioOk = false;
+            try {
+              const respGreen = await fetch("/enviar-whatsapp/envio", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reqGreen)
+              });
+              try {
+                respuestaServicio = await respGreen.text();
+              } catch (e) {
+                respuestaServicio = "Error leyendo respuesta";
               }
-            })()
-          };
-
-          let respuestaServicio = "";
-          let envioOk = false;
-          try {
-            const respGreen = await fetch("/enviar-whatsapp/envio", {
+              envioOk = respGreen.ok;
+            } catch (error) {
+              respuestaServicio = error?.message || "Error en envío";
+              envioOk = false;
+            }
+            transporteAsistente.envioWhatsapp = envioOk ? 1 : 0;
+            const historialEnvio = {
+              fecha: new Date().toISOString(),
+              mensaje: caption,
+              respuesta: respuestaServicio
+            };
+            await fetch("/actualizar-boleta/transporte", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(reqGreen)
+              body: JSON.stringify({ referencia: transporteAsistente.referencia, envioWhatsapp: transporteAsistente.envioWhatsapp, historialEnvio })
             });
-            try {
-              respuestaServicio = await respGreen.text();
-            } catch (e) {
-              respuestaServicio = "Error leyendo respuesta";
-            }
-            envioOk = respGreen.ok;
-          } catch (error) {
-            respuestaServicio = error?.message || "Error en envío";
-            envioOk = false;
-          }
-          transporteAsistente.envioWhatsapp = envioOk ? 1 : 0;
-          const historialEnvio = {
-            fecha: new Date().toISOString(),
-            mensaje: caption,
-            respuesta: respuestaServicio
-          };
-          await fetch("/actualizar-boleta/transporte", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ referencia: transporteAsistente.referencia, envioWhatsapp: transporteAsistente.envioWhatsapp, historialEnvio })
-          });
 
-          ocultarOverlay();
-          alert("Micrófono Abierto registrado exitosamente.");
-          this.reset();
+            ocultarOverlay();
+            alert("Transporte registrado exitosamente.");
+            this.reset();
         } else {
-        ocultarOverlay();
-          alert('Error al guardar el artista: ' + (data.error || 'Error desconocido'));
+          ocultarOverlay();
+          alert('Error al guardar el transporte: ' + (data.error || 'Error desconocido'));
         }
       } catch (err) {
         ocultarOverlay();
-        alert('Error al guardar el artista: ' + err.message);
+        alert('Error al guardar el transporte: ' + err.message);
       }
       } else {
         ocultarOverlay();
@@ -206,8 +227,6 @@ async function obtenerReferenciaGlobal() {
 // Generar imagen boleta para transporte
 async function generarImagenBoletaTransporte({ ruta, nombrePersona, documento, referencia }) {
   return new Promise((resolve, reject) => {
-    console.log('1.nombrePersona: ', nombrePersona);
-    console.log('1.documento: ', documento);
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
     const img = new Image();
@@ -250,5 +269,30 @@ async function generarImagenBoletaTransporte({ ruta, nombrePersona, documento, r
         .catch(err => console.error("Error enviando boleta:", err));
     };
     img.onerror = () => reject("Error al cargar la plantilla");
+  });
+}
+// Función para subir archivos a Cloudinary (o tu endpoint)
+async function subirArchivoCloudinary(file) {
+  // Convertir archivo a base64 como en ventaBoleteria.js
+  const base64 = await convertirArchivoABase64(file);
+  // Subir a tu endpoint (ejemplo: /subir-comprobante)
+  const response = await fetch("/subir-comprobante", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ imagenBase64: base64, referencia: Date.now().toString() })
+  });
+  const data = await response.json();
+  if (!response.ok || !data.url) {
+    throw new Error(data.error || "No se pudo subir el archivo");
+  }
+  return data.url;
+}
+// Utilidad para convertir archivo a base64
+function convertirArchivoABase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
   });
 }

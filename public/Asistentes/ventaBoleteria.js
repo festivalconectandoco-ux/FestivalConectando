@@ -358,7 +358,6 @@ async function registrarAsistente(formElement) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(reqGreenTransporte)
         });
-        console.log('Respuesta transporte:', resp);
         try {
           respuestaServicioTransporte = await resp.text();
         } catch (e) {
