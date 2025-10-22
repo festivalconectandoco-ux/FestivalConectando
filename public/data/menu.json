@@ -1,6 +1,7 @@
 {
   "produccion": [
     { "href": "../Asistentes/ventaBoleteria.html", "label": "Registrar Asistentes" },
+    { "href": "../Transporte/ingresarTransporte.html", "label": "Registrar Transporte" },
     { "href": "../Emprendimientos/ventaEmprendimientos.html", "label": "Registrar Emprendimientos" },
     { "href": "../Logistica/ingresarLogisticos.html", "label": "Registrar Logísticos" },
     { "href": "../MicAbierto/ingresarMicAbierto.html", "label": "Registrar Micrófono Abierto" },
@@ -14,6 +15,7 @@
   ],
   "local": [
     { "href": "../Asistentes/ventaBoleteria.html", "label": "Registrar Asistentes" },
+    { "href": "../Transporte/ingresarTransporte.html", "label": "Registrar Transporte" },
     { "href": "../Emprendimientos/ventaEmprendimientos.html", "label": "Registrar Emprendimientos" },
     { "href": "../Logistica/ingresarLogisticos.html", "label": "Registrar Logísticos" },
     { "href": "../MicAbierto/ingresarMicAbierto.html", "label": "Registrar Micrófono Abierto" },

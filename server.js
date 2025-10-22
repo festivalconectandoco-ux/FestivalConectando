@@ -42,6 +42,7 @@ app.get("/api/referencia-global", async (req, res) => {
     emprendimientos: "referenciaEmprendimientos",
     logisticos: "referenciaLogisticos",
     micAbierto: "referenciaMicAbierto",
+    transporte: "referenciaTransporte"
   };
 
   try {
@@ -99,6 +100,7 @@ app.post("/registrar-boleta/:tipo", async (req, res) => {
       emprendimiento: { coleccion: "emprendimientos", mensaje: "Emprendimiento registrado con éxito" },
       micAbierto: { coleccion: "micAbierto", mensaje: "Micrófono Abierto registrado con éxito" },
       artista: { coleccion: "artistas", mensaje: "Artista registrado con éxito" },
+      transporte: { coleccion: "transporte", mensaje: "Transporte registrado con éxito" },
     };
 
     const { coleccion, mensaje } = tipoMap[tipo] || tipoMap["asistente"];
@@ -127,6 +129,7 @@ app.post("/actualizar-boleta/:tipo", async (req, res) => {
       emprendimiento: "emprendimientos",
       micAbierto: "micAbierto",
       artista: "artistas",
+      transporte: "transporte"
     };
 
     const coleccion = tipoMap[tipo] || "boletas"; // Default a "boletas" si tipo no coincide
@@ -156,12 +159,13 @@ app.post("/actualizar-boleta/:tipo", async (req, res) => {
 
 app.get("/api/traer-todo", async (req, res) => {
   try {
-    const [boletasSnap, emprendimientosSnap, artistasSnap, logisticosSnap, micAbiertoSnap] = await Promise.all([
+    const [boletasSnap, emprendimientosSnap, artistasSnap, logisticosSnap, micAbiertoSnap, transporteSnap] = await Promise.all([
       db.collection("boletas").get(),
       db.collection("emprendimientos").get(),
       db.collection("artistas").get(),
       db.collection("logisticos").get(),
-      db.collection("micAbierto").get()
+      db.collection("micAbierto").get(),
+      db.collection("transporte").get()
     ]);
 
     const camposARevertir = [
@@ -189,13 +193,14 @@ app.get("/api/traer-todo", async (req, res) => {
     const artistas = artistasSnap.docs.map(doc => revertirCampos(doc.data()));
     const logisticos = logisticosSnap.docs.map(doc => revertirCampos(doc.data()));
     const micAbierto = micAbiertoSnap.docs.map(doc => revertirCampos(doc.data()));
-
+    const transporte = transporteSnap.docs.map(doc => revertirCampos(doc.data()));
     res.json({
       boletas,
       emprendimientos,
       artistas,
       logisticos,
-      micAbierto
+      micAbierto,
+      transporte
     });
   } catch (error) {
     console.error("Error al obtener datos:", error);

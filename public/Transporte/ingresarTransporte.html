@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Transporte</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../festival-conectando.css">
+</head>
+<body class="bg-light">
+  <div id="nav-container"></div>
+  <canvas id="canvasBoleta" width="600" height="400" style="display:none;"></canvas>
+  <div class="container mt-5">
+    <h3 class="mb-4">Registro Transporte</h3>
+    <form id="formTransporte" class="card p-4 shadow">
+      <div class="mb-3">
+        <label for="asistentes" class="form-label">Asistente</label>
+        <select class="form-select" id="asistentes" name="asistentes" required></select>
+      </div>
+      <div class="mb-3">
+        <label for="ruta" class="form-label">Ruta</label>
+        <select class="form-select" id="ruta" name="ruta" required></select>
+      </div>
+      <button type="submit" class="btn btn-primary">Registrar</button>
+    </form>
+    <div id="mensajeExito" class="alert alert-success mt-3 d-none">¡Transporte registrado exitosamente!</div>
+  </div>
+  <script>
+    // Cargar festival-conectando-nav.html en el contenedor nav-container
+    fetch('../festival-conectando-nav.html')
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById('nav-container').innerHTML = html;
+        // Esperar a que el HTML se inserte y luego inicializar el menú
+        if (window.initFestivalNavMenu) {
+          window.initFestivalNavMenu();
+        } else {
+          // Si el script aún no se ha cargado, esperar y reintentar
+          setTimeout(() => {
+            if (window.initFestivalNavMenu) window.initFestivalNavMenu();
+          }, 200);
+        }
+      });
+  </script>
+  <script src="ingresarTransporte.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+   <script src="../festival-conectando-nav.js"></script>
+</body>
+</html>
