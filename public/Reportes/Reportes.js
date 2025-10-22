@@ -191,7 +191,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const emprendimientos = data.emprendimientos || [];
   const logisticos = data.logisticos || [];
   const micAbierto = data.micAbierto || [];
-
+  const artistas = data.artistas || [];
+  
   // Boletas
   const boletasAdultos = boletas.filter(b => b.tipoAsistente !== "niño");
   const boletasNinos = boletas.filter(b => b.tipoAsistente === "niño");
