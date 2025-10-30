@@ -212,6 +212,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const totalArtistas = artistas.length;
   // Transportes
   const totalTransportes = transporte.length;
+  const totalRecaudoTransportes = totalTransportes*25000;
   // Personas por emprendimientos (1 por emprendimiento)
   const totalPersonasEmprendimientos = totalEmprendimientos;
   // Total personas
@@ -274,7 +275,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Total boletas vendidas</h5>
-              <div class="display-6">${totalBoletasVendidas}</div>
+              <div class="display-6">${totalBoletasVendidas} </br> $${recaudadoBoletas.toLocaleString('es-CO')}</div>
             </div>
           </div>
         </div>
@@ -282,7 +283,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Total emprendimientos</h5>
-              <div class="display-6">${totalEmprendimientos}</div>
+              <div class="display-6">${totalEmprendimientos}</br> $${recaudadoEmprendimientos.toLocaleString('es-CO')}</div>
             </div>
           </div>
         </div>
@@ -322,7 +323,7 @@ document.addEventListener("DOMContentLoaded", async function () {
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Total transporte</h5>
-              <div class="display-6">${totalTransportes}</div>
+              <div class="display-6">${totalTransportes}</br> $${totalRecaudoTransportes.toLocaleString('es-CO')}</div>
             </div>
           </div>
         </div>

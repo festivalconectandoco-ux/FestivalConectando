@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       try {
         const referencia = await obtenerReferenciaGlobal();
-        imagenBase64 = await generarImagenBoleta({ nombre: nombre, documento: numeroDocumento, referencia, areas: areas.join(', ') });
+        imagenBase64 = await generarImagenBoleta({ nombre: nombre, documento: numeroDocumento, referencia, areas: areas.join(', '), promocion });
         let asistente = { 
           nombre, 
           tipoDocumento, 
@@ -206,7 +206,7 @@ async function obtenerReferenciaGlobal() {
   return data.referencia; // El backend debe responder { referencia: valor }
 }
 
-async function generarImagenBoleta({ nombre, documento, referencia, areas }) {
+async function generarImagenBoleta({ nombre, documento, referencia, areas, promocion }) {
   return new Promise((resolve, reject) => {
     const canvas = document.getElementById("canvasBoleta");
     const ctx = canvas.getContext("2d");
@@ -232,9 +232,16 @@ async function generarImagenBoleta({ nombre, documento, referencia, areas }) {
       ctx.fillText(`${documento}`, 1560, 490);
       ctx.font = "bold 35px Arial";
       ctx.fillText(`# ${referencia}`, 1850, 180);
-      ctx.fillText(`Logística`, 1535, 180);
-      ctx.font = "bold 19px Arial";
-      ctx.fillText(`(${areas})`, 1535, 220);
+      if(promocion && promocion==='Logistica'){
+        ctx.fillText(`Logística`, 1535, 180);
+        ctx.font = "bold 19px Arial";
+        ctx.fillText(`(${areas})`, 1535, 220);
+      }else{
+        ctx.fillText(`${promocion}`, 1535, 180);
+        ctx.font = "bold 19px Arial";
+        ctx.fillText(`(${areas})`, 1535, 220);
+      }
+      
       const imagenBase64 = canvas.toDataURL("image/png");
 
       const reqFb = { imagenBase64: imagenBase64, referencia: `${referencia}_${nombre}`};
