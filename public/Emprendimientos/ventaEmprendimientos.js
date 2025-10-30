@@ -176,10 +176,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
   actualizarBotonesEliminarProducto();
-  
   // Cargar categorías como checkboxes
   const categoriasCatalogo = (catalogosGlobales.CategoriasEmprendimiento || []);
-  const todasCategorias = [...categoriasCatalogo.map(c => c.nombre)];
+  const todasCategorias = [...categoriasCatalogo];
   const contenedorCheckboxes = document.getElementById("categoriasCheckboxes");
   contenedorCheckboxes.innerHTML = "";
   todasCategorias.forEach((cat, idx) => {
