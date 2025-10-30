@@ -176,18 +176,10 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
   });
   actualizarBotonesEliminarProducto();
-  // Categorías fijas + las del catálogo
-  const categoriasFijas = [
-    "Artesanías",
-    "Comida",
-    "Bebidas",
-    "Ropa",
-    "Medicinas"
-  ];
-
+  
   // Cargar categorías como checkboxes
-  const categoriasCatalogo = (catalogosGlobales.categoriasEmprendimiento || []);
-  const todasCategorias = [...categoriasFijas, ...categoriasCatalogo.map(c => c.nombre)];
+  const categoriasCatalogo = (catalogosGlobales.CategoriasEmprendimiento || []);
+  const todasCategorias = [...categoriasCatalogo.map(c => c.nombre)];
   const contenedorCheckboxes = document.getElementById("categoriasCheckboxes");
   contenedorCheckboxes.innerHTML = "";
   todasCategorias.forEach((cat, idx) => {
