@@ -123,7 +123,7 @@ function renderTablaLogisticos(Logisticos) {
             if (/^(\+|57|58|51|52|53|54|55|56|591|593|595|598|1|44|34)/.test(num)) {
               return num.replace(/[^\d+]/g, '');
             } else {
-              return '+57' + num.replace(/[^\d]/g, '');
+              return '57' + num.replace(/[^\d]/g, '');
             }
           })()
         };
