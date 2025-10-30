@@ -119,16 +119,7 @@
 	},
 	{
 	  "idPromocion": "2",
-	  "descripcion": "Invitados festival",
-	  "fechaInicial": "2025-05-15",
-	  "fechaFin": "2025-11-30",
-	  "precio": 0,
-	  "cantidadPersonas": 1,
-	  "activo": true
-	},
-	{
-	  "idPromocion": "2",
-	  "descripcion": "Invitado emprendimiento",
+	  "descripcion": "Invitados",
 	  "fechaInicial": "2025-05-15",
 	  "fechaFin": "2025-11-30",
 	  "precio": 0,
