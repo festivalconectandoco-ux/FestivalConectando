@@ -166,14 +166,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     };
     document.getElementById('reportesResumen').parentNode.insertBefore(btnExcel, document.getElementById('reportesResumen'));
   }
+
+  const resp = await fetch("/api/traer-costos");
+  const data = await resp.json();
+  console.log('data costos', data);
+  const costos = data.costos || [];
+  console.log('costos', costos);
+
   // Traer valores de costos y metas desde catalogos.json
   let totalCostos = 0, reunidoPreviamente = 0, gananciaEsperada = 0;
   try {
-    const respCat = await fetch("../data/catalogos.json");
-    const cat = await respCat.json();
-    totalCostos = cat.totalCostos || 0;
-    reunidoPreviamente = cat.reunidoPreviamente || 0;
-    gananciaEsperada = cat.gananciaEsperada || 0;
+    //const respCat = await fetch("../data/catalogos.json");
+    //const cat = await respCat.json();
+    totalCostos = costos[0].MetaCostosSubTotal || 0;
+    reunidoPreviamente = costos[0].MetaColchonFetival || 0;
+    gananciaEsperada = costos[0].MetaGanancia || 0;
   } catch {}
   const aforoMaximo = 200;
   const contenedor = document.getElementById("reportesResumen");
@@ -396,7 +403,7 @@ document.addEventListener("DOMContentLoaded", async function () {
               <h5 class="card-title">Faltante para colchón Festival y ganancia esperada</h5>
               <div class="display-6">$${(() => {
                 // Si no se ha cubierto el costo, mostrar '-'
-                if (totalRecaudado < totalCostos) return '-';
+                //if (totalRecaudado < totalCostos) return '-';
                 // Faltante para colchón Festival
                 const faltanteReunido = Math.max(reunidoPreviamente - (totalRecaudado - totalCostos), 0);
                 // Faltante para ganancia esperada
@@ -407,7 +414,40 @@ document.addEventListener("DOMContentLoaded", async function () {
                 return (faltanteReunido + faltanteGanancia).toLocaleString('es-CO');
               })()}</div>
               <small class="text-muted">Meta colchón Festival: $${reunidoPreviamente.toLocaleString('es-CO')} + Meta ganancia esperada: $${gananciaEsperada.toLocaleString('es-CO')}</small>
-            </div>
+              <br>
+              <span class="text-info">
+                Boletas faltantes por vender: 
+                ${(() => {
+                  const faltante = Math.max((reunidoPreviamente+gananciaEsperada) - (totalRecaudado - totalCostos), 0);
+                  let maxValor = 0;
+                  boletasAdultos.forEach(b => {
+                    let valor = 0;
+                    if (b.promocion) {
+                      const match = b.promocion.match(/\$([\d.,]+)/);
+                      if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
+                    } else if (b.valorBoleta) {
+                      valor = Number(b.valorBoleta);
+                    }
+                    if (valor > maxValor) maxValor = valor;
+                  });
+                  return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
+                })()}
+                <small class="text-muted">(Valor boleta: $${boletasAdultos.length > 0 ? (() => {
+                  let maxValor = 0;
+                  boletasAdultos.forEach(b => {
+                    let valor = 0;
+                    if (b.promocion) {
+                      const match = b.promocion.match(/\$([\d.,]+)/);
+                      if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
+                    } else if (b.valorBoleta) {
+                      valor = Number(b.valorBoleta);
+                    }
+                    if (valor > maxValor) maxValor = valor;
+                  });
+                  return maxValor.toLocaleString('es-CO');
+                })() : '0'})</small>
+              </span>
+              </div>
           </div>
         </div>
       </div>

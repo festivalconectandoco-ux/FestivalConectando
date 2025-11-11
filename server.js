@@ -208,6 +208,23 @@ app.get("/api/traer-todo", async (req, res) => {
   }
 });
 
+app.get("/api/traer-costos", async (req, res) => {
+  try {
+    const [costosSnap] = await Promise.all([
+      db.collection("costos").get()
+    ]);
+
+    const costos = costosSnap.docs.map(doc => doc.data());
+    res.json({
+      costos
+    });
+  } catch (error) {
+    console.error("Error al obtener datos:", error);
+    res.status(500).json({ error: "Error al obtener datos" });
+  }
+});
+
+
 app.post("/enviar-whatsapp/:tipo", async (req, res) => {
   try {
     let { urlFile, fileName, caption, numero } = req.body;
