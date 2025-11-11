@@ -113,11 +113,12 @@ document.addEventListener("DOMContentLoaded", async function () {
         const transp = transporte
           .map(a => ({
             "Referencia": a.referencia || "",
-            "Tipo de asistente": "Artista Principal",
+            "Tipo de asistente": "Transporte",
             "Nombre persona": a.nombrePersona || "",
             "Tipo de documento": a.tipoDocumento || "",
             "Número de documento": a.numeroDocumento || "",
-            "celular": a.celular || "",
+            "Celular": a.celular || "",
+            "Ruta": a.ruta || "",
           }))
           .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
 
