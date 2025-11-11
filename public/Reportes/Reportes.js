@@ -170,18 +170,17 @@ document.addEventListener("DOMContentLoaded", async function () {
 
   const resp = await fetch("/api/traer-costos");
   const data = await resp.json();
-  console.log('data costos', data);
   const costos = data.costos || [];
-  console.log('costos', costos);
 
   // Traer valores de costos y metas desde catalogos.json
-  let totalCostos = 0, reunidoPreviamente = 0, gananciaEsperada = 0;
+  let totalCostos = 0, reunidoPreviamente = 0, gananciaEsperada = 0, precioBoleta=0;
   try {
     //const respCat = await fetch("../data/catalogos.json");
     //const cat = await respCat.json();
     totalCostos = costos[0].MetaCostosSubTotal || 0;
     reunidoPreviamente = costos[0].MetaColchonFetival || 0;
     gananciaEsperada = costos[0].MetaGanancia || 0;
+    precioBoleta = costos[0].PrecioBoleta || 0;
   } catch {}
   const aforoMaximo = 200;
   const contenedor = document.getElementById("reportesResumen");
@@ -363,31 +362,11 @@ document.addEventListener("DOMContentLoaded", async function () {
                 Boletas faltantes por vender: 
                 ${(() => {
                   const faltante = Math.max(totalCostos - totalRecaudado, 0);
-                  let maxValor = 0;
-                  boletasAdultos.forEach(b => {
-                    let valor = 0;
-                    if (b.promocion) {
-                      const match = b.promocion.match(/\$([\d.,]+)/);
-                      if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
-                    } else if (b.valorBoleta) {
-                      valor = Number(b.valorBoleta);
-                    }
-                    if (valor > maxValor) maxValor = valor;
-                  });
+                  let maxValor = precioBoleta;
                   return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
                 })()}
                 <small class="text-muted">(Valor boleta: $${boletasAdultos.length > 0 ? (() => {
-                  let maxValor = 0;
-                  boletasAdultos.forEach(b => {
-                    let valor = 0;
-                    if (b.promocion) {
-                      const match = b.promocion.match(/\$([\d.,]+)/);
-                      if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
-                    } else if (b.valorBoleta) {
-                      valor = Number(b.valorBoleta);
-                    }
-                    if (valor > maxValor) maxValor = valor;
-                  });
+                  let maxValor = precioBoleta;
                   return maxValor.toLocaleString('es-CO');
                 })() : '0'})</small>
               </span>
@@ -420,31 +399,11 @@ document.addEventListener("DOMContentLoaded", async function () {
                 Boletas faltantes por vender: 
                 ${(() => {
                   const faltante = Math.max((reunidoPreviamente+gananciaEsperada) - (totalRecaudado - totalCostos), 0);
-                  let maxValor = 0;
-                  boletasAdultos.forEach(b => {
-                    let valor = 0;
-                    if (b.promocion) {
-                      const match = b.promocion.match(/\$([\d.,]+)/);
-                      if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
-                    } else if (b.valorBoleta) {
-                      valor = Number(b.valorBoleta);
-                    }
-                    if (valor > maxValor) maxValor = valor;
-                  });
+                  let maxValor = precioBoleta;
                   return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
                 })()}
                 <small class="text-muted">(Valor boleta: $${boletasAdultos.length > 0 ? (() => {
-                  let maxValor = 0;
-                  boletasAdultos.forEach(b => {
-                    let valor = 0;
-                    if (b.promocion) {
-                      const match = b.promocion.match(/\$([\d.,]+)/);
-                      if (match) valor = parseInt(match[1].replace(/[.,]/g, ""));
-                    } else if (b.valorBoleta) {
-                      valor = Number(b.valorBoleta);
-                    }
-                    if (valor > maxValor) maxValor = valor;
-                  });
+                  let maxValor = precioBoleta;
                   return maxValor.toLocaleString('es-CO');
                 })() : '0'})</small>
               </span>
