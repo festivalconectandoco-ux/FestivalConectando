@@ -401,3 +401,46 @@ app.get("/favicon.ico", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+
+// Endpoints para separaciones (reservas / abonos)
+app.post('/registrar-separacion', async (req, res) => {
+  try {
+    const { referencia, nombreComprador, nombreAsistente, tipoDocumento, numeroDocumento, celular, promocionId, promocionDescripcion, valorBoleta, valorAbonado, comprobante, recibidoPor, medioPago } = req.body;
+    if (!referencia) return res.status(400).json({ error: 'referencia requerida' });
+    const fechaRegistro = new Date().toISOString();
+    const saldo = (Number(valorBoleta) || 0) - (Number(valorAbonado) || 0);
+    const doc = {
+      referencia,
+      nombreComprador: nombreComprador || '',
+      nombreAsistente: nombreAsistente || '',
+      tipoDocumento: tipoDocumento || '',
+  numeroDocumento: numeroDocumento ? String(numeroDocumento) : '',
+      celular: celular || '',
+      promocionId: promocionId || '',
+      promocionDescripcion: promocionDescripcion || '',
+      valorBoleta: Number(valorBoleta) || 0,
+      valorAbonado: Number(valorAbonado) || 0,
+      saldo: saldo,
+      recibidoPor: recibidoPor || '',
+      comprobante: comprobante || '',
+      medioPago: medioPago || '',
+      fechaRegistro
+    };
+    await db.collection('separaciones').doc(String(referencia)).set(doc);
+    res.status(200).json({ mensaje: 'Separación registrada', referencia, saldo });
+  } catch (error) {
+    console.error('Error registrando separacion:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/separaciones', async (req, res) => {
+  try {
+    const snap = await db.collection('separaciones').get();
+    const separaciones = snap.docs.map(d => d.data());
+    res.json({ separaciones });
+  } catch (error) {
+    console.error('Error obteniendo separaciones:', error);
+    res.status(500).json({ error: 'Error al obtener separaciones' });
+  }
+});

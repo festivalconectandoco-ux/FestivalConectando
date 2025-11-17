@@ -153,6 +153,26 @@ document.addEventListener("DOMContentLoaded", async function () {
           return ws;
         }
 
+        // Traer separaciones desde la API para incluir en el reporte
+        let separaciones = [];
+        try {
+          const respSep = await fetch('/api/separaciones');
+          const dataSep = await respSep.json();
+          separaciones = (dataSep.separaciones || []).map(s => ({
+            Referencia: s.referencia || '',
+            'Nombre comprador': s.nombreComprador ? s.nombreComprador.replace(/_/g, ' ') : '',
+            'Nombre asistente': s.nombreAsistente ? s.nombreAsistente.replace(/_/g, ' ') : '',
+            'Promoción': s.promocionDescripcion || '',
+            'Valor boleta': s.valorBoleta || 0,
+            'Valor abonado': s.valorAbonado || 0,
+            'Saldo': s.saldo || 0,
+            'Celular': s.celular || '',
+            'Fecha registro': s.fechaRegistro || ''
+          }));
+        } catch (e) {
+          console.warn('No se pudieron cargar separaciones para el reporte:', e);
+        }
+
         // Crear workbook y hojas tipo tabla
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(boletasSheet), 'Boletas');
@@ -161,6 +181,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(arts), 'Artistas Principales');
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(logis), 'Logística');
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(transp), 'Transporte');
+        // Agregar hoja de separaciones si hay datos
+        if (separaciones && separaciones.length) {
+          XLSX.utils.book_append_sheet(wb, crearHojaTabla(separaciones), 'Separaciones');
+        }
         // Descargar archivo
         XLSX.writeFile(wb, 'reporte_asistentes_grupos.xlsx');
       });
@@ -245,6 +269,20 @@ document.addEventListener("DOMContentLoaded", async function () {
   let recaudadoEmprendimientos = emprendimientos.reduce((acc, emp) => acc + (emp.valorPromocion ? Number(emp.valorPromocion) : 0), 0);
   totalRecaudado = recaudadoBoletas + recaudadoEmprendimientos;
 
+  // Traer separaciones para métricas
+  let separaciones = [];
+  try {
+    const respSep = await fetch('/api/separaciones');
+    const dataSep = await respSep.json();
+    separaciones = dataSep.separaciones || [];
+  } catch (e) {
+    console.warn('No se pudieron cargar separaciones:', e);
+  }
+  const totalSeparadas = separaciones.length;
+  const totalAbonadoSeparaciones = separaciones.reduce((acc, s) => acc + (Number(s.valorAbonado) || 0), 0);
+  const totalValorSeparadas = separaciones.reduce((acc, s) => acc + (Number(s.valorBoleta) || 0), 0);
+  const espaciosLibresConSeparacion = Math.max(aforoMaximo - totalPersonasAforo - totalSeparadas, 0);
+
     contenedor.innerHTML = `
       <!-- Grupo 1: Espacios libres y cantidad total personas -->
       <div class="row mb-3">
@@ -263,6 +301,37 @@ document.addEventListener("DOMContentLoaded", async function () {
               <h5 class="card-title">Cantidad total personas</h5>
               <div class="display-6">${totalPersonas}</div>
               <small class="text-muted">Asistentes, niños, emprendimientos, logísticos, artistas e invitados</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo 1b: Separaciones y espacios libres considerando separaciones -->
+      <div class="row mb-3">
+        <div class="col-md-4">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Boletas separadas</h5>
+              <div class="display-6">${totalSeparadas}</div>
+              <small class="text-muted">Abonos: $${Number(totalAbonadoSeparaciones).toLocaleString('es-CO')}</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Estimado si se completan</h5>
+              <div class="display-6">$${Number(totalValorSeparadas).toLocaleString('es-CO')}</div>
+              <small class="text-muted">Suma valores boleta separadas</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Espacios libres (con separaciones)</h5>
+              <div class="display-6">${espaciosLibresConSeparacion}</div>
+              <small class="text-muted">Incluye ${totalSeparadas} separadas</small>
             </div>
           </div>
         </div>
@@ -375,6 +444,29 @@ document.addEventListener("DOMContentLoaded", async function () {
         </div>
       </div>
 
+      <!-- Grupo 4b: Boletas faltantes considerando separaciones completadas -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Boletas faltantes por vender (con separaciones)</h5>
+              <span class="text-info">
+                Si se completan ${totalSeparadas} separadas ($${totalValorSeparadas.toLocaleString('es-CO')}), faltarían:
+                <div class="display-6 mt-2">
+                  ${(() => {
+                    const recaudoConSeparaciones = totalRecaudado + totalValorSeparadas;
+                    const faltante = Math.max(totalCostos - recaudoConSeparaciones, 0);
+                    let maxValor = precioBoleta;
+                    return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
+                  })()}
+                </div>
+                <small class="text-muted">boletas</small>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Grupo 5: Faltante para reunido previamente + ganancia esperada -->
       <div class="row mb-3">
         <div class="col-md-12">
@@ -399,6 +491,41 @@ document.addEventListener("DOMContentLoaded", async function () {
                 Boletas faltantes por vender: 
                 ${(() => {
                   const faltante = Math.max((reunidoPreviamente+gananciaEsperada) - (totalRecaudado - totalCostos), 0);
+                  let maxValor = precioBoleta;
+                  return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
+                })()}
+                <small class="text-muted">(Valor boleta: $${boletasAdultos.length > 0 ? (() => {
+                  let maxValor = precioBoleta;
+                  return maxValor.toLocaleString('es-CO');
+                })() : '0'})</small>
+              </span>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo 5b: Faltante para colchón Festival y ganancia esperada (con separaciones) -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Faltante para colchón Festival y ganancia esperada (con separaciones)</h5>
+              <div class="display-6">$${(() => {
+                // Calcular faltante considerando separaciones completadas
+                const recaudoConSeparaciones = totalRecaudado + totalValorSeparadas;
+                const faltanteReunido = Math.max(reunidoPreviamente - (recaudoConSeparaciones - totalCostos), 0);
+                const faltanteGanancia = (recaudoConSeparaciones < totalCostos + reunidoPreviamente)
+                  ? gananciaEsperada
+                  : Math.max(gananciaEsperada - (recaudoConSeparaciones - totalCostos - reunidoPreviamente), 0);
+                return (faltanteReunido + faltanteGanancia).toLocaleString('es-CO');
+              })()}</div>
+              <small class="text-muted">Si se completan ${totalSeparadas} separadas ($${totalValorSeparadas.toLocaleString('es-CO')})</small>
+              <br>
+              <span class="text-info">
+                Boletas faltantes por vender: 
+                ${(() => {
+                  const recaudoConSeparaciones = totalRecaudado + totalValorSeparadas;
+                  const faltante = Math.max((reunidoPreviamente+gananciaEsperada) - (recaudoConSeparaciones - totalCostos), 0);
                   let maxValor = precioBoleta;
                   return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
                 })()}

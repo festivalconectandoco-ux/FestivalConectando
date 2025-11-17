@@ -43,28 +43,28 @@
   "promocion": [
 	{
 	  "idPromocion": "1",
-	  "descripcion": "Preventa 18 Oct",
+	  "descripcion": "Promoción individual",
 	  "fechaInicial": "2025-09-15",
-	  "fechaFin": "2025-10-21",
-	  "precio": 120000,
-	  "cantidadPersonas": 1,
-	  "activo": true
-	},
-	{
-	  "idPromocion": "2",
-	  "descripcion": "Preventa 18 Nov",
-	  "fechaInicial": "2025-10-20",
-	  "fechaFin": "2025-11-19",
+	  "fechaFin": "2025-11-30",
 	  "precio": 130000,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	},
 	{
-	  "idPromocion": "3",
-	  "descripcion": "Precio final",
-	  "fechaInicial": "2025-11-20",
+	  "idPromocion": "2",
+	  "descripcion": "Promoción pareja",
+	  "fechaInicial": "2025-10-20",
 	  "fechaFin": "2025-11-30",
-	  "precio": 140000,
+	  "precio": 110000,
+	  "cantidadPersonas": 1,
+	  "activo": true
+	},
+	{
+	  "idPromocion": "3",
+	  "descripcion": "Promoción grupal",
+	  "fechaInicial": "2025-10-20",
+	  "fechaFin": "2025-11-30",
+	  "precio": 100000,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	},
