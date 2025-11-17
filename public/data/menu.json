@@ -1,12 +1,14 @@
 {
   "produccion": [
     { "href": "../Asistentes/ventaBoleteria.html", "label": "Registrar Asistentes" },
+    { "href": "../Separacion/separaciones.html", "label": "Registrar Separación" },
     { "href": "../Transporte/ingresarTransporte.html", "label": "Registrar Transporte" },
     { "href": "../Emprendimientos/ventaEmprendimientos.html", "label": "Registrar Emprendimientos" },
     { "href": "../Logistica/ingresarLogisticos.html", "label": "Registrar Logísticos" },
     { "href": "../MicAbierto/ingresarMicAbierto.html", "label": "Registrar Micrófono Abierto" },
     { "href": "../Artistas/ingresarArtistas.html", "label": "Registrar Artistas" },
     { "href": "../Asistentes/verBoletas.html", "label": "Ver Asistentes" },
+    { "href": "../Separacion/verSeparaciones.html", "label": "Ver Separaciones" },
     { "href": "../Transporte/verTransporte.html", "label": "Ver Transporte" },
     { "href": "../Emprendimientos/verEmprendimientos.html", "label": "Ver Emprendimientos" },
     { "href": "../Logistica/verLogisticos.html", "label": "Ver Logísticos" },
