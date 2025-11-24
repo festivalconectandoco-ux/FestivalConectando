@@ -69,15 +69,67 @@ document.addEventListener("DOMContentLoaded", async function () {
     
     const response = await fetch('/api/traer-todo');
     const data = await response.json();
-    asistentes = data.boletas || [];
+    const boletas = data.boletas || [];
+    const emprendimientos = data.emprendimientos || [];
+    const logisticos = data.logisticos || [];
+    const micAbierto = data.micAbierto || [];
+    const artistas = data.artistas || [];
+
+    // Normalizar y combinar en 'asistentes' para poblar el select
+    asistentes = [];
+    boletas.forEach(b => {
+      asistentes.push({
+        origen: 'Asistente',
+        nombreAsistente: b.nombreAsistente || b.nombre || b.nombrePersona || '',
+        tipoDocumentoAsistente: b.tipoDocumentoAsistente || b.tipoDocumento || '',
+        documentoAsistente: b.documentoAsistente || b.numeroDocumento || '',
+        celular: b.celular || ''
+      });
+    });
+    emprendimientos.forEach(e => {
+      asistentes.push({
+        origen: 'Emprendimiento',
+        nombreAsistente: e.nombrePersona || e.nombreEmprendimiento || '',
+        tipoDocumentoAsistente: e.tipoDocumento || '',
+        documentoAsistente: e.numeroDocumento || '',
+        celular: e.celularPersona || e.celular || ''
+      });
+    });
+    logisticos.forEach(l => {
+      asistentes.push({
+        origen: 'Logística',
+        nombreAsistente: l.nombre || l.nombrePersona || '',
+        tipoDocumentoAsistente: l.tipoDocumento || '',
+        documentoAsistente: l.numeroDocumento || '',
+        celular: l.celular || ''
+      });
+    });
+    micAbierto.forEach(m => {
+      asistentes.push({
+        origen: 'Micrófono Abierto',
+        nombreAsistente: m.nombrePersona || m.nombre || m.agrupacion || '',
+        tipoDocumentoAsistente: m.tipoDocumento || '',
+        documentoAsistente: m.numeroDocumento || '',
+        celular: m.celular || ''
+      });
+    });
+    artistas.forEach(a => {
+      asistentes.push({
+        origen: 'Artista',
+        nombreAsistente: a.nombrePersona || a.nombre || a.artista || '',
+        tipoDocumentoAsistente: a.tipoDocumento || '',
+        documentoAsistente: a.numeroDocumento || '',
+        celular: a.celular || ''
+      });
+    });
 
     const selectAsistentes = document.getElementById('asistentes');
     if (selectAsistentes) {
       selectAsistentes.innerHTML = '';
-      asistentes.forEach(t => {
+      asistentes.forEach((t, idx) => {
         const option = document.createElement("option");
-        option.value = t.nombreAsistente;
-        option.textContent = t.nombreAsistente;
+        option.value = String(idx); // usar índice para referencia segura
+        option.textContent = `${t.nombreAsistente}${t.origen ? ' (' + t.origen + ')' : ''}`;
         selectAsistentes.appendChild(option);
       });
 
@@ -98,9 +150,9 @@ document.addEventListener("DOMContentLoaded", async function () {
       const rutaSelect = form.querySelector('#ruta');
       const ruta = rutaSelect ? rutaSelect.options[rutaSelect.selectedIndex].text : '';
       let comprobanteFile = document.getElementById("comprobantePago").files[0];
-      const nombreAsistente = form.asistentes.value.trim();
-
-      const asistenteEncontrado = asistentes.find(a => a.nombreAsistente === nombreAsistente);
+      // obtener el índice seleccionado del select (valor es el índice en 'asistentes')
+      const selectedIndex = form.asistentes.value;
+      const asistenteEncontrado = asistentes[Number(selectedIndex)];
       let nombrePersona = asistenteEncontrado ? (asistenteEncontrado.nombreAsistente || '') : '';
       let tipoDocumento = asistenteEncontrado ? (asistenteEncontrado.tipoDocumentoAsistente || '') : '';
       let numeroDocumento = asistenteEncontrado ? (asistenteEncontrado.documentoAsistente || '') : '';
