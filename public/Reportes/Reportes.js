@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             "Promoción": l.promocion || "",
             "Tareas": l.tareas || "",
             "Áreas de apoyo": Array.isArray(l.areasApoyo) ? l.areasApoyo.join(", ") : "",
+            "Almuerzo": l.almuerzo || "",
           }))
           .sort((a, b) => String(a["referencia"]).localeCompare(String(b["referencia"])));
         // Emprendimientos
@@ -80,6 +81,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             "Productos": Array.isArray(e.productos) ? e.productos.join(", ") : "",
             "Medio de pago": e.medioPago || "",
             "Recibido por": e.recibidoPor || "",
+            "Almuerzo": e.almuerzo || "",
           }))
           .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
         // Micrófono abierto
@@ -93,6 +95,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             "Número de documento": m.numeroDocumento || "",
             "celular": m.celular || "",
             "Observaciones": m.observaciones || "",
+            "Almuerzo": m.almuerzo || "",
           }))
           .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
         // Artistas principales
@@ -106,6 +109,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             "Número de documento": a.numeroDocumento || "",
             "celular": a.celular || "",
             "Observaciones": a.observaciones || "",
+            "Almuerzo": a.almuerzo || "",
           }))
           .sort((a, b) => String(a["Referencia"]).localeCompare(String(b["Referencia"])));
         
@@ -173,6 +177,56 @@ document.addEventListener("DOMContentLoaded", async function () {
           console.warn('No se pudieron cargar separaciones para el reporte:', e);
         }
 
+        const almuerzos = [];
+        // Emprendimientos
+        (emprendimientos || []).forEach(e => {
+          if ((String(e.almuerzo || '').toLowerCase()) === 'si') {
+            almuerzos.push({
+              Nombre: e.nombreEmprendimiento || e.nombrePersona || e.nombre || '',
+              Documento: e.numeroDocumento || e.documento || '',
+              Origen: 'Emprendimiento',
+              Detalle: '',
+              Observaciones: e.observaciones || ''
+            });
+          }
+        });
+        // Logísticos
+        (logisticos || []).forEach(l => {
+          if ((String(l.almuerzo || '').toLowerCase()) === 'si') {
+            almuerzos.push({
+              Nombre: l.nombre || l.nombrePersona || '',
+              Documento: l.numeroDocumento || l.documento || '',
+              Origen: 'Logística',
+              Detalle: Array.isArray(l.areasApoyo) ? l.areasApoyo.join(", ") : "",
+              Observaciones: l.observaciones || ''
+            });
+          }
+        });
+        // Micrófono Abierto
+        (micAbierto || []).forEach(m => {
+          if ((String(m.almuerzo || '').toLowerCase()) === 'si') {
+            almuerzos.push({
+              Nombre: m.agrupacion || m.nombrePersona || m.nombre || '',
+              Documento: m.numeroDocumento || m.documento || '',
+              Origen: 'Micrófono Abierto',
+              Detalle: '',
+              Observaciones: m.observaciones || ''
+            });
+          }
+        });
+        // Artistas
+        (artistas || []).forEach(a => {
+          if ((String(a.almuerzo || '').toLowerCase()) === 'si') {
+            almuerzos.push({
+              Nombre: a.nombrePersona,
+              Documento: a.numeroDocumento || a.documento || '',
+              Origen: 'Artista',
+              Detalle: a.artista,
+              Observaciones: a.observaciones || ''
+            });
+          }
+        });
+
         // Crear workbook y hojas tipo tabla
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(boletasSheet), 'Boletas');
@@ -181,12 +235,18 @@ document.addEventListener("DOMContentLoaded", async function () {
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(arts), 'Artistas Principales');
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(logis), 'Logística');
         XLSX.utils.book_append_sheet(wb, crearHojaTabla(transp), 'Transporte');
+        // Agregar hoja de almuerzos si hay datos
+        if (almuerzos && almuerzos.length) {
+          XLSX.utils.book_append_sheet(wb, crearHojaTabla(almuerzos), 'Almuerzos');
+        }
         // Agregar hoja de separaciones si hay datos
         if (separaciones && separaciones.length) {
           XLSX.utils.book_append_sheet(wb, crearHojaTabla(separaciones), 'Separaciones');
         }
-        // Descargar archivo
-        XLSX.writeFile(wb, 'reporte_asistentes_grupos.xlsx');
+        // Descargar archivo con fecha
+        const ahora = new Date();
+        const fechaFormato = `${String(ahora.getDate()).padStart(2, '0')}/${String(ahora.getMonth() + 1).padStart(2, '0')}/${ahora.getFullYear()}`;
+        XLSX.writeFile(wb, `Reporte Festival Conectando ${fechaFormato}.xlsx`);
       });
     };
     document.getElementById('reportesResumen').parentNode.insertBefore(btnExcel, document.getElementById('reportesResumen'));
@@ -282,6 +342,27 @@ document.addEventListener("DOMContentLoaded", async function () {
   const totalAbonadoSeparaciones = separaciones.reduce((acc, s) => acc + (Number(s.valorAbonado) || 0), 0);
   const totalValorSeparadas = separaciones.reduce((acc, s) => acc + (Number(s.valorBoleta) || 0), 0);
   const espaciosLibresConSeparacion = Math.max(aforoMaximo - totalPersonasAforo - totalSeparadas, 0);
+
+  // Calcular total de almuerzos (mismo cálculo que en el botón Excel)
+  let totalAlmuerzos = 0;
+  try {
+    let almuerzosCont = [];
+    (emprendimientos || []).forEach(e => {
+      if ((String(e.almuerzo || '').toLowerCase()) === 'si') almuerzosCont.push(e);
+    });
+    (logisticos || []).forEach(l => {
+      if ((String(l.almuerzo || '').toLowerCase()) === 'si') almuerzosCont.push(l);
+    });
+    (micAbierto || []).forEach(m => {
+      if ((String(m.almuerzo || '').toLowerCase()) === 'si') almuerzosCont.push(m);
+    });
+    (artistas || []).forEach(a => {
+      if ((String(a.almuerzo || '').toLowerCase()) === 'si') almuerzosCont.push(a);
+    });
+    totalAlmuerzos = almuerzosCont.length;
+  } catch (e) {
+    console.warn('Error al calcular total almuerzos:', e);
+  }
 
     contenedor.innerHTML = `
       <!-- Grupo 1: Espacios libres y cantidad total personas -->
@@ -400,6 +481,15 @@ document.addEventListener("DOMContentLoaded", async function () {
             <div class="card-body text-center">
               <h5 class="card-title">Total transporte</h5>
               <div class="display-6">${totalTransportes}</br> $${totalRecaudoTransportes.toLocaleString('es-CO')}</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card card-report shadow">
+            <div class="card-body text-center">
+              <h5 class="card-title">Total almuerzos</h5>
+              <div class="display-6">${totalAlmuerzos}</div>
+              <small class="text-muted">Emprendimientos, logística, micrófono, artistas</small>
             </div>
           </div>
         </div>
