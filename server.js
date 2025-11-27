@@ -215,12 +215,45 @@ app.get("/api/traer-costos", async (req, res) => {
     ]);
 
     const costos = costosSnap.docs.map(doc => doc.data());
+    console.log("Costos desde BD:", costos);
     res.json({
       costos
     });
   } catch (error) {
     console.error("Error al obtener datos:", error);
     res.status(500).json({ error: "Error al obtener datos" });
+  }
+});
+
+// Endpoint para verificar/crear documento de costos
+app.get("/api/costos-status", async (req, res) => {
+  try {
+    const snap = await db.collection("costos").get();
+    if (snap.empty) {
+      // Crear documento por defecto
+      const defaultCostos = {
+        MetaCostosSubTotal: 5000000,
+        MetaColchonFetival: 2000000,
+        MetaGanancia: 3000000,
+        PrecioBoleta: 120000
+      };
+      await db.collection("costos").doc("config").set(defaultCostos);
+      res.json({ 
+        status: "creado",
+        costos: defaultCostos,
+        mensaje: "Documento de costos creado con valores por defecto"
+      });
+    } else {
+      const costos = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      res.json({ 
+        status: "existe",
+        costos: costos,
+        mensaje: "Documento de costos existe"
+      });
+    }
+  } catch (error) {
+    console.error("Error verificando costos:", error);
+    res.status(500).json({ error: error.message });
   }
 });
 
