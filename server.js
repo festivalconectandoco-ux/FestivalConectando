@@ -273,7 +273,7 @@ app.post("/enviar-whatsapp-mensaje/:tipo", async (req, res) => {
 
     const modo = tipo === "reenvio" ? process.env.REENVIO_WHATSAPP : process.env.MENSAJE_WHATSAPP;
     // Usar URL_GREENAPI pero cambiar el endpoint a sendMessage
-    let url = process.env.URL_GREENAPI;
+    let url = process.env.URL_GREENAPI_MESSAGE;
     if (url.includes('sendFile')) {
       url = url.replace('sendFile', 'sendMessage');
     }
