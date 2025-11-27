@@ -150,6 +150,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       const rutaSelect = form.querySelector('#ruta');
       const ruta = rutaSelect ? rutaSelect.options[rutaSelect.selectedIndex].text : '';
       let comprobanteFile = document.getElementById("comprobantePago").files[0];
+      const recibidoPor = form.recibidoPor.value.trim();
+      const valorTransporte = Number(form.valorTransporte.value) || 25000;
       // obtener el índice seleccionado del select (valor es el índice en 'asistentes')
       const selectedIndex = form.asistentes.value;
       const asistenteEncontrado = asistentes[Number(selectedIndex)];
@@ -185,6 +187,8 @@ document.addEventListener("DOMContentLoaded", async function () {
             tipoDocumento,
             numeroDocumento,
             celular,
+            recibidoPor,
+            valorTransporte,
             referencia, 
             boleta: imagenBase64, 
             comprobanteUrl,

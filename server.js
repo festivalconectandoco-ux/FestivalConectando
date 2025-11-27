@@ -278,6 +278,7 @@ app.post("/enviar-whatsapp-mensaje/:tipo", async (req, res) => {
     const chatId = `${numero}@c.us`;
     const payload = { chatId, message };
     const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+    console.log("Payload enviado a GreenAPI:", payload);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -443,4 +444,181 @@ app.get('/api/separaciones', async (req, res) => {
     console.error('Error obteniendo separaciones:', error);
     res.status(500).json({ error: 'Error al obtener separaciones' });
   }
+});
+
+// Endpoint para obtener dinero agrupado por persona que lo recibió
+app.get('/api/dinero-por-persona', async (req, res) => {
+  try {
+    const [boletasSnap, emprendimientosSnap, transporteSnap, separacionesSnap] = await Promise.all([
+      db.collection('boletas').get(),
+      db.collection('emprendimientos').get(),
+      db.collection('transporte').get(),
+      db.collection('separaciones').get()
+    ]);
+
+    const dineroAcumulado = {};
+
+    // Función auxiliar para extraer el nombre de quien recibió
+    const getRecibidoPor = (doc) => {
+      let recibidor = doc.recibidoPor || doc.quienRecibio || null;
+      if (recibidor && typeof recibidor === 'string') {
+        recibidor = recibidor.trim();
+        return recibidor.length > 0 ? recibidor : null;
+      }
+      return null;
+    };
+
+    // Función auxiliar para extraer el valor (intenta múltiples campos)
+    const getValor = (doc, campos = []) => {
+      for (const campo of campos) {
+        const valor = Number(doc[campo]);
+        if (!isNaN(valor) && valor > 0) {
+          return valor;
+        }
+      }
+      return 0;
+    };
+
+    // Procesar boletas (solo si tienen recibidoPor o quienRecibio)
+    boletasSnap.docs.forEach(doc => {
+      const boleta = doc.data();
+      const recibidoPor = getRecibidoPor(boleta);
+      if (recibidoPor) {
+        const valor = getValor(boleta, ['valorBoleta', 'valorPromocion', 'valorAbonado']);
+        if (valor > 0) {
+          if (!dineroAcumulado[recibidoPor]) {
+            dineroAcumulado[recibidoPor] = { total: 0, boletas: 0, emprendimientos: 0, transporte: 0, separaciones: 0 };
+          }
+          dineroAcumulado[recibidoPor].total += valor;
+          dineroAcumulado[recibidoPor].boletas += valor;
+        }
+      }
+    });
+
+    // Procesar emprendimientos (solo si tienen recibidoPor o quienRecibio)
+    emprendimientosSnap.docs.forEach(doc => {
+      const emp = doc.data();
+      const recibidoPor = getRecibidoPor(emp);
+      if (recibidoPor) {
+        const valor = getValor(emp, ['valorPromocion', 'valorBoleta', 'valorAbonado']);
+        if (valor > 0) {
+          if (!dineroAcumulado[recibidoPor]) {
+            dineroAcumulado[recibidoPor] = { total: 0, boletas: 0, emprendimientos: 0, transporte: 0, separaciones: 0 };
+          }
+          dineroAcumulado[recibidoPor].total += valor;
+          dineroAcumulado[recibidoPor].emprendimientos += valor;
+        }
+      }
+    });
+
+    // Procesar transporte (sumar monto fijo por persona que recibió)
+    // Asumiendo que cada transporte = $25.000
+    const montoTransporte = 25000;
+    transporteSnap.docs.forEach(doc => {
+      const transporte = doc.data();
+      const recibidoPor = getRecibidoPor(transporte);
+      if (recibidoPor) {
+        const valor = montoTransporte;
+        if (!dineroAcumulado[recibidoPor]) {
+          dineroAcumulado[recibidoPor] = { total: 0, boletas: 0, emprendimientos: 0, transporte: 0, separaciones: 0 };
+        }
+        dineroAcumulado[recibidoPor].total += valor;
+        dineroAcumulado[recibidoPor].transporte += valor;
+      }
+    });
+
+    // Procesar separaciones (intenta valorAbonado, valorBoleta, valorPromocion)
+    separacionesSnap.docs.forEach(doc => {
+      const sep = doc.data();
+      const recibidoPor = getRecibidoPor(sep);
+      if (recibidoPor) {
+        const valor = getValor(sep, ['valorAbonado', 'valorBoleta', 'valorPromocion']);
+        if (valor > 0) {
+          if (!dineroAcumulado[recibidoPor]) {
+            dineroAcumulado[recibidoPor] = { total: 0, boletas: 0, emprendimientos: 0, transporte: 0, separaciones: 0 };
+          }
+          dineroAcumulado[recibidoPor].total += valor;
+          dineroAcumulado[recibidoPor].separaciones += valor;
+        }
+      }
+    });
+
+    // Convertir a array y ordenar por total descendente
+    const resultado = Object.keys(dineroAcumulado)
+      .map(persona => ({
+        persona,
+        ...dineroAcumulado[persona]
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    res.json({ dinerosPorPersona: resultado, totalGlobal: resultado.reduce((acc, item) => acc + item.total, 0) });
+  } catch (error) {
+    console.error('Error obteniendo dineros por persona:', error);
+    res.status(500).json({ error: 'Error al obtener dineros por persona' });
+  }
+});
+
+// Endpoint para migrar registros existentes - asignar recibidoPor y valorTransporte por defecto
+app.post("/api/migrar-campos-defecto", async (req, res) => {
+  try {
+    let actualizacionesSeparaciones = 0;
+    let actualizacionesTransporte = 0;
+
+    // Migrar Separaciones
+    const separacionesSnapshot = await db.collection('separaciones').get();
+    const batch1 = db.batch();
+    
+    separacionesSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      // Si no tiene recibidoPor, asignar "Jennifer"
+      if (!data.recibidoPor) {
+        batch1.update(doc.ref, { recibidoPor: "Jennifer" });
+        actualizacionesSeparaciones++;
+      }
+    });
+    
+    if (actualizacionesSeparaciones > 0) {
+      await batch1.commit();
+    }
+
+    // Migrar Transporte
+    const transporteSnapshot = await db.collection('transporte').get();
+    const batch2 = db.batch();
+    
+    transporteSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const actualizaciones = {};
+      
+      // Si no tiene recibidoPor, asignar "Jennifer"
+      if (!data.recibidoPor) {
+        actualizaciones.recibidoPor = "Jennifer";
+      }
+      
+      // Si no tiene valorTransporte, asignar 25000
+      if (!data.valorTransporte) {
+        actualizaciones.valorTransporte = 25000;
+      }
+      
+      if (Object.keys(actualizaciones).length > 0) {
+        batch2.update(doc.ref, actualizaciones);
+        actualizacionesTransporte++;
+      }
+    });
+    
+    if (actualizacionesTransporte > 0) {
+      await batch2.commit();
+    }
+
+    res.json({
+      success: true,
+      mensaje: `Migración completada. Separaciones actualizadas: ${actualizacionesSeparaciones}. Transporte actualizado: ${actualizacionesTransporte}`
+    });
+  } catch (error) {
+    console.error('Error en migración:', error);
+    res.status(500).json({ error: 'Error al migrar registros', detalles: error.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

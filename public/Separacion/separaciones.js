@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const promocionObj = promoSelect.options[promoSelect.selectedIndex] ? JSON.parse(promoSelect.options[promoSelect.selectedIndex].value) : null;
     const medioPago = document.getElementById('medioPago').value || '';
     const quienRecibio = document.getElementById('quienRecibio').value || '';
+    const recibidoPor = document.getElementById('recibidoPor').value.trim();
     const comprobanteFile = document.getElementById('comprobante').files[0];
 
     const payload = {
@@ -66,7 +67,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       valorAbonado: Number(document.getElementById('valorAbonado').value) || 0,
       celular: document.getElementById('celular').value.trim(),
       medioPago: medioPago,
-      recibidoPor: quienRecibio
+      quienRecibio: quienRecibio,
+      recibidoPor: recibidoPor || quienRecibio
     };
 
     // Si hay comprobante, subirlo primero a /subir-comprobante

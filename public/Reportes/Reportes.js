@@ -177,6 +177,23 @@ document.addEventListener("DOMContentLoaded", async function () {
           console.warn('No se pudieron cargar separaciones para el reporte:', e);
         }
 
+        // Traer dinero por persona desde la API
+        let dinerosPorPersona = [];
+        try {
+          const respDinero = await fetch('/api/dinero-por-persona');
+          const dataDinero = await respDinero.json();
+          dinerosPorPersona = (dataDinero.dinerosPorPersona || []).map(d => ({
+            'Persona': d.persona || '',
+            'Total': d.total || 0,
+            'Boletas': d.boletas || 0,
+            'Emprendimientos': d.emprendimientos || 0,
+            'Transporte': d.transporte || 0,
+            'Separaciones': d.separaciones || 0
+          }));
+        } catch (e) {
+          console.warn('No se pudieron cargar dineros por persona para el reporte:', e);
+        }
+
         const almuerzos = [];
         // Emprendimientos
         (emprendimientos || []).forEach(e => {
@@ -242,6 +259,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         // Agregar hoja de separaciones si hay datos
         if (separaciones && separaciones.length) {
           XLSX.utils.book_append_sheet(wb, crearHojaTabla(separaciones), 'Separaciones');
+        }
+        // Agregar hoja de dinero por persona si hay datos
+        if (dinerosPorPersona && dinerosPorPersona.length) {
+          XLSX.utils.book_append_sheet(wb, crearHojaTabla(dinerosPorPersona), 'Dinero por Persona');
         }
         // Descargar archivo con fecha
         const ahora = new Date();
@@ -362,6 +383,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     totalAlmuerzos = almuerzosCont.length;
   } catch (e) {
     console.warn('Error al calcular total almuerzos:', e);
+  }
+
+  // Traer dinero por persona
+  let dinerosPorPersona = [];
+  try {
+    const respDinero = await fetch('/api/dinero-por-persona');
+    const dataDinero = await respDinero.json();
+    dinerosPorPersona = dataDinero.dinerosPorPersona || [];
+  } catch (e) {
+    console.warn('No se pudieron cargar dineros por persona:', e);
   }
 
     contenedor.innerHTML = `
@@ -625,6 +656,44 @@ document.addEventListener("DOMContentLoaded", async function () {
                 })() : '0'})</small>
               </span>
               </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grupo 6: Dinero recolectado por persona -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <div class="card card-report shadow">
+            <div class="card-body">
+              <h5 class="card-title">Dinero recolectado por persona</h5>
+              <div style="overflow-x: auto;">
+                <table class="table table-sm table-striped">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Persona</th>
+                      <th class="text-end">Total</th>
+                      <th class="text-end">Boletas</th>
+                      <th class="text-end">Emprendimientos</th>
+                      <th class="text-end">Transporte</th>
+                      <th class="text-end">Separaciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${dinerosPorPersona.length > 0 ? dinerosPorPersona.map(d => '<tr><td><strong>' + d.persona + '</strong></td><td class="text-end"><strong>$' + (d.total || 0).toLocaleString('es-CO') + '</strong></td><td class="text-end">$' + (d.boletas || 0).toLocaleString('es-CO') + '</td><td class="text-end">$' + (d.emprendimientos || 0).toLocaleString('es-CO') + '</td><td class="text-end">$' + (d.transporte || 0).toLocaleString('es-CO') + '</td><td class="text-end">$' + (d.separaciones || 0).toLocaleString('es-CO') + '</td></tr>').join('') : '<tr><td colspan="6" class="text-center text-muted">Sin datos</td></tr>'}
+                  </tbody>
+                  <tfoot class="table-light">
+                    <tr>
+                      <th>TOTAL</th>
+                      <th class="text-end"><strong>$${dinerosPorPersona.reduce((acc, d) => acc + (d.total || 0), 0).toLocaleString('es-CO')}</strong></th>
+                      <th class="text-end">$${dinerosPorPersona.reduce((acc, d) => acc + (d.boletas || 0), 0).toLocaleString('es-CO')}</th>
+                      <th class="text-end">$${dinerosPorPersona.reduce((acc, d) => acc + (d.emprendimientos || 0), 0).toLocaleString('es-CO')}</th>
+                      <th class="text-end">$${dinerosPorPersona.reduce((acc, d) => acc + (d.transporte || 0), 0).toLocaleString('es-CO')}</th>
+                      <th class="text-end">$${dinerosPorPersona.reduce((acc, d) => acc + (d.separaciones || 0), 0).toLocaleString('es-CO')}</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>

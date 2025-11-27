@@ -27,6 +27,15 @@
         <select class="form-select" id="ruta" name="ruta" required></select>
       </div>
       <div class="mb-3">
+        <label for="recibidoPor" class="form-label">Dinero recibido por:</label>
+        <input type="text" class="form-control" id="recibidoPor" name="recibidoPor" placeholder="Nombre de quien recibe el dinero">
+      </div>
+      <div class="mb-3">
+        <label for="valorTransporte" class="form-label">Valor del transporte:</label>
+        <input type="number" class="form-control" id="valorTransporte" name="valorTransporte" value="25000" readonly>
+        <small class="text-muted">Valor fijo: $25.000</small>
+      </div>
+      <div class="mb-3">
         <label for="comprobantePago" class="form-label">comprobante de pago:</label>
         <input type="file" class="form-control" id="comprobantePago" name="comprobantePago" accept="image/png, image/jpeg, image/jpg, image/webp, application/pdf" required>
         <small class="text-muted">Formatos permitidos: PNG, JPG, JPEG, WEBP, PDF.</small>
