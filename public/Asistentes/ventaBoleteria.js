@@ -245,7 +245,11 @@ async function registrarAsistente(formElement) {
     const medioPagoSelect = document.getElementById("medioPago");
     const medioPagoTexto = medioPagoSelect.options[medioPagoSelect.selectedIndex].text;
     const quienRecibioSelect = document.getElementById("quienRecibio");
-    const quienRecibioTexto = quienRecibioSelect.options[quienRecibioSelect.selectedIndex].text;
+    let quienRecibioTexto = quienRecibioSelect.options[quienRecibioSelect.selectedIndex].text;
+    // Si quienRecibio es "Otro" (99), usar el valor de nombreOtro
+    if (quienRecibioSelect.value === "99") {
+      quienRecibioTexto = document.getElementById("nombreOtro").value.trim();
+    }
     const comprobanteInput = document.getElementById("comprobante");
     const file = comprobanteInput.files[0];
     let comprobanteBase64, imagenBase64, comprobanteUrl;
