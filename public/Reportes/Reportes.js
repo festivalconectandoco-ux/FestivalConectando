@@ -306,6 +306,17 @@ document.addEventListener("DOMContentLoaded", async function () {
   const artistas = data.artistas || [];
   const transporte = data.transporte || [];
 
+  // Traer separaciones para métricas
+  let separaciones = [];
+  try {
+    const respSep = await fetch('/api/separaciones');
+    const dataSep = await respSep.json();
+    separaciones = dataSep.separaciones || [];
+  } catch (e) {
+    console.warn('No se pudieron cargar separaciones:', e);
+  }
+  const totalSeparadas = separaciones.length;
+  
   // Boletas
   const boletasAdultos = boletas.filter(b => b.tipoAsistente !== "niño");
   const boletasNinos = boletas.filter(b => b.tipoAsistente === "niño");
@@ -331,7 +342,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Para aforo, no contar niños, pero sí logísticos y micAbierto
   const totalPersonasAforo = boletasAdultos.length + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto + totalArtistas;
   totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto;
-  totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto + totalArtistas;
+  totalPersonas = totalPersonasBoletas + totalPersonasEmprendimientos + totalLogisticos + totalMicAbierto + totalArtistas + totalSeparadas;
   // Total recaudado: boletas (solo adultos) + emprendimientos
   // Sumar el valor de boletas pagas (adultos) usando promocion
   let recaudadoBoletas = 0;
@@ -350,16 +361,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   let recaudadoEmprendimientos = emprendimientos.reduce((acc, emp) => acc + (emp.valorPromocion ? Number(emp.valorPromocion) : 0), 0);
   totalRecaudado = recaudadoBoletas + recaudadoEmprendimientos;
 
-  // Traer separaciones para métricas
-  let separaciones = [];
-  try {
-    const respSep = await fetch('/api/separaciones');
-    const dataSep = await respSep.json();
-    separaciones = dataSep.separaciones || [];
-  } catch (e) {
-    console.warn('No se pudieron cargar separaciones:', e);
-  }
-  const totalSeparadas = separaciones.length;
+  
   const totalAbonadoSeparaciones = separaciones.reduce((acc, s) => acc + (Number(s.valorAbonado) || 0), 0);
   const totalValorSeparadas = separaciones.reduce((acc, s) => acc + (Number(s.valorBoleta) || 0), 0);
   const espaciosLibresConSeparacion = Math.max(aforoMaximo - totalPersonasAforo - totalSeparadas, 0);
