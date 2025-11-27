@@ -272,13 +272,19 @@ app.post("/enviar-whatsapp-mensaje/:tipo", async (req, res) => {
     }
 
     const modo = tipo === "reenvio" ? process.env.REENVIO_WHATSAPP : process.env.MENSAJE_WHATSAPP;
-    const url = process.env.URL_GREENAPI_MESSAGE;
+    // Usar URL_GREENAPI pero cambiar el endpoint a sendMessage
+    let url = process.env.URL_GREENAPI;
+    if (url.includes('sendFile')) {
+      url = url.replace('sendFile', 'sendMessage');
+    }
+    
     numero = modo === "camilo" ? "573058626761" : modo === "festival" ? "573143300821" :  modo === "asistente" ? numero.replace(/[^\d]/g, "") : "573143300821";
 
     const chatId = `${numero}@c.us`;
     const payload = { chatId, message };
     const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
     console.log("Payload enviado a GreenAPI:", payload);
+    console.log("URL usada:", url);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -288,12 +294,12 @@ app.post("/enviar-whatsapp-mensaje/:tipo", async (req, res) => {
     const data = await response.json();
 
     if (response.ok) {
-      res.status(200).json({ mensaje: "Archivo enviado con éxito", data });
+      res.status(200).json({ mensaje: "Mensaje enviado con éxito", data });
     } else {
       res.status(500).json({ error: data });
     }
   } catch (error) {
-    console.error("Error enviando archivo por GreenAPI:", error);
+    console.error("Error enviando mensaje por GreenAPI:", error);
     res.status(500).json({ error: error.message });
   }
 });
