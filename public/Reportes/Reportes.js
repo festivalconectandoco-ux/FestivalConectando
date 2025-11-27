@@ -550,7 +550,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         </div>
       </div>
 
-      <!-- Grupo 3: Meta de costos -->
+      <!-- Grupo 3: Meta de costos (línea completa) -->
       <div class="row mb-3">
         <div class="col-md-12">
           <div class="card card-report shadow">
@@ -563,9 +563,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         </div>
       </div>
 
-      <!-- Grupo 4: Faltante para costos y promedio de boletas faltantes -->
+      <!-- Grupo 4: Faltante para costos + Boletas faltantes (con separaciones) -->
       <div class="row mb-3">
-        <div class="col-md-12">
+        <!-- Faltante para costos -->
+        <div class="col-md-6">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Faltante para costos</h5>
@@ -573,33 +574,27 @@ document.addEventListener("DOMContentLoaded", async function () {
               <small class="text-muted">Meta: $${totalCostos.toLocaleString('es-CO')}</small>
               <br>
               <span class="text-info">
-                Boletas faltantes por vender: 
+                Boletas faltantes: 
                 ${(() => {
                   const faltante = Math.max(totalCostos - totalRecaudado, 0);
                   let maxValor = precioBoleta;
                   return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
                 })()}
-                <small class="text-muted">(Valor boleta: $${boletasAdultos.length > 0 ? (() => {
-                  let maxValor = precioBoleta;
-                  return maxValor.toLocaleString('es-CO');
-                })() : '0'})</small>
               </span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Grupo 4b: Boletas faltantes considerando separaciones completadas -->
-      <div class="row mb-3">
-        <div class="col-md-12">
+        <!-- Boletas faltantes (con separaciones) -->
+        <div class="col-md-6">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Boletas faltantes por vender (con separaciones)</h5>
               <span class="text-info">
-                Si se completan ${totalSeparadas} separadas ($${totalValorSeparadas.toLocaleString('es-CO')}), faltarían:
+                Si se completan ${totalSeparadas} separadas:
                 <div class="display-6 mt-2">
                   ${(() => {
-                    const recaudoConSeparaciones = totalRecaudado + totalValorSeparadas -totalAbonadoSeparaciones;
+                    const recaudoConSeparaciones = totalRecaudado + (totalValorSeparadas - totalAbonadoSeparaciones);
                     const faltante = Math.max(totalCostos - recaudoConSeparaciones, 0);
                     let maxValor = precioBoleta;
                     return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
@@ -612,14 +607,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         </div>
       </div>
 
-      <!-- Grupo 4c: Faltante para colchón Festival (sin ganancia) -->
+      <!-- Grupo 5: Faltante para colchón Festival + Faltante para colchón Festival (con separaciones) -->
       <div class="row mb-3">
-        <div class="col-md-12">
+        <!-- Faltante para colchón Festival (sin ganancia) -->
+        <div class="col-md-6">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Faltante para colchón Festival</h5>
               <div class="display-6">$${(() => {
-                // Faltante solo para colchón (sin ganancia esperada)
                 const metaTotal = totalCostos + reunidoPreviamente;
                 const faltante = Math.max(metaTotal - totalRecaudado, 0);
                 return faltante.toLocaleString('es-CO');
@@ -627,28 +622,25 @@ document.addEventListener("DOMContentLoaded", async function () {
               <small class="text-muted">Meta: $${(totalCostos + reunidoPreviamente).toLocaleString('es-CO')}</small>
               <br>
               <span class="text-info">
-                Boletas faltantes por vender: 
+                Boletas faltantes: 
                 ${(() => {
                   const metaTotal = totalCostos + reunidoPreviamente;
                   const faltante = Math.max(metaTotal - totalRecaudado, 0);
                   let maxValor = precioBoleta;
                   return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
                 })()}
-                <small class="text-muted">(Valor boleta: $${precioBoleta.toLocaleString('es-CO')})</small>
               </span>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Grupo 4d: Faltante para colchón Festival (con separaciones, sin ganancia) -->
-      <div class="row mb-3">
-        <div class="col-md-12">
+        <!-- Faltante para colchón Festival (con separaciones, sin ganancia) -->
+        <div class="col-md-6">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Faltante para colchón Festival (con separaciones)</h5>
               <span class="text-info">
-                Si se completan ${totalSeparadas} separadas ($${totalValorSeparadas.toLocaleString('es-CO')}), faltarían:
+                Si se completan ${totalSeparadas} separadas:
                 <div class="display-6 mt-2">
                   ${(() => {
                     const recaudoConSeparaciones = totalRecaudado + (totalValorSeparadas - totalAbonadoSeparaciones);
@@ -665,15 +657,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         </div>
       </div>
 
-      <!-- Grupo 5: Faltante para reunido previamente + ganancia esperada -->
+      <!-- Grupo 6: Faltante para colchón + ganancia + Faltante para colchón + ganancia (con separaciones) -->
       <div class="row mb-3">
-        <div class="col-md-12">
+        <!-- Faltante para colchón Festival y ganancia esperada -->
+        <div class="col-md-6">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Faltante para colchón Festival y ganancia esperada</h5>
               <div class="display-6">$${(() => {
-                // Faltante considerando: reunidoPreviamente (colchón) + gananciaEsperada
-                // Recaudo sin considerar separaciones completadas
                 const metaTotal = totalCostos + reunidoPreviamente + gananciaEsperada;
                 const faltante = Math.max(metaTotal - totalRecaudado, 0);
                 return faltante.toLocaleString('es-CO');
@@ -681,38 +672,33 @@ document.addEventListener("DOMContentLoaded", async function () {
               <small class="text-muted">Meta: $${(totalCostos + reunidoPreviamente + gananciaEsperada).toLocaleString('es-CO')}</small>
               <br>
               <span class="text-info">
-                Boletas faltantes por vender: 
+                Boletas faltantes: 
                 ${(() => {
                   const metaTotal = totalCostos + reunidoPreviamente + gananciaEsperada;
                   const faltante = Math.max(metaTotal - totalRecaudado, 0);
                   let maxValor = precioBoleta;
                   return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
                 })()}
-                <small class="text-muted">(Valor boleta: $${precioBoleta.toLocaleString('es-CO')})</small>
               </span>
-              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- Grupo 5b: Faltante para colchón Festival y ganancia esperada (con separaciones) -->
-      <div class="row mb-3">
-        <div class="col-md-12">
+        <!-- Faltante para colchón Festival y ganancia esperada (con separaciones) -->
+        <div class="col-md-6">
           <div class="card card-report shadow">
             <div class="card-body text-center">
               <h5 class="card-title">Faltante para colchón Festival y ganancia esperada (con separaciones)</h5>
               <div class="display-6">$${(() => {
-                // Calcular recaudo considerando separaciones completadas
                 const recaudoConSeparaciones = totalRecaudado + (totalValorSeparadas - totalAbonadoSeparaciones);
-                // Meta total a alcanzar
                 const metaTotal = totalCostos + reunidoPreviamente + gananciaEsperada;
                 const faltante = Math.max(metaTotal - recaudoConSeparaciones, 0);
                 return faltante.toLocaleString('es-CO');
               })()}</div>
-              <small class="text-muted">Si se completan ${totalSeparadas} separadas ($${totalValorSeparadas.toLocaleString('es-CO')})</small>
+              <small class="text-muted">Si se completan ${totalSeparadas} separadas</small>
               <br>
               <span class="text-info">
-                Boletas faltantes por vender: 
+                Boletas faltantes: 
                 ${(() => {
                   const recaudoConSeparaciones = totalRecaudado + (totalValorSeparadas - totalAbonadoSeparaciones);
                   const metaTotal = totalCostos + reunidoPreviamente + gananciaEsperada;
@@ -720,14 +706,13 @@ document.addEventListener("DOMContentLoaded", async function () {
                   let maxValor = precioBoleta;
                   return maxValor > 0 ? Math.ceil(faltante / maxValor) : '-';
                 })()}
-                <small class="text-muted">boletas</small>
               </span>
-              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Grupo 6: Dinero recolectado por persona -->
+      <!-- Grupo 7: Dinero recolectado por persona -->
       <div class="row mb-3">
         <div class="col-md-12">
           <div class="card card-report shadow">
