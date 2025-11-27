@@ -356,20 +356,20 @@ async function registrarAsistente(formElement) {
         respuestaServicio = error?.message || "Error en envío";
         envioOk = false;
       }
-      try {
-        const resp = await fetch("/enviar-whatsapp-mensaje/envio", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(reqGreenTransporte)
-        });
-        try {
-          respuestaServicioTransporte = await resp.text();
-        } catch (e) {
-          respuestaServicioTransporte = "Error leyendo respuesta";
-        }
-      } catch (error) {
-        respuestaServicioTransporte = error?.message || "Error en envío";
-      }
+      // try {
+      //   const resp = await fetch("/enviar-whatsapp-mensaje/envio", {
+      //     method: "POST",
+      //     headers: { "Content-Type": "application/json" },
+      //     body: JSON.stringify(reqGreenTransporte)
+      //   });
+      //   try {
+      //     respuestaServicioTransporte = await resp.text();
+      //   } catch (e) {
+      //     respuestaServicioTransporte = "Error leyendo respuesta";
+      //   }
+      // } catch (error) {
+      //   respuestaServicioTransporte = error?.message || "Error en envío";
+      // }
       asistente.envioWhatsapp = envioOk ? 1 : 0;
       const historialEnvio = {
         fecha: new Date().toISOString(),
