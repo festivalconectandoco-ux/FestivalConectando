@@ -187,11 +187,11 @@ async function mostrarBoletasAgrupadas(lista) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(reqGreen)
           });
-          const respTransporte = await fetch("/enviar-whatsapp-mensaje/reenvio", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(reqGreenTransporte)
-          });
+          // const respTransporte = await fetch("/enviar-whatsapp-mensaje/reenvio", {
+          //   method: "POST",
+          //   headers: { "Content-Type": "application/json" },
+          //   body: JSON.stringify(reqGreenTransporte)
+          // });
           try {
             respuestaServicio = await resp.text();
           } catch (e) {
