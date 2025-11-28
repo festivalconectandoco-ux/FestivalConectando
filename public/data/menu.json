@@ -15,7 +15,8 @@
     { "href": "../Logistica/verLogisticos.html", "label": "Ver Logísticos" },
     { "href": "../MicAbierto/verMicAbierto.html", "label": "Ver Micrófono Abierto" },
     { "href": "../Artistas/verArtistas.html", "label": "Ver Artistas principales" },
-    { "href": "../Reportes/Reportes.html", "label": "Ver Reportes" }
+    { "href": "../Reportes/Reportes.html", "label": "Ver Reportes" },
+    { "href": "../Presupuestos/Presupuestos.html", "label": "Presupuestos" }
   ],
   "local": [
     { "href": "../Asistentes/ventaBoleteria.html", "label": "Registrar Asistentes" },
@@ -33,6 +34,8 @@
     { "href": "../Logistica/verLogisticos.html", "label": "Ver Logísticos" },
     { "href": "../MicAbierto/verMicAbierto.html", "label": "Ver Micrófono Abierto" },
     { "href": "../Artistas/verArtistas.html", "label": "Ver Artistas principales" },
-    { "href": "../Reportes/Reportes.html", "label": "Ver Reportes" }
+    { "href": "../Reportes/Reportes.html", "label": "Ver Reportes" },
+    { "href": "../Presupuestos/Presupuestos.html", "label": "Presupuestos" }
+
   ]
 }
