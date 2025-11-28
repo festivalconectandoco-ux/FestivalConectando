@@ -282,7 +282,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
       const statusResp = await fetch("/api/costos-status");
       const statusData = await statusResp.json();
-      console.log("Status de costos:", statusData);
       if (statusData.costos && statusData.costos.length > 0) {
         costos.push(statusData.costos[0]);
       } else if (statusData.status === "creado") {
@@ -298,12 +297,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   try {
     //const respCat = await fetch("../data/catalogos.json");
     //const cat = await respCat.json();
-    console.log("Costos cargados:", costos);
     totalCostos = costos[0]?.MetaCostosSubTotal || 0;
     reunidoPreviamente = costos[0]?.MetaColchonFetival || 0;
     gananciaEsperada = costos[0]?.MetaGanancia || 0;
     precioBoleta = costos[0]?.PrecioBoleta || 0;
-    console.log("totalCostos:", totalCostos, "reunidoPreviamente:", reunidoPreviamente, "gananciaEsperada:", gananciaEsperada, "precioBoleta:", precioBoleta);
   } catch (e) {
     console.error("Error cargando costos:", e);
   }

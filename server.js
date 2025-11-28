@@ -215,7 +215,6 @@ app.get("/api/traer-costos", async (req, res) => {
     ]);
 
     const costos = costosSnap.docs.map(doc => doc.data());
-    console.log("Costos desde BD:", costos);
     res.json({
       costos
     });
@@ -275,7 +274,6 @@ app.post("/enviar-whatsapp/:tipo", async (req, res) => {
     const payload = { chatId, urlFile, fileName, caption };
 
     const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-    console.log('Payload enviado a GreenAPI:', payload);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -283,7 +281,6 @@ app.post("/enviar-whatsapp/:tipo", async (req, res) => {
     });
 
     const data = await response.json();
-    console.log('Respuesta de GreenAPI:', data);
     if (response.ok) {
       res.status(200).json({ mensaje: "Archivo enviado con éxito", data });
     } else {
@@ -316,8 +313,6 @@ app.post("/enviar-whatsapp-mensaje/:tipo", async (req, res) => {
     const chatId = `${numero}@c.us`;
     const payload = { chatId, message };
     const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
-    console.log("Payload enviado a GreenAPI:", payload);
-    console.log("URL usada:", url);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -660,4 +655,53 @@ app.post("/api/migrar-campos-defecto", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+});
+
+// Endpoints para Presupuestos (CRUD)
+app.get('/api/presupuestos', async (req, res) => {
+  try {
+    const snap = await db.collection('Presupuestos').get();
+    const presupuestos = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json({ presupuestos });
+  } catch (error) {
+    console.error('Error obteniendo presupuestos:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/presupuestos', async (req, res) => {
+  try {
+    const gasto = req.body;
+    // Usar id proporcionado o timestamp
+    const docId = gasto.id ? String(gasto.id) : String(Date.now());
+    gasto.fechaRegistro = gasto.fechaRegistro || new Date().toISOString();
+    await db.collection('Presupuestos').doc(docId).set(gasto);
+    res.status(200).json({ mensaje: 'Gasto guardado', id: docId });
+  } catch (error) {
+    console.error('Error guardando presupuesto:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/presupuestos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const gasto = req.body;
+    await db.collection('Presupuestos').doc(String(id)).set(gasto, { merge: true });
+    res.status(200).json({ mensaje: 'Gasto actualizado', id });
+  } catch (error) {
+    console.error('Error actualizando presupuesto:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/presupuestos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.collection('Presupuestos').doc(String(id)).delete();
+    res.status(200).json({ mensaje: 'Gasto eliminado', id });
+  } catch (error) {
+    console.error('Error eliminando presupuesto:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
