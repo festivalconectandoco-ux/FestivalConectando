@@ -70,10 +70,10 @@
 	},
 	{
 	  "idPromocion": "5",
-	  "descripcion": "Invitados artistas",
+	  "descripcion": "Invitado artistas",
 	  "fechaInicial": "2025-05-15",
 	  "fechaFin": "2025-11-30",
-	  "precio": 60000,
+	  "precio": 50000,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	},
@@ -83,6 +83,15 @@
 	  "fechaInicial": "2025-09-15",
 	  "fechaFin": "2025-11-30",
 	  "precio": 120000,
+	  "cantidadPersonas": 1,
+	  "activo": true
+	},
+	{
+	  "idPromocion": "5",
+	  "descripcion": "Invitado emprendimientos",
+	  "fechaInicial": "2025-05-15",
+	  "fechaFin": "2025-11-30",
+	  "precio": 50000,
 	  "cantidadPersonas": 1,
 	  "activo": true
 	}
